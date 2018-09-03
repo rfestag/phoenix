@@ -1,6 +1,6 @@
 import { GridLayer, withLeaflet } from "react-leaflet";
 import { GridLayer as LeafletGridLayer } from "leaflet";
-import { Stage, Line, FastLayer } from "konva";
+import { Stage, Line, Circle, FastLayer } from "konva";
 import * as Util from "leaflet/src/core/Util";
 import _ from "lodash";
 
@@ -21,8 +21,6 @@ export const CollectionLayer = LeafletGridLayer.extend({
     Util.setOptions(this, props);
     this.collection = collection;
     this.stages = new Map();
-    this.shapes = {};
-    this.cached = {};
     this.on("tileunload", e => {
       const stage = this.stages[e.coords];
       if (stage) {
@@ -37,8 +35,8 @@ export const CollectionLayer = LeafletGridLayer.extend({
     layer.add(shape);
     const points = geom.coordinates.reduce((pts, p) => {
       const pt = this._map.project([p[1], p[0]], this._tileZoom);
-      pts.push(pt.x - x);
-      pts.push(pt.y - y);
+      pts.push(Math.floor(pt.x - x));
+      pts.push(Math.floor(pt.y - y));
       return pts;
     }, []);
     shape.points(points);
@@ -47,14 +45,16 @@ export const CollectionLayer = LeafletGridLayer.extend({
     layer.add(shape);
   },
   renderPoint: function(geom, layer, x, y) {
-    let shape = new Line();
-    shape.shadowForStrokeEnabled(false);
-    layer.add(shape);
     const p = [geom.coordinates[1], geom.coordinates[0]];
     const pt = this._map.project(p, this._tileZoom);
-    shape.points([[pt.x - x, pt.y - y]]);
-    shape.stroke("red");
-    shape.strokeWidth(2);
+    let shape = new Circle({
+      radius: 2,
+      x: Math.floor(pt.x - x),
+      y: Math.floor(pt.y - y)
+    });
+    shape.shadowForStrokeEnabled(false);
+    shape.fill("red");
+    shape.strokeWidth(0);
     layer.add(shape);
   },
   renderStage: function(stage, coords, tileBounds) {
@@ -63,18 +63,15 @@ export const CollectionLayer = LeafletGridLayer.extend({
     //const y = tilePixelBounds.min.y;
     const x = coords.x * this._tileSize.x;
     const y = coords.y * this._tileSize.y;
-    const z = coords.z;
+    //const z = coords.z;
     const layer = stage.getLayers()[0];
 
     if (!layer || !tileBounds) return;
-    let count = 0;
-    let printed = false;
-    console.time("Computing shapes");
+    //console.time("Computing shapes");
     _.each(this.collection.data, (entity, id) => {
       _.each(entity.geometries, (geometryCollection, field) => {
         _.each(geometryCollection.geometries, geom => {
           if (geom && geom.bbox && shouldDraw(geom.bbox, tileBounds)) {
-            count += 1;
             if (geom.type === "Point") {
               this.renderPoint(geom, layer, x, y);
             } else if (geom.etype === "Track") {
@@ -84,11 +81,10 @@ export const CollectionLayer = LeafletGridLayer.extend({
         });
       });
     });
-    console.timeEnd("Computing shapes");
-    console.log("Rendering", count);
-    console.time("Drawing");
-    layer.draw();
-    console.timeEnd("Drawing");
+    //console.timeEnd("Computing shapes");
+    //console.time("Drawing");
+    layer.batchDraw();
+    //console.timeEnd("Drawing");
   },
   createTile: function(coords) {
     const tile = document.createElement("div");
@@ -109,16 +105,14 @@ export const CollectionLayer = LeafletGridLayer.extend({
 
 class ReactCollectionLayer extends GridLayer {
   createLeafletElement(props) {
-    console.log("Created?");
+    this.redraw = _.throttle(() => this.leafletElement.redraw(), 8000);
     return new CollectionLayer(props.collection.data, this.getOptions(props));
   }
   updateLeafletElement(fromProps, toProps) {
     super.updateLeafletElement(fromProps, toProps);
     if (this.leafletElement.collection !== toProps.collection) {
       this.leafletElement.collection = toProps.collection;
-      //console.log(this.leafletElement.stages.size)
-      this.leafletElement.redraw();
-      //console.log(this.leafletElement.stages.size)
+      this.redraw();
     }
   }
 }

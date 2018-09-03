@@ -3,27 +3,11 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
-import {
-  Map,
-  WMSTileLayer,
-  TileLayer,
-  Marker,
-  Popup,
-  LayerGroup,
-  GeoJSON
-} from "react-leaflet";
-import styled from "styled-components";
+import { Map, TileLayer } from "react-leaflet";
 import CollectionLayer from "./CollectionLayer";
 import _ from "lodash";
-import L from "leaflet";
 
-const renderer = L.canvas({ padding: 0.5 });
-
-//Component
-const StyledMap = styled(Map)`
-  width: 100%;
-  height: 100%;
-`;
+//const renderer = L.canvas({ padding: 0.5 });
 
 export class Map2D extends Component {
   constructor(props) {

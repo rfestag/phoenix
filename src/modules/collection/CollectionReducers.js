@@ -8,45 +8,6 @@ import {
 import { updateEntity } from "../entities/entities";
 const initialState = { collections: {} };
 
-/*
-function applyUpdates(entity, updates) {
-  let updatedProperties = {};
-  return updates.reduce((entity, update) => {
-    entity.start = update.time < entity.start ? update.time : entity.start;
-    entity.end = update.time > entity.end ? update.time : entity.end;
-    if (update.position && update.position.value[0] && update.position.value[1]) {
-      const pt = new L.LatLng(update.position.value[1], update.position.value[0]);
-      entity.bounds = entity.bounds ? entity.bounds.extend(pt) : pt.toBounds(500)
-      entity.position = entity.position.insert(
-        update.position,
-        update.position.time
-      );
-    }
-    if (update.properties) {
-      updatedProperties = _.reduce(
-        update.properties,
-        (updatedProperties, v, k) => {
-          let values = updatedProperties[k]
-            ? updatedProperties[k]
-            : entity.properties[k]
-              ? entity.properties[k]
-              : new TimeSeries();
-          updatedProperties[k] = values.insert(
-            update.properties[k],
-            update.properties[k].time
-          );
-          return updatedProperties;
-        },
-        updatedProperties
-      );
-    }
-    entity.properties = { ...entity.properties, ...updatedProperties };
-
-    return entity;
-  }, entity);
-}
-*/
-
 export default function(state = initialState, action) {
   const id = action.id;
   let collection;
@@ -78,29 +39,17 @@ export default function(state = initialState, action) {
     case UPDATE_COLLECTION:
       collection = state.collections[id];
       if (collection) {
-        console.time("Update Collection");
+        //console.time("Update Collection");
         let data = _.reduce(
           action.data,
           (data, updates, id) => {
             data[id] = updateEntity(data[id], updates);
-            /*
-            let entity = data[id]
-              ? { ...data[id] }
-              : {
-                  id: id,
-                  start: updates[0].time,
-                  end: updates[0].time,
-                  position: new TimeSeries(),
-                  properties: {}
-                };
-            data[id] = applyUpdates(entity, updates);
-            */
             return data;
           },
           { ...collection.data }
         );
         collection = { ...collection, data };
-        console.timeEnd("Update Collection");
+        //console.timeEnd("Update Collection");
         //let keys = Object.keys(data)
         //console.log(data[keys[0]])
         return {
