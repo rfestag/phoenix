@@ -46,3 +46,10 @@ but may contain Epics (see `redux-observable`), components, and constants. Gener
 - Actions should define the action names as well as functions that wrap action creators.
 - Reducers should only handle state. You may define epics in here
 - Epics should be used to generate additional actions from actions. An example is querying. When a query is creatd, it should create a new collection, start an adapter, and emit updates to the collection based on normalized data from the adapter
+
+## Requirements
+
+1. Must many collections of entities
+2. Must support many features types for each entity
+3. Must support instantaneous and interval times for features and properties
+4. Must support timeline and playback of loaded data

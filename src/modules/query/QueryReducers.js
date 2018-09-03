@@ -21,7 +21,10 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
   const observable = new Observable(observer => {
     port.onmessage = function(e) {
       //console.log("Got message from worker", e.data.length / 1000000 + "MB");
-      observer.next(JSON.parse(e.data));
+      console.time("Parsing data");
+      let data = JSON.parse(e.data);
+      console.timeEnd("Parsing data");
+      observer.next(data);
     };
     port.onerror = function(e) {
       //TODO: We should put out some message that can be used to restart the worker,

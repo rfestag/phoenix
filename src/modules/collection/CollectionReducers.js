@@ -1,4 +1,3 @@
-import TimeSeries from "./TimeSeries";
 import _ from "lodash";
 import {
   CREATE_COLLECTION,
@@ -6,45 +5,18 @@ import {
   UPDATE_COLLECTION,
   DELETE_FROM_COLLECTION
 } from "./CollectionActions";
-/*
-const initialStateTest = {
-  collections: {
-    1: { name: "Fake 1", data: {} },
-    2: { name: "Fake 2", data: {} }
-  }
-};
-*/
+import { updateEntity } from "../entities/entities";
 const initialState = { collections: {} };
 
 /*
-function insertProperty(array, p) {
-  //If the array is non-empty, try to return a new array with p inserted in the correct location
-  if (array.length > 0) {
-    //Iterate backwards through the array. When you find a time
-    //older than the property being inserted, insert there
-    for (let i = array.length - 1; i >= 0; i--) {
-      let property = array[i];
-      //We found point *before* insertion.
-      if (property.time <= p.time) {
-        //If the values are the same, no change. Return the current array
-        if (property.value === p.value) return array;
-        //Otherwise, copy the array, then insert after the current property
-        array.splice(i + 1, 0, p);
-        return array;
-      }
-    }
-  }
-  //If we get here, the new value is before all other values.
-  if (array.length === 0 || p.value !== array[0].value) array.push(p);
-  return array;
-}
-*/
 function applyUpdates(entity, updates) {
   let updatedProperties = {};
   return updates.reduce((entity, update) => {
     entity.start = update.time < entity.start ? update.time : entity.start;
     entity.end = update.time > entity.end ? update.time : entity.end;
-    if (update.position) {
+    if (update.position && update.position.value[0] && update.position.value[1]) {
+      const pt = new L.LatLng(update.position.value[1], update.position.value[0]);
+      entity.bounds = entity.bounds ? entity.bounds.extend(pt) : pt.toBounds(500)
       entity.position = entity.position.insert(
         update.position,
         update.position.time
@@ -73,6 +45,7 @@ function applyUpdates(entity, updates) {
     return entity;
   }, entity);
 }
+*/
 
 export default function(state = initialState, action) {
   const id = action.id;
@@ -105,9 +78,12 @@ export default function(state = initialState, action) {
     case UPDATE_COLLECTION:
       collection = state.collections[id];
       if (collection) {
+        console.time("Update Collection");
         let data = _.reduce(
           action.data,
           (data, updates, id) => {
+            data[id] = updateEntity(data[id], updates);
+            /*
             let entity = data[id]
               ? { ...data[id] }
               : {
@@ -118,11 +94,15 @@ export default function(state = initialState, action) {
                   properties: {}
                 };
             data[id] = applyUpdates(entity, updates);
+            */
             return data;
           },
           { ...collection.data }
         );
         collection = { ...collection, data };
+        console.timeEnd("Update Collection");
+        //let keys = Object.keys(data)
+        //console.log(data[keys[0]])
         return {
           ...state,
           collections: { ...state.collections, [id]: collection }

@@ -30,6 +30,12 @@ export default class TimeSeries {
   splice(start, deleteCount) {
     return new TimeSeries(this.data.splice(start, deleteCount));
   }
+  map(cb) {
+    return this.data.map(cb);
+  }
+  reduce(cb, init) {
+    return this.data.reduce(cb, init);
+  }
   /*
   *[Symbol.iterator]() {
     for (const x of this.data) {

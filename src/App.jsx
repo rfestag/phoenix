@@ -90,7 +90,8 @@ class App extends Component {
 
   componentDidMount() {
     if (window.WebSocket) {
-      this.props.createQuery("Test", {});
+      //this.props.createQuery("ADSBApollo", {});
+      this.props.createQuery("ADSBApollo", {});
     }
   }
   toggleQuery() {

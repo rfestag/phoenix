@@ -30,6 +30,7 @@ import {
   mergeAll,
   pipe
 } from "rxjs/operators";
+import "babel-polyfill";
 
 export function collectBy(field) {
   return source => {
@@ -53,6 +54,7 @@ export function collectBy(field) {
 export function mapToCollection(action$) {
   return function mapToCollectionImplementation(src) {
     return src.mergeMap(action => {
+      console.log("Subscribing to", action.source);
       const adapter = sources[action.source].query(action.query);
       const id = action.id;
       const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value

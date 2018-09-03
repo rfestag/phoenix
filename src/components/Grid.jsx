@@ -23,23 +23,25 @@ const getColumns = (state, props) => {
       suppressResize: true,
       suppressSizeToFit: true
     },
-    { headerName: "ID", field: "id", enableCellChangeFlash: true },
+    { headerName: "ID", field: "id" },
     {
       headerName: "Latitude",
-      enableCellChangeFlash: true,
+      field: "Lat",
+      //enableCellChangeFlash: true,
       cellRendererFramework: ValueRenderer,
-      valueGetter: latitudeGetter
+      valueGetter: latestValueGetter
     },
     {
       headerName: "Longitude",
-      enableCellChangeFlash: true,
+      field: "Long",
+      //enableCellChangeFlash: true,
       cellRendererFramework: ValueRenderer,
-      valueGetter: longitudeGetter
+      valueGetter: latestValueGetter
     },
     {
       headerName: "Altitude",
       field: "Alt",
-      enableCellChangeFlash: true,
+      //enableCellChangeFlash: true,
       cellRendererFramework: ValueRenderer,
       valueGetter: latestValueGetter
     },
@@ -48,14 +50,16 @@ const getColumns = (state, props) => {
       field: "start",
       valueFormatter: timeFormatter,
       cellRendererFramework: ValueRenderer,
-      enableCellChangeFlash: true
+      //enableCellChangeFlash: true,
+      valueGetter: timeGetter
     },
     {
       headerName: "Last seen",
       field: "end",
       valueFormatter: timeFormatter,
       cellRendererFramework: ValueRenderer,
-      enableCellChangeFlash: true
+      //enableCellChangeFlash: true,
+      valueGetter: timeGetter
     }
   ];
 };
@@ -67,20 +71,17 @@ const getColumnDefs = createSelector([getColumns], columns => {
 });
 
 function latestValueGetter(params) {
-  const values = params.data.properties[params.colDef.field].data;
-  return values === undefined ? undefined : values[values.length - 1].value;
+  if (params.data.properties[params.colDef.field] === undefined)
+    return undefined;
+  return params.data.properties[params.colDef.field].last;
+  //const values = params.data.properties[params.colDef.field].data;
+  //return values === undefined ? undefined : values[values.length - 1];
 }
-function latitudeGetter(params) {
-  if (!params.data.position) return undefined;
-  const coords = params.data.position.data;
-  return coords[coords.length - 1].value[1];
-}
-function longitudeGetter(params) {
-  if (!params.data.position) return undefined;
-  const coords = params.data.position.data;
-  return coords[coords.length - 1].value[0];
+function timeGetter(params) {
+  return params.data.when[params.colDef.field];
 }
 function timeFormatter(params) {
+  if (params === undefined || params.value === undefined) return undefined;
   return moment(params.value)
     .utc()
     .format();
@@ -93,7 +94,7 @@ class ValueRenderer extends React.Component {
   render() {
     // or access props using 'this'
     const formatter = this.props.colDef.valueFormatter;
-    const value = formatter ? formatter(this.props.value) : this.props.value;
+    const value = formatter ? formatter(this.props) : this.props.value;
     return <span>{value}</span>;
   }
 }
