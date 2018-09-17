@@ -53,6 +53,7 @@ const trackFromPoint = function(pt) {
   return track;
 };
 const mergeBounds = function(b1, b2) {
+  //minX, minY, maxX, maxY
   return [
     b1[0] < b2[0] ? b1[0] : b2[0],
     b1[1] < b2[1] ? b1[1] : b2[1],

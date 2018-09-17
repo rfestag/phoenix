@@ -22,6 +22,7 @@ export default function(state = initialState, action) {
           id,
           name: action.name,
           queries: action.queries,
+          visible: true,
           data: {}
         };
         return {
@@ -40,6 +41,7 @@ export default function(state = initialState, action) {
       collection = state.collections[id];
       if (collection) {
         //console.time("Update Collection");
+        console.time("update entities");
         let data = _.reduce(
           action.data,
           (data, updates, id) => {
@@ -48,10 +50,8 @@ export default function(state = initialState, action) {
           },
           { ...collection.data }
         );
+        console.timeEnd("update entities");
         collection = { ...collection, data };
-        //console.timeEnd("Update Collection");
-        //let keys = Object.keys(data)
-        //console.log(data[keys[0]])
         return {
           ...state,
           collections: { ...state.collections, [id]: collection }
