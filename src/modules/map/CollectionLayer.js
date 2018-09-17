@@ -42,6 +42,7 @@ function style(shape) {
 }
 function hoverStyle(shape) {
   shape.stroke("yellow");
+  shape.moveToTop();
 }
 export const CollectionLayer = Layer.extend({
   options: {
@@ -252,21 +253,22 @@ export const CollectionLayer = Layer.extend({
     return shape;
   },
   _onMouseMove: function(e) {
-    console.time("hover");
+    //console.time("hover");
     if (this.dragging) return;
     const map = this._map;
+    const t = 8; //Threshold
     const clickPt = map.latLngToLayerPoint(e.latlng);
     const nw = map.layerPointToLatLng(
-      new Point(e.layerPoint.x - 5, e.layerPoint.y - 5)
+      new Point(e.layerPoint.x - t, e.layerPoint.y - t)
     );
     const ne = map.layerPointToLatLng(
-      new Point(e.layerPoint.x + 5, e.layerPoint.y - 5)
+      new Point(e.layerPoint.x + t, e.layerPoint.y - t)
     );
     const se = map.layerPointToLatLng(
-      new Point(e.layerPoint.x + 5, e.layerPoint.y + 5)
+      new Point(e.layerPoint.x + t, e.layerPoint.y + t)
     );
     const sw = map.layerPointToLatLng(
-      new Point(e.layerPoint.x - 5, e.layerPoint.y + 5)
+      new Point(e.layerPoint.x - t, e.layerPoint.y + t)
     );
     const clickGeo = {
       type: "Point",
@@ -285,6 +287,7 @@ export const CollectionLayer = Layer.extend({
       ]
     };
     const clickBounds = { _northEast: ne, _southWest: sw };
+    let didHover = false;
     //const pt = e.latlng //this._map.layerPointToLatLng(e);
     this.hovered = _.reduce(
       this.collection.data,
@@ -304,6 +307,7 @@ export const CollectionLayer = Layer.extend({
                     clickBounds
                   )
                 ) {
+                  didHover = true;
                   hits[id] = { [field]: true };
                   if (this.entities[id] && this.entities[id][field]) {
                     const geoms = this.entities[id][field];
@@ -334,7 +338,14 @@ export const CollectionLayer = Layer.extend({
       },
       {}
     );
-    console.timeEnd("hover");
+    if (didHover && !this._hoverCursor) {
+      this._container.style.cursor = "pointer";
+      this._hoverCursor = true;
+    } else if (!didHover && this._hoverCursor) {
+      this._container.style.cursor = "";
+      this._hoverCursor = false;
+    }
+    //console.timeEnd("hover");
   },
   _onMoveStart: function(e) {
     this.dragging = true;
