@@ -1,23 +1,47 @@
 import { MapLayer, withLeaflet } from "react-leaflet";
-import { Layer, LatLng, Bounds, Browser, DomUtil, DomEvent } from "leaflet";
+import {
+  Layer,
+  LatLng,
+  Point,
+  Bounds,
+  Browser,
+  DomUtil,
+  DomEvent
+} from "leaflet";
 import { Stage, Line, Circle, FastLayer } from "konva";
 import * as Util from "leaflet/src/core/Util";
 import _ from "lodash";
+import * as turf from "@turf/turf";
 
-function shouldDraw(geom, bounds) {
+function touchBounds(geom, bounds) {
   const bbox = geom.bbox;
-  //minlon, minlat, maxlon, maxlat
+  //bbox -> minlon, minlat, maxlon, maxlat
   if (bbox[0] > bounds._northEast.lng) return false; // box is east of tile
   if (bbox[1] > bounds._northEast.lat) return false; // box is north of tile
   if (bbox[2] < bounds._southWest.lng) return false; // box is west of tile
   if (bbox[3] < bounds._southWest.lat) return false; // box is south of tile
   return true; // boxes overlap
 }
+function pointInBBox(geom, pt) {
+  const bbox = geom.bbox;
+  //bbox -> minlon, minlat, maxlon, maxlat
+  if (pt.lng < bbox[0]) return false;
+  if (pt.lat < bbox[1]) return false;
+  if (pt.lng > bbox[2]) return false;
+  if (pt.lat > bbox[3]) return false;
+  return true;
+}
 
 function destroyNode(node) {
   if (node === undefined) return;
   _.each(node.getChildren(), c => destroyNode(c));
   node.destroy();
+}
+function style(shape) {
+  shape.stroke("red");
+}
+function hoverStyle(shape) {
+  shape.stroke("yellow");
 }
 export const CollectionLayer = Layer.extend({
   options: {
@@ -35,22 +59,19 @@ export const CollectionLayer = Layer.extend({
     const container = (this._container = document.createElement("div"));
     const self = this;
     this.getPane().appendChild(this._container);
-    DomEvent.on(
-      container,
-      "mousemove",
-      Util.throttle(this._onMouseMove, 32, this),
-      this
-    );
+    //TODO: Properly register this so that we can remove the handler
+    this._map.on("mousemove", Util.throttle(this._onMouseMove, 32, this), this);
     DomEvent.on(
       container,
       "click dblclick mousedown mouseup contextmenu",
       this._onClick,
       this
     );
-    DomEvent.on(container, "mouseout", this._handleMouseOut, this);
+    //DomEvent.on(container, "mouseout", this._handleMouseOut, this);
     this.throttleRedraw = _.throttle(self.redraw, 750);
+    this._map.on("movestart", this._onMoveStart, this);
+    this._map.on("moveend", this._onMoveEnd, this);
     this._map.on("zoomend", this.throttleRedraw, this);
-    this._map.on("moveend", this.throttleRedraw, this);
     this.stage = new Stage({ container });
     this.layer = new FastLayer({ transformEnabled: "position" });
     this.stage.add(this.layer);
@@ -114,6 +135,7 @@ export const CollectionLayer = Layer.extend({
   },
   initialize: function(collection, timeRange, props) {
     this.entities = {};
+    this.hovered = {};
     this.setTimeRange(timeRange);
     this.setCollection(collection);
   },
@@ -124,33 +146,47 @@ export const CollectionLayer = Layer.extend({
     this.collection = collection;
     this.redraw();
   },
+  _closeTo: function(geom, clickPt, clickGeo, clickBox, clickBounds) {
+    if (!touchBounds(geom, clickBounds)) return false;
+    if (geom.type === "Point") return true;
+    else {
+      if (!touchBounds(geom, clickBounds)) return false;
+      if (geom.type === "Polygon") {
+        return turf.booleanContains(geom, clickGeo);
+      } else if (geom.type === "LineString") {
+        return !turf.booleanDisjoint(geom, clickBox);
+      }
+    }
+  },
   _updateEntity: function(entity, id) {
     return (this.entities[id] = _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
-        geoms[field] = this._updateGeometry(geom, field, geoms);
+        geoms[field] = this._updateGeometry(geom, field, id, geoms);
         return geoms;
       },
       this.entities[id] || {}
     ));
   },
-  _updateGeometry: function(geometryCollection, field, geoms) {
+  _updateGeometry: function(geometryCollection, field, id, geoms) {
     return (geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
+        const hovered = this.hovered[id] && this.hovered[id][field];
+        //Update the shape itself
         if (geometry.type === "Point") {
-          geom[idx] = this._renderPoint(geometry, geom[idx]);
+          geom[idx] = this._renderPoint(geometry, geom[idx], hovered);
         } else if (geometry.type === "LineString") {
-          geom[idx] = this._renderLine(geometry, geom[idx]);
+          geom[idx] = this._renderLine(geometry, geom[idx], hovered);
         }
         return geom;
       },
       geoms[field] || {}
     ));
   },
-  _renderPoint: function(geom, shape) {
+  _renderPoint: function(geom, shape, hovered) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-    if (shouldDraw(geom, this._map.getBounds())) {
+    if (touchBounds(geom, this._map.getBounds())) {
       const coords = geom.coordinates;
       const pt = this._map.latLngToLayerPoint(
         new LatLng(coords[1], coords[0], coords[2])
@@ -167,24 +203,24 @@ export const CollectionLayer = Layer.extend({
           shadowForStrokeEnabled: false,
           strokeHitEnabled: false,
           listening: false,
-          perfectDrawEnabled: false
+          perfectDrawEnabled: false,
+          radius: 1,
+          strokeWidth: 1
         });
         this.layer.add(shape);
       }
       shape._lastGeom = geom;
       shape.x(x);
       shape.y(y);
-      shape.radius(1);
-      shape.stroke("red");
-      shape.strokeWidth(1);
+      hovered ? hoverStyle(shape) : style(shape);
       shape.show();
     } else {
       if (shape) shape.hide();
     }
     return shape;
   },
-  _renderLine: function(geom, shape) {
-    if (shouldDraw(geom, this._map.getBounds())) {
+  _renderLine: function(geom, shape, hovered) {
+    if (touchBounds(geom, this._map.getBounds())) {
       const points = geom.coordinates.reduce((pts, p) => {
         const pt = this._map.latLngToLayerPoint(new LatLng(p[1], p[0], p[2]));
         pts.push(Math.floor(pt.x));
@@ -198,84 +234,119 @@ export const CollectionLayer = Layer.extend({
       if (!shape) {
         shape = new Line({
           shadowForStrokeEnabled: false,
+          fillEnabled: false,
           strokeHitEnabled: false,
           listening: false,
-          perfectDrawEnabled: false
+          perfectDrawEnabled: true,
+          strokeWidth: 2
         });
         this.layer.add(shape);
       }
       shape.points(points);
       shape.tension(0.5);
-      shape.stroke("red");
-      shape.strokeWidth(2);
+      hovered ? hoverStyle(shape) : style(shape);
       shape.show();
     } else {
       if (shape) shape.hide();
     }
     return shape;
   },
-  _onMouseMove: function() {},
-  _onClick: function() {},
-  _handleMouseOut: function() {}
-  /*
-  _renderPoint: function(geom, layer, x, y) {
-    const p = [geom.coordinates[1], geom.coordinates[0]];
-    const pt = this._map.project(p, this._tileZoom);
-    let shape = new Circle({
-      radius: 1,
-      fill: "red",
-      strokeWidth: 0,
-      x: Math.floor(pt.x - x),
-      y: Math.floor(pt.y - y)
-    });
-    shape.shadowForStrokeEnabled(false);
-    shape.strokeHitEnabled(false);
-    layer.add(shape);
+  _onMouseMove: function(e) {
+    console.time("hover");
+    if (this.dragging) return;
+    const map = this._map;
+    const clickPt = map.latLngToLayerPoint(e.latlng);
+    const nw = map.layerPointToLatLng(
+      new Point(e.layerPoint.x - 5, e.layerPoint.y - 5)
+    );
+    const ne = map.layerPointToLatLng(
+      new Point(e.layerPoint.x + 5, e.layerPoint.y - 5)
+    );
+    const se = map.layerPointToLatLng(
+      new Point(e.layerPoint.x + 5, e.layerPoint.y + 5)
+    );
+    const sw = map.layerPointToLatLng(
+      new Point(e.layerPoint.x - 5, e.layerPoint.y + 5)
+    );
+    const clickGeo = {
+      type: "Point",
+      coordinates: [e.latlng.lng, e.latlng.lat]
+    };
+    const clickBox = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [nw.lng, nw.lat],
+          [ne.lng, ne.lat],
+          [se.lng, se.lat],
+          [sw.lng, sw.lat],
+          [nw.lng, nw.lat]
+        ]
+      ]
+    };
+    const clickBounds = { _northEast: ne, _southWest: sw };
+    //const pt = e.latlng //this._map.layerPointToLatLng(e);
+    this.hovered = _.reduce(
+      this.collection.data,
+      (hits, entity, id) => {
+        return _.reduce(
+          entity.geometries,
+          (hits, gc, field) => {
+            return _.reduce(
+              gc.geometries,
+              (hits, geometry, idx) => {
+                if (
+                  this._closeTo(
+                    geometry,
+                    clickPt,
+                    clickGeo,
+                    clickBox,
+                    clickBounds
+                  )
+                ) {
+                  hits[id] = { [field]: true };
+                  if (this.entities[id] && this.entities[id][field]) {
+                    const geoms = this.entities[id][field];
+                    _.each(geoms, (shape, idx) => {
+                      hoverStyle(shape);
+                      try {
+                        shape.draw();
+                      } catch (e) {}
+                    });
+                  }
+                } else if (this.hovered[id] && this.hovered[id][field]) {
+                  //It is no longer a hover, re-style
+                  const geoms = this.entities[id][field];
+                  _.each(geoms, (shape, idx) => {
+                    style(shape);
+                    try {
+                      shape.draw();
+                    } catch (e) {}
+                  });
+                }
+                return hits;
+              },
+              hits
+            );
+          },
+          hits
+        );
+      },
+      {}
+    );
+    console.timeEnd("hover");
   },
-  renderStage: function(stage, coords, tileBounds) {
-    //const tilePixelBounds = this._getTiledPixelBounds();
-    //const x = tilePixelBounds.min.x;
-    //const y = tilePixelBounds.min.y;
-    const x = coords.x * this._tileSize.x;
-    const y = coords.y * this._tileSize.y;
-    const z = coords.z;
-    const layer = stage.getLayers()[0];
-
-    if (!layer || !tileBounds) return;
-    console.time("Computing shapes");
-    _.each(this.collection.data, (entity, id) => {
-      _.each(entity.geometries, (geometryCollection, field) => {
-        _.each(geometryCollection.geometries, geom => {
-          if (geom && geom.bbox && shouldDraw(geom.bbox, tileBounds)) {
-            if (geom.type === "Point") {
-              this._renderPoint(geom, layer, x, y);
-            } else if (geom.etype === "Track") {
-              this._renderLine(geom, layer, x, y);
-            }
-          }
-        });
-      });
-    });
-    console.timeEnd("Computing shapes");
-    layer.batchDraw();
+  _onMoveStart: function(e) {
+    this.dragging = true;
   },
-  createTile: function(coords) {
-    console.log("Creating tile")
-    const tile = document.createElement("div");
-    const tileSize = this.getTileSize();
-    const stage = new Stage({
-      container: tile,
-      width: tileSize.x,
-      height: tileSize.y
-    });
-    const bounds = this._tileCoordsToBounds(coords);
-    const layer = new FastLayer();
-    stage.add(layer);
-    this.stages[coords] = stage;
-    this.renderStage(stage, coords, bounds);
-    return tile;
+  _onMoveEnd: function(e) {
+    this.dragging = false;
+    this.throttleRedraw();
+  },
+  _onClick: function(e) {
+    console.log(e);
   }
-  */
+  //_handleMouseOut: function() {}
 });
 
 class ReactCollectionLayer extends MapLayer {
