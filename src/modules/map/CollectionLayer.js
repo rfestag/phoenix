@@ -13,6 +13,9 @@ import * as Util from "leaflet/src/core/Util";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 
+const MIN_SIMPLIFY_ZOOM = 6;
+const MAX_SIMPLIFY_ZOOM = 8;
+
 function touchBounds(geom, bounds) {
   const bbox = geom.bbox;
   //bbox -> minlon, minlat, maxlon, maxlat
@@ -31,6 +34,50 @@ function pointInBBox(geom, pt) {
   if (pt.lat > bbox[3]) return false;
   return true;
 }
+function getBoundsAndTransforms(bounds) {
+  let west, east;
+  if (bounds._northEast.lng > 180) {
+    west = {
+      _southWest: bounds._southWest,
+      _northEast: {
+        lng: 180,
+        lat: bounds._northEast.lat
+      }
+    };
+    east = {
+      _southWest: {
+        lng: -180,
+        lat: bounds._southWest.lat
+      },
+      _northEast: {
+        lng: bounds._northEast.lng - 360,
+        lat: bounds._northEast.lat
+      }
+    };
+    return [[east, 360], [west, 0]];
+  } else if (bounds._southWest.lng < -180) {
+    west = {
+      _southWest: {
+        lng: bounds._southWest.lng + 360,
+        lat: bounds._southWest.lat
+      },
+      _northEast: {
+        lng: 180,
+        lat: bounds._northEast.lat
+      }
+    };
+    east = {
+      _northEast: bounds._northEast,
+      _southWest: {
+        lng: -180,
+        lat: bounds._southWest.lat
+      }
+    };
+    return [[west, -360], [east, 0]];
+  } else {
+    return [[bounds, 0]];
+  }
+}
 
 function destroyNode(node) {
   if (node === undefined) return;
@@ -43,6 +90,18 @@ function style(shape) {
 function hoverStyle(shape) {
   shape.stroke("yellow");
   shape.moveToTop();
+}
+function simplifyByZoom(geom, zoom) {
+  return geom;
+  /*
+  if (geom.coordinates.length < 5 || zoom > MAX_SIMPLIFY_ZOOM) return geom
+  let tolerance
+  if (zoom === 8) tolerance = 0.01
+  else if (zoom === 7) tolerance = 0.05
+  else if (zoom === 6) tolerance = 0.1
+  else if (zoom === 5) tolerance = 5
+  return turf.simplify(geom, {tolerance})
+  */
 }
 export const CollectionLayer = Layer.extend({
   options: {
@@ -89,6 +148,7 @@ export const CollectionLayer = Layer.extend({
     const map = this._map;
 
     if (map) {
+      this._allBounds = getBoundsAndTransforms(this._map.getBounds());
       var p = this.options.padding,
         msize = this._map.getSize(),
         min = this._map
@@ -129,7 +189,7 @@ export const CollectionLayer = Layer.extend({
         this._updateEntity(entity, id);
       });
       console.timeEnd("update shapes");
-      console.log(count);
+      console.log(count, this._map.getZoom());
       stage.batchDraw();
     }
     return this;
@@ -151,7 +211,6 @@ export const CollectionLayer = Layer.extend({
     if (!touchBounds(geom, clickBounds)) return false;
     if (geom.type === "Point") return true;
     else {
-      if (!touchBounds(geom, clickBounds)) return false;
       if (geom.type === "Polygon") {
         return turf.booleanContains(geom, clickGeo);
       } else if (geom.type === "LineString") {
@@ -160,7 +219,7 @@ export const CollectionLayer = Layer.extend({
     }
   },
   _updateEntity: function(entity, id) {
-    return (this.entities[id] = _.reduce(
+    const e = (this.entities[id] = _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
         geoms[field] = this._updateGeometry(geom, field, id, geoms);
@@ -168,6 +227,7 @@ export const CollectionLayer = Layer.extend({
       },
       this.entities[id] || {}
     ));
+    return e;
   },
   _updateGeometry: function(geometryCollection, field, id, geoms) {
     return (geoms[field] = _.reduce(
@@ -187,69 +247,108 @@ export const CollectionLayer = Layer.extend({
   },
   _renderPoint: function(geom, shape, hovered) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-    if (touchBounds(geom, this._map.getBounds())) {
-      const coords = geom.coordinates;
-      const pt = this._map.latLngToLayerPoint(
-        new LatLng(coords[1], coords[0], coords[2])
-      );
-      const x = Math.floor(pt.x);
-      const y = Math.floor(pt.y);
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds)) {
+          rendered = true;
+          const coords = geom.coordinates;
+          const pt = this._map.latLngToLayerPoint(
+            new LatLng(coords[1], coords[0] + transform, coords[2])
+          );
+          const x = Math.floor(pt.x);
+          const y = Math.floor(pt.y);
 
-      if (shape && shape.constructor !== Circle) {
-        shape.destroy();
-        shape = undefined;
-      }
-      if (!shape) {
-        shape = new Circle({
-          shadowForStrokeEnabled: false,
-          strokeHitEnabled: false,
-          listening: false,
-          perfectDrawEnabled: false,
-          radius: 1,
-          strokeWidth: 1
-        });
-        this.layer.add(shape);
-      }
-      shape._lastGeom = geom;
-      shape.x(x);
-      shape.y(y);
-      hovered ? hoverStyle(shape) : style(shape);
-      shape.show();
-    } else {
-      if (shape) shape.hide();
-    }
+          if (shape && shape.constructor !== Circle) {
+            shape.destroy();
+            shape = undefined;
+          }
+          if (!shape) {
+            shape = new Circle({
+              shadowForStrokeEnabled: false,
+              strokeHitEnabled: false,
+              listening: false,
+              perfectDrawEnabled: false,
+              radius: 1,
+              strokeWidth: 1
+            });
+            this.layer.add(shape);
+          }
+          shape._lastGeom = geom;
+          shape.x(x);
+          shape.y(y);
+          hovered ? hoverStyle(shape) : style(shape);
+          shape.show();
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
     return shape;
   },
   _renderLine: function(geom, shape, hovered) {
-    if (touchBounds(geom, this._map.getBounds())) {
-      const points = geom.coordinates.reduce((pts, p) => {
-        const pt = this._map.latLngToLayerPoint(new LatLng(p[1], p[0], p[2]));
-        pts.push(Math.floor(pt.x));
-        pts.push(Math.floor(pt.y));
-        return pts;
-      }, []);
-      if (shape && shape.constructor !== Line) {
-        shape.destroy();
-        shape = undefined;
-      }
-      if (!shape) {
-        shape = new Line({
-          shadowForStrokeEnabled: false,
-          fillEnabled: false,
-          strokeHitEnabled: false,
-          listening: false,
-          perfectDrawEnabled: true,
-          strokeWidth: 2
-        });
-        this.layer.add(shape);
-      }
-      shape.points(points);
-      shape.tension(0.5);
-      hovered ? hoverStyle(shape) : style(shape);
-      shape.show();
-    } else {
-      if (shape) shape.hide();
-    }
+    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds)) {
+          rendered = true;
+          const zoom = this._map.getZoom();
+          let points = [];
+          if (zoom < MIN_SIMPLIFY_ZOOM) {
+            const p1 = geom.coordinates[0];
+            const p2 = geom.coordinates[geom.coordinates.length - 1];
+            const pt1 = this._map.latLngToLayerPoint(
+              new LatLng(p1[1], p1[0] + transform, p1[2])
+            );
+            const pt2 = this._map.latLngToLayerPoint(
+              new LatLng(p2[1], p2[0] + transform, p2[2])
+            );
+            points = [
+              Math.floor(pt1.x),
+              Math.floor(pt1.y),
+              Math.floor(pt2.x),
+              Math.floor(pt2.y)
+            ];
+          } else {
+            points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
+              const pt = this._map.latLngToLayerPoint(
+                new LatLng(p[1], p[0] + transform, p[2])
+              );
+              pts.push(Math.floor(pt.x));
+              pts.push(Math.floor(pt.y));
+              return pts;
+            }, points);
+          }
+          if (shape && shape.constructor !== Line) {
+            shape.destroy();
+            shape = undefined;
+          }
+          if (!shape) {
+            shape = new Line({
+              shadowForStrokeEnabled: false,
+              fillEnabled: false,
+              strokeHitEnabled: false,
+              listening: false,
+              perfectDrawEnabled: true,
+              strokeWidth: 2
+            });
+            this.layer.add(shape);
+          }
+          shape.points(points);
+          shape.tension(0.5);
+          hovered ? hoverStyle(shape) : style(shape);
+          shape.show();
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
     return shape;
   },
   _onMouseMove: function(e) {
@@ -312,10 +411,13 @@ export const CollectionLayer = Layer.extend({
                   if (this.entities[id] && this.entities[id][field]) {
                     const geoms = this.entities[id][field];
                     _.each(geoms, (shape, idx) => {
-                      hoverStyle(shape);
-                      try {
-                        shape.draw();
-                      } catch (e) {}
+                      //Only redraw if it changed from not hovered to hovered
+                      if (!this.hovered[id] || !this.hovered[id][field]) {
+                        hoverStyle(shape);
+                        try {
+                          shape.draw();
+                        } catch (e) {}
+                      }
                     });
                   }
                 } else if (this.hovered[id] && this.hovered[id][field]) {
