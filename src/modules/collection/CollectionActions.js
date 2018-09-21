@@ -6,6 +6,9 @@ export const CREATE_COLLECTION = "CREATE_COLLECTION";
 export const DELETE_COLLECTION = "DELETE_COLLECTION";
 export const DELETE_FROM_COLLECTION = "DELETE_FROM_COLLECTION";
 export const UPDATE_COLLECTION = "UPDATE_COLLECTION";
+export const UPDATE_COLLECTION_FIELDS = "UPDATE_COLLECTION_FIELDS";
+export const SET_CURRENT_COLLECTION = "SET_CURRENT_COLLECTION";
+export const SET_FOCUSED_ENTITY = "SET_FOCUSED_ENTITY";
 
 /* Actions */
 export const createCollection = (id, name, queries) => ({
@@ -38,7 +41,17 @@ export const setObservationAgeoff = (id, ageoff) => ({
   id,
   ageoff
 });
+export const updateCollectionFields = (id, fields) => ({
+  type: UPDATE_COLLECTION_FIELDS,
+  id,
+  fields
+});
 export const ageoffCollection = id => ({
   type: AGEOFF_COLLECTION,
   id
+});
+export const setCurrentCollection = (id, eid) => ({
+  type: SET_CURRENT_COLLECTION,
+  id,
+  eid
 });

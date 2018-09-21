@@ -220,7 +220,7 @@ export const CollectionLayer = Layer.extend({
         container.style.width = x + "px";
         stage.width(width);
       }
-      if (height !== container.position) {
+      if (height !== container.height) {
         container.height = height;
         container.style.height = y + "px";
         stage.height(height);
@@ -228,14 +228,11 @@ export const CollectionLayer = Layer.extend({
       if (x !== position.x || y !== position.y) {
         stage.position({ x, y });
       }
-
-      //console.timeEnd("Map setup")
       let count = 0;
       _.each(this.collection.data, (entity, id) => {
         count += 1;
         this._updateEntity(entity, id);
       });
-      console.log(count, this._map.getZoom());
       stage.batchDraw();
     }
     return this;
@@ -328,7 +325,7 @@ export const CollectionLayer = Layer.extend({
             });
             this.layer.add(shape);
           }
-          shape._lastGeom = geom;
+          shape.geom = geom;
           shape.x(x);
           shape.y(y);
           hovered ? hoverStyle(shape) : style(shape);
@@ -393,6 +390,7 @@ export const CollectionLayer = Layer.extend({
             });
             this.layer.add(shape);
           }
+          shape.geom = geom;
           shape.points(points);
           shape.tension(0.5);
           hovered ? hoverStyle(shape) : style(shape);

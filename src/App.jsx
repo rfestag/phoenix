@@ -28,6 +28,7 @@ import Banner from "./components/Banner";
 import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
 import LeftMenuBarButton from "./components/LeftMenuBarButton";
+import ColumnManager from "./modules/columns/ColumManager";
 
 fontawesome.library.add(search, rss, chart, brands, cancel, pause, play);
 
@@ -204,7 +205,7 @@ class App extends Component {
                   maxSize={400}
                   threshold={60}
                 >
-                  Right
+                  <ColumnManager />
                 </CollapsibleElement>
               )}
             </ReflexContainer>

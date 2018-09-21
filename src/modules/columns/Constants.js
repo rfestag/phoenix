@@ -3,6 +3,16 @@ import ValueRenderer from "./ValueRenderer";
 import moment from "moment";
 import _ from "lodash";
 
+const SELECT_COLUMN = {
+  checkboxSelection: true,
+  pinned: true,
+  suppressMenu: true,
+  headerCheckboxSelection: true,
+  width: 40,
+  suppressResize: true,
+  suppressSizeToFit: true
+};
+
 export const GETTERS = {
   latestValueGetter: params => {
     if (params.data.properties[params.colDef.field] === undefined)
@@ -25,30 +35,18 @@ export const FORMATTERS = {
 export const getDefaultColumns = () => {
   return [
     {
-      checkboxSelection: true,
-      pinned: true,
-      suppressMenu: true,
-      headerCheckboxSelection: true,
-      width: 40,
-      suppressResize: true,
-      suppressSizeToFit: true
-    },
-    { headerName: "ID", field: "id" },
-    {
       headerName: "First seen",
       field: "start",
-      valueFormatter: FORMATTERS.timeFormatter,
-      cellRendererFramework: ValueRenderer,
-      //enableCellChangeFlash: true,
-      valueGetter: GETTERS.timeGetter
+      _type: "time",
+      _getterName: "timeGetter",
+      _formatterName: "timeFormatter"
     },
     {
       headerName: "Last seen",
       field: "end",
-      valueFormatter: FORMATTERS.timeFormatter,
-      cellRendererFramework: ValueRenderer,
-      //enableCellChangeFlash: true,
-      valueGetter: GETTERS.timeGetter
+      _type: "time",
+      _getterName: "timeGetter",
+      _formatterName: "timeFormatter"
     }
   ];
 };
@@ -85,24 +83,32 @@ export const createPropertyColumn = (field, value) => {
   }
 };
 export const createGeometryColumn = (field, value) => {};
-export const getColumnsForCollection = (state, props) => {
+export const getPropertiesForCollection = (state, props) => {
   if (props.collection) {
     return props.collection.fields.properties;
   }
-  return [];
+  return {};
+};
+export const getGeometriesForCollection = (state, props) => {
+  if (props.collection) {
+    return props.collection.fields.geometries;
+  }
+  return {};
 };
 
 export const getColumnDefs = createSelector(
-  [getColumnsForCollection],
+  [getPropertiesForCollection],
   columns => {
-    return getDefaultColumns().concat(
+    const defs = [SELECT_COLUMN].concat(
       _.map(columns, c => {
         return {
           ...c,
           cellRendererFramework: ValueRenderer,
-          valueGetter: GETTERS[c._getterName]
+          valueGetter: GETTERS[c._getterName],
+          valueFormatter: FORMATTERS[c._formatterName]
         };
       })
     );
+    return defs;
   }
 );

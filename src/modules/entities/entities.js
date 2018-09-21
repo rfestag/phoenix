@@ -46,7 +46,7 @@ export const updateEntity = (e, updates, fields) => {
           updatedProperties[field] = updateProperty(prop, value, time);
           updateWhen(entity, time);
           if (!fields.properties[field])
-            createPropertyColumn(fields.properties, field, value);
+            fields.properties[field] = createPropertyColumn(field, value);
           return updatedProperties;
         },
         {}
@@ -62,8 +62,8 @@ export const updateEntity = (e, updates, fields) => {
             : createGeometry(entity.geometries[field]);
           updatedGeometries[field] = updateGeometry(prop, update);
           updateWhen(entity, update.when.end || update.when.start);
-          if (!fields.properties[field])
-            createGeometryColumn(fields.geometries, field, update);
+          if (!fields.geometries[field])
+            fields.geometries[field] = createGeometryColumn(field, update);
           return updatedGeometries;
         },
         {}

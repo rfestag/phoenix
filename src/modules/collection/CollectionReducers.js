@@ -3,9 +3,13 @@ import {
   CREATE_COLLECTION,
   DELETE_COLLECTION,
   UPDATE_COLLECTION,
-  DELETE_FROM_COLLECTION
+  UPDATE_COLLECTION_FIELDS,
+  DELETE_FROM_COLLECTION,
+  SET_CURRENT_COLLECTION,
+  SET_FOCUSED_ENTITY
 } from "./CollectionActions";
 import { updateEntity } from "../entities/entities";
+import { getDefaultColumns } from "../columns/Constants";
 const initialState = { collections: {} };
 
 export default function(state = initialState, action) {
@@ -23,11 +27,12 @@ export default function(state = initialState, action) {
           name: action.name,
           queries: action.queries,
           visible: true,
-          fields: { geometries: {}, properties: {} },
+          fields: { geometries: {}, properties: getDefaultColumns() },
           data: {}
         };
         return {
           ...state,
+          current: id,
           collections: { ...state.collections, [id]: collection }
         };
       }
@@ -43,7 +48,7 @@ export default function(state = initialState, action) {
       if (collection) {
         //console.time("Update Collection");
         console.time("update entities");
-        const fields = {
+        let fields = {
           properties: { ...collection.fields.properties },
           geometries: { ...collection.fields.geometries }
         };
@@ -56,7 +61,7 @@ export default function(state = initialState, action) {
               fields
             );
             data[id] = updatedEntity;
-            collection.fields = updatedFields;
+            fields = updatedFields;
             return data;
           },
           { ...collection.data }
@@ -71,12 +76,25 @@ export default function(state = initialState, action) {
         console.error("Cannot update collection (does not exist)", id);
         return state;
       }
+    case UPDATE_COLLECTION_FIELDS:
+      return state;
     case DELETE_FROM_COLLECTION:
       //TODO: Reimplement
       collection = _.omit(state.collection[action.id], action.ids);
       return {
         ...state,
         collections: { ...state.collections, [action.id]: collection }
+      };
+    case SET_CURRENT_COLLECTION:
+      return {
+        ...state,
+        current: id
+      };
+    case SET_FOCUSED_ENTITY:
+      collection = { ...state.collections[id], focused: action.eid };
+      return {
+        ...state,
+        collections: { ...state.collections, [id]: collection }
       };
     default:
   }
