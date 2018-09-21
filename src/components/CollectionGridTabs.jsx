@@ -61,7 +61,7 @@ export class CollectionGridTabs extends React.Component {
         <TabContent activeTab={this.state.activeTab} style={{ flex: "1" }}>
           {_.map(this.props.collections, (collection, id) => (
             <TabPane tabId={id} key={id} style={{ height: "100%" }}>
-              <Grid collection={collection} />
+              <Grid collectionId={id} collection={collection} />
             </TabPane>
           ))}
         </TabContent>

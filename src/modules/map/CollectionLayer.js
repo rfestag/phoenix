@@ -25,56 +25,94 @@ function touchBounds(geom, bounds) {
   if (bbox[3] < bounds._southWest.lat) return false; // box is south of tile
   return true; // boxes overlap
 }
-function pointInBBox(geom, pt) {
-  const bbox = geom.bbox;
-  //bbox -> minlon, minlat, maxlon, maxlat
-  if (pt.lng < bbox[0]) return false;
-  if (pt.lat < bbox[1]) return false;
-  if (pt.lng > bbox[2]) return false;
-  if (pt.lat > bbox[3]) return false;
-  return true;
-}
 function getBoundsAndTransforms(bounds) {
   let west, east;
   if (bounds._northEast.lng > 180) {
-    west = {
-      _southWest: bounds._southWest,
-      _northEast: {
-        lng: 180,
-        lat: bounds._northEast.lat
-      }
-    };
-    east = {
-      _southWest: {
-        lng: -180,
-        lat: bounds._southWest.lat
-      },
-      _northEast: {
-        lng: bounds._northEast.lng - 360,
-        lat: bounds._northEast.lat
-      }
-    };
-    return [[east, 360], [west, 0]];
+    if (bounds._southWest.lng > 180) {
+      //When the entire box is "east" of 180 (west is > 180), we translate both corners
+      //This only occurs when we pass in a non-map bounds (say, a select box, or the area
+      //around the cursor for hover events). In this case, the bounds is entirely on the
+      //"eastern" side of the map (but is really the far west). So we return a translated box
+      bounds = {
+        _southWest: {
+          lng: bounds._southWest.lng - 360,
+          lat: bounds._southWest.lat
+        },
+        _northEast: {
+          lng: bounds._northEast.lng - 360,
+          lat: bounds._northEast.lat
+        }
+      };
+      return [[bounds, 360]];
+    } else {
+      //When only part of the box crosses 180, we split it.
+      //When the eastern bounds is > 180, the "eastern" half
+      //of the box is actually the far west.
+      //So, we truncate the "western" half of the box at 180, and
+      //create a new "eastern" box that is from -180 to the equivalent
+      //eastern latitude (by subracting 360)
+      west = {
+        _southWest: bounds._southWest,
+        _northEast: {
+          lng: 180,
+          lat: bounds._northEast.lat
+        }
+      };
+      east = {
+        _southWest: {
+          lng: -180,
+          lat: bounds._southWest.lat
+        },
+        _northEast: {
+          lng: bounds._northEast.lng - 360,
+          lat: bounds._northEast.lat
+        }
+      };
+      return [[east, 360], [west, 0]];
+    }
   } else if (bounds._southWest.lng < -180) {
-    west = {
-      _southWest: {
-        lng: bounds._southWest.lng + 360,
-        lat: bounds._southWest.lat
-      },
-      _northEast: {
-        lng: 180,
-        lat: bounds._northEast.lat
-      }
-    };
-    east = {
-      _northEast: bounds._northEast,
-      _southWest: {
-        lng: -180,
-        lat: bounds._southWest.lat
-      }
-    };
-    return [[west, -360], [east, 0]];
+    if (bounds._northEast.lng < -180) {
+      //This only occurs when we pass in a non-map bounds (say, a select box, or the area
+      //around the cursor for hover events). In this case, the bounds is entirely on the
+      //"western" side of the map (but is really the far east). So we return a translated box
+      bounds = {
+        _southWest: {
+          lng: bounds._southWest.lng + 360,
+          lat: bounds._southWest.lat
+        },
+        _northEast: {
+          lng: bounds._northEast.lng + 360,
+          lat: bounds._northEast.lat
+        }
+      };
+      return [[bounds, -360]];
+    } else {
+      //When the western bounds is < -180, the "western" half
+      //of the box is actually the far east.
+      //So, we truncate the "eastern" half of the box at -180, and
+      //create a new "western" box that is from the equivalent western
+      //longitude (by adding 360) to 180
+      west = {
+        _southWest: {
+          lng: bounds._southWest.lng + 360,
+          lat: bounds._southWest.lat
+        },
+        _northEast: {
+          lng: 180,
+          lat: bounds._northEast.lat
+        }
+      };
+      east = {
+        _northEast: bounds._northEast,
+        _southWest: {
+          lng: -180,
+          lat: bounds._southWest.lat
+        }
+      };
+      return [[west, -360], [east, 0]];
+    }
   } else {
+    //We are completely within normal bounds, so no need to do anything special
     return [[bounds, 0]];
   }
 }
@@ -128,7 +166,8 @@ export const CollectionLayer = Layer.extend({
       this
     );
     //DomEvent.on(container, "mouseout", this._handleMouseOut, this);
-    this.throttleRedraw = _.throttle(self.redraw, 750);
+    //We check for dragging outside of the actual throttle so we can still render after
+    this.throttleRedraw = _.throttle(self.redraw, 200);
     this._map.on("movestart", this._onMoveStart, this);
     this._map.on("moveend", this._onMoveEnd, this);
     this._map.on("zoomend", this.throttleRedraw, this);
@@ -145,6 +184,7 @@ export const CollectionLayer = Layer.extend({
     delete this._container;
   },
   redraw: function(fast) {
+    if (this.dragging) return;
     const map = this._map;
 
     if (map) {
@@ -170,25 +210,31 @@ export const CollectionLayer = Layer.extend({
       DomUtil.setPosition(container, b.min);
 
       // set canvas size (also clearing it); use double size on retina
-      container.width = m * size.x;
-      container.height = m * size.y;
-      container.style.width = size.x + "px";
-      container.style.height = size.y + "px";
-      stage.width(container.width);
-      stage.height(container.height);
-      stage.position({ x: -b.min.x, y: -b.min.y });
+      const width = m * size.x,
+        height = m * size.x,
+        x = -b.min.x,
+        y = -b.min.y;
+      const position = stage.position();
+      if (width !== container.width) {
+        container.width = width;
+        container.style.width = x + "px";
+        stage.width(width);
+      }
+      if (height !== container.position) {
+        container.height = height;
+        container.style.height = y + "px";
+        stage.height(height);
+      }
+      if (x !== position.x || y !== position.y) {
+        stage.position({ x, y });
+      }
 
-      /*if (Browser.retina) {
-		  	stage.scale({x: 2, y: 2});
-		  }*/
-
-      console.time("update shapes");
+      //console.timeEnd("Map setup")
       let count = 0;
       _.each(this.collection.data, (entity, id) => {
         count += 1;
         this._updateEntity(entity, id);
       });
-      console.timeEnd("update shapes");
       console.log(count, this._map.getZoom());
       stage.batchDraw();
     }
@@ -207,16 +253,23 @@ export const CollectionLayer = Layer.extend({
     this.collection = collection;
     this.redraw();
   },
-  _closeTo: function(geom, clickPt, clickGeo, clickBox, clickBounds) {
-    if (!touchBounds(geom, clickBounds)) return false;
-    if (geom.type === "Point") return true;
-    else {
-      if (geom.type === "Polygon") {
-        return turf.booleanContains(geom, clickGeo);
-      } else if (geom.type === "LineString") {
-        return !turf.booleanDisjoint(geom, clickBox);
-      }
-    }
+  _closeTo: function(geom, allBoxes) {
+    return _.reduce(
+      allBoxes,
+      (close, box) => {
+        const [transform, clickBounds, clickBox] = box;
+        if (close) return close;
+        if (!touchBounds(geom, clickBounds)) return false;
+        if (geom.type === "Point") return true;
+        else {
+          return (
+            turf.booleanWithin(geom, clickBox) ||
+            !turf.booleanDisjoint(geom, clickBox)
+          );
+        }
+      },
+      false
+    );
   },
   _updateEntity: function(entity, id) {
     const e = (this.entities[id] = _.reduce(
@@ -294,6 +347,7 @@ export const CollectionLayer = Layer.extend({
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
+        if (rendered) return rendered;
         const [bounds, transform] = bt;
         if (touchBounds(geom, bounds)) {
           rendered = true;
@@ -356,7 +410,6 @@ export const CollectionLayer = Layer.extend({
     if (this.dragging) return;
     const map = this._map;
     const t = 8; //Threshold
-    const clickPt = map.latLngToLayerPoint(e.latlng);
     const nw = map.layerPointToLatLng(
       new Point(e.layerPoint.x - t, e.layerPoint.y - t)
     );
@@ -369,10 +422,6 @@ export const CollectionLayer = Layer.extend({
     const sw = map.layerPointToLatLng(
       new Point(e.layerPoint.x - t, e.layerPoint.y + t)
     );
-    const clickGeo = {
-      type: "Point",
-      coordinates: [e.latlng.lng, e.latlng.lat]
-    };
     const clickBox = {
       type: "Polygon",
       coordinates: [
@@ -386,6 +435,28 @@ export const CollectionLayer = Layer.extend({
       ]
     };
     const clickBounds = { _northEast: ne, _southWest: sw };
+    const allBounds = getBoundsAndTransforms(clickBounds);
+    const allBoxes = allBounds.map(bt => {
+      const [bounds, transform] = bt;
+      return [
+        transform,
+        bounds,
+        {
+          type: "Polygon",
+          coordinates: [
+            [
+              [nw.lng + transform, nw.lat],
+              [ne.lng + transform, ne.lat],
+              [se.lng + transform, se.lat],
+              [sw.lng + transform, sw.lat],
+              [nw.lng + transform, nw.lat]
+            ]
+          ]
+        }
+      ];
+    });
+    //TODO: Instead of create just an allBounds, I need an allBox and allGeos. Better,
+    //create an array that has all three in them, since they are based on allBounds translate
     let didHover = false;
     //const pt = e.latlng //this._map.layerPointToLatLng(e);
     this.hovered = _.reduce(
@@ -397,22 +468,17 @@ export const CollectionLayer = Layer.extend({
             return _.reduce(
               gc.geometries,
               (hits, geometry, idx) => {
-                if (
-                  this._closeTo(
-                    geometry,
-                    clickPt,
-                    clickGeo,
-                    clickBox,
-                    clickBounds
-                  )
-                ) {
+                if (this._closeTo(geometry, allBoxes)) {
                   didHover = true;
                   hits[id] = { [field]: true };
                   if (this.entities[id] && this.entities[id][field]) {
                     const geoms = this.entities[id][field];
                     _.each(geoms, (shape, idx) => {
                       //Only redraw if it changed from not hovered to hovered
-                      if (!this.hovered[id] || !this.hovered[id][field]) {
+                      if (
+                        shape &&
+                        (!this.hovered[id] || !this.hovered[id][field])
+                      ) {
                         hoverStyle(shape);
                         try {
                           shape.draw();
@@ -424,10 +490,12 @@ export const CollectionLayer = Layer.extend({
                   //It is no longer a hover, re-style
                   const geoms = this.entities[id][field];
                   _.each(geoms, (shape, idx) => {
-                    style(shape);
-                    try {
-                      shape.draw();
-                    } catch (e) {}
+                    if (shape) {
+                      style(shape);
+                      try {
+                        shape.draw();
+                      } catch (e) {}
+                    }
                   });
                 }
                 return hits;
@@ -468,10 +536,12 @@ class ReactCollectionLayer extends MapLayer {
     return new CollectionLayer(props.collection.data, this.getOptions(props));
   }
   updateLeafletElement(fromProps, toProps) {
+    console.time("layer update");
     super.updateLeafletElement(fromProps, toProps);
     if (fromProps.collection !== toProps.collection) {
       this.leafletElement.setCollection(toProps.collection);
     }
+    console.timeEnd("layer update");
   }
 }
 

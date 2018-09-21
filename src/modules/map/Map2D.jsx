@@ -3,11 +3,12 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
-import { Map, TileLayer } from "react-leaflet";
+import { Map, TileLayer, ScaleControl } from "react-leaflet";
 //import HeatmapLayer from 'react-leaflet-heatmap-layer';
 import CollectionLayer from "./CollectionLayer.js";
 import _ from "lodash";
 //import { createSelector } from 'reselect'
+//import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
 
 /*
@@ -85,6 +86,16 @@ export class Map2D extends Component {
         minZoom={3}
         style={{ width: "100%", height: "100%" }}
       >
+        <div
+          style={{
+            width: "100%",
+            height: 32,
+            position: "absolute",
+            top: 0,
+            zIndex: 100,
+            backgroundColor: "black"
+          }}
+        />
         {/*
         <HeatmapLayer
           points={this.props.heatmapPoints}
@@ -94,6 +105,7 @@ export class Map2D extends Component {
           maxZoom={5} />
           */}
         <TileLayer {...this.props.layer.settings} tileSize={512} />
+        <ScaleControl position="bottomleft" />
         {_.map(this.props.collections, (collection, cid) => {
           return (
             <CollectionLayer key={cid} collection={collection} minZoom={5} />

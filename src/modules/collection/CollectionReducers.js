@@ -23,6 +23,7 @@ export default function(state = initialState, action) {
           name: action.name,
           queries: action.queries,
           visible: true,
+          fields: { geometries: {}, properties: {} },
           data: {}
         };
         return {
@@ -42,16 +43,26 @@ export default function(state = initialState, action) {
       if (collection) {
         //console.time("Update Collection");
         console.time("update entities");
+        const fields = {
+          properties: { ...collection.fields.properties },
+          geometries: { ...collection.fields.geometries }
+        };
         let data = _.reduce(
           action.data,
           (data, updates, id) => {
-            data[id] = updateEntity(data[id], updates);
+            const [updatedEntity, updatedFields] = updateEntity(
+              data[id],
+              updates,
+              fields
+            );
+            data[id] = updatedEntity;
+            collection.fields = updatedFields;
             return data;
           },
           { ...collection.data }
         );
         console.timeEnd("update entities");
-        collection = { ...collection, data };
+        collection = { ...collection, fields, data };
         return {
           ...state,
           collections: { ...state.collections, [id]: collection }
