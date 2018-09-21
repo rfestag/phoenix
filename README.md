@@ -86,6 +86,8 @@ but may contain Epics (see `redux-observable`), components, and constants. Gener
     - Description
   - Support filtering by shape - Feature
     - Users specify contains/intersect
+  - Support transformation
+    - Rotate/Translate all shapes in layer by user-defined factors.
   - Support data styling
     - By rules - Same as shape styling above
   - Timeline - Component
