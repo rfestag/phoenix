@@ -1,5 +1,6 @@
 import { Source } from "./source";
 import { Observable } from "rxjs";
+import { createTrackPoint } from "../entities/geometries";
 
 /**
  * Connects to a websocket providing JSON data from ADSBExchange
@@ -22,13 +23,16 @@ export class TestSource extends Source {
   query(def) {
     return Observable.interval(1000).map(v => {
       const data = [];
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 100; i++) {
         let time = Date.now();
         let lat = { time, value: Math.random() * 180 - 90 };
         let lng = { time, value: Math.random() * 360 - 180 };
         let alt = { time, value: Math.random() * 50000 };
         let position = { time, value: [lng.value, lat.value] };
-        let properties = {};
+        let geometries = {
+          track: createTrackPoint([lng, lat], time)
+        };
+
         data[i] = {
           id: i,
           label: i,

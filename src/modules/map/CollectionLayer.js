@@ -43,7 +43,7 @@ function getBoundsAndTransforms(bounds) {
           lat: bounds._northEast.lat
         }
       };
-      return [[bounds, 360]];
+      return [[bounds, -360]];
     } else {
       //When only part of the box crosses 180, we split it.
       //When the eastern bounds is > 180, the "eastern" half
@@ -85,7 +85,7 @@ function getBoundsAndTransforms(bounds) {
           lat: bounds._northEast.lat
         }
       };
-      return [[bounds, -360]];
+      return [[bounds, +360]];
     } else {
       //When the western bounds is < -180, the "western" half
       //of the box is actually the far east.

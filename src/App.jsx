@@ -66,7 +66,7 @@ function mapDispatchToProps(dispatch) {
     collapseLeft: () => dispatch(collapsePanel("left")),
     collapseRight: () => dispatch(collapsePanel("right")),
     collapseBottom: () => dispatch(collapsePanel("bottom")),
-    createQuery: query => dispatch(createQuery(query)),
+    createQuery: (src, query, name) => dispatch(createQuery(src, query, name)),
     cancelQuery: id => dispatch(cancelQuery(id)),
     startQuery: id => dispatch(startQuery(id)),
     stopQuery: id => dispatch(stopQuery(id))
@@ -91,10 +91,12 @@ class App extends Component {
 
   componentDidMount() {
     if (window.WebSocket) {
-      //this.props.createQuery("ADSBApollo", {});
-      this.props.createQuery("ADSBApollo", {});
+      this.props.createQuery("ADSBApollo", {}, "ADSB Exchange");
     }
   }
+  startNewTest = () => {
+    this.props.createQuery("Test", {});
+  };
   toggleQuery() {
     const id = Object.keys(this.props.query)[0];
     console.log(this.props.query);
@@ -167,7 +169,7 @@ class App extends Component {
                   maxSize={400}
                   threshold={40}
                 >
-                  Left
+                  <button onClick={() => this.startNewTest()}>Start</button>
                 </CollapsibleElement>
               )}
               {!this.props.panel.left && <ReflexSplitter propogate={true} />}

@@ -6,9 +6,10 @@ export const PAUSE_QUERY = "PAUSE_QUERY";
 export const CANCEL_QUERY = "CANCEL_QUERY";
 
 /* Actions */
-export const createQuery = (source, query) => ({
+export const createQuery = (source, query, name) => ({
   type: CREATE_QUERY,
   id: uuid(),
+  name,
   source,
   query
 });
