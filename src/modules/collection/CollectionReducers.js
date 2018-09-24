@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 import {
   CREATE_COLLECTION,
   DELETE_COLLECTION,
@@ -24,6 +25,7 @@ export default function(state = initialState, action) {
       } else {
         collection = {
           id,
+          ageoff: { value: 30, unit: "seconds" },
           name: action.name,
           queries: action.queries,
           visible: true,
@@ -79,11 +81,14 @@ export default function(state = initialState, action) {
     case UPDATE_COLLECTION_FIELDS:
       return state;
     case DELETE_FROM_COLLECTION:
-      //TODO: Reimplement
-      collection = _.omit(state.collection[action.id], action.ids);
+      console.log("DELETE_FROM_COLLECTION", action);
+      collection = state.collections[id];
       return {
         ...state,
-        collections: { ...state.collections, [action.id]: collection }
+        collections: {
+          ...state.collections,
+          [id]: { ...collection, data: _.omit(collection.data, action.ids) }
+        }
       };
     case SET_CURRENT_COLLECTION:
       return {
@@ -91,10 +96,12 @@ export default function(state = initialState, action) {
         current: id
       };
     case SET_FOCUSED_ENTITY:
-      collection = { ...state.collections[id], focused: action.eid };
       return {
         ...state,
-        collections: { ...state.collections, [id]: collection }
+        collections: {
+          ...state.collections,
+          [id]: { ...collection, focused: action.eid }
+        }
       };
     default:
   }

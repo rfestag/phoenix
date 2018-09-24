@@ -38,6 +38,9 @@ export class ApolloWsSource extends Source {
     });
   }
 
+  dictionary() {
+    super.dictionary();
+  }
   query(def) {
     super.query(def);
   }

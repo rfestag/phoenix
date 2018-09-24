@@ -165,7 +165,6 @@ export const CollectionLayer = Layer.extend({
       this._onClick,
       this
     );
-    //DomEvent.on(container, "mouseout", this._handleMouseOut, this);
     //We check for dragging outside of the actual throttle so we can still render after
     this.throttleRedraw = _.throttle(self.redraw, 200);
     this._map.on("movestart", this._onMoveStart, this);
@@ -228,9 +227,7 @@ export const CollectionLayer = Layer.extend({
       if (x !== position.x || y !== position.y) {
         stage.position({ x, y });
       }
-      let count = 0;
       _.each(this.collection.data, (entity, id) => {
-        count += 1;
         this._updateEntity(entity, id);
       });
       stage.batchDraw();
@@ -254,7 +251,7 @@ export const CollectionLayer = Layer.extend({
     return _.reduce(
       allBoxes,
       (close, box) => {
-        const [transform, clickBounds, clickBox] = box;
+        const [, clickBounds, clickBox] = box;
         if (close) return close;
         if (!touchBounds(geom, clickBounds)) return false;
         if (geom.type === "Point") return true;
@@ -420,6 +417,7 @@ export const CollectionLayer = Layer.extend({
     const sw = map.layerPointToLatLng(
       new Point(e.layerPoint.x - t, e.layerPoint.y + t)
     );
+    /*
     const clickBox = {
       type: "Polygon",
       coordinates: [
@@ -432,6 +430,7 @@ export const CollectionLayer = Layer.extend({
         ]
       ]
     };
+    */
     const clickBounds = { _northEast: ne, _southWest: sw };
     const allBounds = getBoundsAndTransforms(clickBounds);
     const allBoxes = allBounds.map(bt => {
@@ -524,8 +523,9 @@ export const CollectionLayer = Layer.extend({
   },
   _onClick: function(e) {
     console.log(e);
+    //This is to stop the context menu popup. May want to move to its own handler?
+    e.preventDefault();
   }
-  //_handleMouseOut: function() {}
 });
 
 class ReactCollectionLayer extends MapLayer {

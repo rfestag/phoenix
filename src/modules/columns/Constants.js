@@ -50,37 +50,28 @@ export const getDefaultColumns = () => {
     }
   ];
 };
-export const createPropertyColumn = (field, value) => {
-  if (value) {
-    if (_.isArray(value)) createPropertyColumn(field, value[0]);
-    if (_.isNumber(value)) {
-      return {
-        field,
-        headerName: field,
-        hide: true,
-        _type: "numeric",
-        _unitType: undefined,
-        _units: undefined,
-        _getterName: "latestValueGetter"
-      };
+export const createPropertyColumn = (field, sample, opts = {}) => {
+  let columnDef = {
+    name: field,
+    headerName: field,
+    hide: true,
+    _getterName: "latestValueGetter"
+  };
+  if (sample) {
+    if (_.isArray(sample)) createPropertyColumn(field, sample[0]);
+    if (_.isBoolean(sample)) {
+      columnDef._type = "boolean";
+    } else if (_.isNumber(sample)) {
+      columnDef._type = "numeric";
+      columnDef._unitType = undefined;
+      columnDef._units = undefined;
     } else {
-      return {
-        field,
-        headerName: field,
-        hide: true,
-        _type: "string",
-        _getterName: "latestValueGetter"
-      };
+      columnDef._type = "string";
     }
   } else {
-    return {
-      field,
-      headerName: field,
-      hide: true,
-      _type: undefined,
-      _getterName: "latestValueGetter"
-    };
+    columnDef._type = undefined;
   }
+  return { ...columnDef, ...opts };
 };
 export const createGeometryColumn = (field, value) => {};
 export const getPropertiesForCollection = (state, props) => {

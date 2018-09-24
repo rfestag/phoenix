@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-export default class ValueRenderer extends React.Component {
+export default class ValueRenderer extends Component {
   static propTypes = {
     colDef: PropTypes.object,
     value: PropTypes.any

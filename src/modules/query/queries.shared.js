@@ -53,32 +53,34 @@ export function collectBy(field) {
 }
 export function mapToCollection(action$) {
   return function mapToCollectionImplementation(src) {
-    return src.mergeMap(action => {
-      const adapter = sources[action.source].query(action.query);
-      const id = action.id;
-      const name = action.name || id;
-      const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value
-      const buffered = new Subject(); //Our buffer of data during pause
+    return src.pipe(
+      mergeMap(action => {
+        const adapter = sources[action.source].query(action.query);
+        const id = action.id;
+        const name = action.name || id;
+        const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value
+        const buffered = new Subject(); //Our buffer of data during pause
 
-      const isComplete = action$.pipe(queryCancelled(id));
+        const isComplete = action$.pipe(queryCancelled(id));
 
-      const pauseQuery = action$.pipe(queryPaused(id, false));
+        const pauseQuery = action$.pipe(queryPaused(id, false));
 
-      //We separate the query's observable from the source because we assume it 'cold',
-      //and we don't want to restart it on subscription
-      adapter.pipe(bufferTime(3000), collectBy(d => d.id)).subscribe(source);
-      source.pipe(buffer(pauseQuery), mergeAll()).subscribe(buffered);
+        //We separate the query's observable from the source because we assume it 'cold',
+        //and we don't want to restart it on subscription
+        adapter.pipe(bufferTime(3000), collectBy(d => d.id)).subscribe(source);
+        source.pipe(buffer(pauseQuery), mergeAll()).subscribe(buffered);
 
-      const collectionId = uuid();
-      return concat(
-        of(createCollection(collectionId, name)),
-        pauseQuery.pipe(
-          switchMap(paused => (paused ? buffered : source)),
-          map(data => updateCollection(collectionId, data)),
-          takeUntil(isComplete)
-        )
-      );
-    });
+        const collectionId = uuid();
+        return concat(
+          of(createCollection(collectionId, name)),
+          pauseQuery.pipe(
+            switchMap(paused => (paused ? buffered : source)),
+            map(data => updateCollection(collectionId, data)),
+            takeUntil(isComplete)
+          )
+        );
+      })
+    );
   };
 }
 

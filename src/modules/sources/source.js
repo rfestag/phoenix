@@ -6,6 +6,9 @@ export class Source {
   constructor(name) {
     this.name = name;
   }
+  dictionary() {
+    return {};
+  }
   query() {
     throw Error("You must implement a 'query' method");
   }

@@ -9,7 +9,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import _ from "lodash";
 
-export class ColumnManager extends React.Component {
+export class ColumnManager extends Component {
   static propTypes = {
     columns: PropTypes.object,
     geometries: PropTypes.object

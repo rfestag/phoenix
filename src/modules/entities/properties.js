@@ -58,29 +58,42 @@ export const createProperty = def =>
 export const updateProperty = (prop, value, time) => {
   prop.data = prop.data || [];
   prop.times = prop.times || [];
+  let updated = false;
+  //If we have time, sort by it
   if (time) {
     const index = findIndex(prop.data, t => t <= time);
-    if (
-      index === prop.times.length - 1 &&
-      value !== prop.data[prop.data.length - 1]
-    ) {
-      prop.times.push(time);
-      prop.data.push(value);
-    } else if (index > 0 && value !== prop.data[prop.data.length - 1]) {
-      prop.times.splice(index, 0, time);
-      prop.data.splice(index, 0, value);
-    } else {
+    //If this should be pushed to the last position, only add it if
+    //the value hasn't changed
+    if (index === prop.times.length - 1) {
       if (value !== prop.data[prop.data.length - 1]) {
+        prop.times.push(time);
+        prop.data.push(value);
+        updated = true;
+      }
+      //If this is somewhere in the middle of the array, put it there unless
+      //we already have the value there
+    } else if (index > 0) {
+      if (value !== prop.data[index]) {
+        prop.times.splice(index, 0, time);
+        prop.data.splice(index, 0, value);
+        updated = true;
+      }
+      //If it is at 0 (the only remaining case), put it at the beginning of the array.
+      //If it is the same value as the beginning of the array, just change the first time
+    } else {
+      if (value !== prop.data[0]) {
         prop.times.unshift(time);
         prop.data.unshift(value);
+        updated = true;
       } else {
         prop.times[0] = time;
       }
     }
     updateWhen(prop, time);
-    updateAggregations(prop, value);
+    //If we don't have time, we just append in natural order
   } else {
     prop.data.push(value);
   }
+  updateAggregations(prop, value);
   return prop;
 };
