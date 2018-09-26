@@ -1,11 +1,12 @@
 import _ from "lodash";
-import moment from "moment";
 import {
   CREATE_COLLECTION,
   DELETE_COLLECTION,
   UPDATE_COLLECTION,
   UPDATE_COLLECTION_FIELDS,
   DELETE_FROM_COLLECTION,
+  SELECT_ENTITIES,
+  SET_SELECTED_ENTITIES,
   SET_CURRENT_COLLECTION,
   SET_FOCUSED_ENTITY
 } from "./CollectionActions";
@@ -30,6 +31,7 @@ export default function(state = initialState, action) {
           queries: action.queries,
           visible: true,
           fields: { geometries: {}, properties: getDefaultColumns() },
+          selected: {},
           data: {}
         };
         return {
@@ -79,17 +81,50 @@ export default function(state = initialState, action) {
         return state;
       }
     case UPDATE_COLLECTION_FIELDS:
-      return state;
-    case DELETE_FROM_COLLECTION:
-      console.log("DELETE_FROM_COLLECTION", action);
       collection = state.collections[id];
-      return {
-        ...state,
-        collections: {
-          ...state.collections,
-          [id]: { ...collection, data: _.omit(collection.data, action.ids) }
-        }
-      };
+      if (collection) {
+        console.log("UPDATED FIELDS", collection.fields, action.fields);
+        collection = { ...collection, fields: action.fields };
+        return {
+          ...state,
+          collections: { ...state.collections, [id]: collection }
+        };
+      } else {
+        return state;
+      }
+    case SELECT_ENTITIES:
+      collection = state.collections[id];
+      if (collection) {
+        collection.selected = action.ids.reduce(
+          (selected, id) => {
+            selected[id] = true;
+            return selected;
+          },
+          { ...collection.selected }
+        );
+        return {
+          ...state,
+          collections: { ...state.collections, [id]: { ...collection } }
+        };
+      } else {
+        return state;
+      }
+    case SET_SELECTED_ENTITIES:
+      console.log("Setting selected entities");
+      collection = state.collections[id];
+      if (collection) {
+        collection.selected = action.ids.reduce((selected, id) => {
+          selected[id] = true;
+          return selected;
+        }, {});
+        console.log(collection.selected);
+        return {
+          ...state,
+          collections: { ...state.collections, [id]: { ...collection } }
+        };
+      } else {
+        return state;
+      }
     case SET_CURRENT_COLLECTION:
       return {
         ...state,

@@ -1,4 +1,3 @@
-import { Observable } from "rxjs";
 import { withLatestFrom, mergeMap } from "rxjs/operators";
 import { of } from "rxjs/observable/of";
 import { interval } from "rxjs/observable/interval";
@@ -12,7 +11,6 @@ export const ageOffEpic = (action$, state$) => {
     withLatestFrom(state$),
     mergeMap(([, state]) => {
       const collections = state.collection.collections;
-      const now = Date.now();
       const actions = _.reduce(
         collections,
         (actions, collection, id) => {

@@ -14,7 +14,8 @@ import {
 } from "./QueryActions";
 import {
   createCollection,
-  updateCollection
+  updateCollection,
+  updateCollectionFields
 } from "../collection/CollectionActions";
 import {
   tap,
@@ -56,6 +57,7 @@ export function mapToCollection(action$) {
     return src.pipe(
       mergeMap(action => {
         const adapter = sources[action.source].query(action.query);
+        const dictionary = sources[action.source].dictionary();
         const id = action.id;
         const name = action.name || id;
         const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value
@@ -72,7 +74,10 @@ export function mapToCollection(action$) {
 
         const collectionId = uuid();
         return concat(
-          of(createCollection(collectionId, name)),
+          of(
+            createCollection(collectionId, name),
+            updateCollectionFields(collectionId, dictionary)
+          ),
           pauseQuery.pipe(
             switchMap(paused => (paused ? buffered : source)),
             map(data => updateCollection(collectionId, data)),

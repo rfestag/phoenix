@@ -122,8 +122,9 @@ function destroyNode(node) {
   _.each(node.getChildren(), c => destroyNode(c));
   node.destroy();
 }
-function style(shape) {
-  shape.stroke("red");
+function style(shape, selected) {
+  shape.stroke(selected ? "blue" : "red");
+  //shape.moveToBottom();
 }
 function hoverStyle(shape) {
   shape.stroke("yellow");
@@ -227,9 +228,39 @@ export const CollectionLayer = Layer.extend({
       if (x !== position.x || y !== position.y) {
         stage.position({ x, y });
       }
-      _.each(this.collection.data, (entity, id) => {
-        this._updateEntity(entity, id);
-      });
+      //Update the entity shapes
+      const newEntities = _.reduce(
+        this.collection.data,
+        (entities, entity, id) => {
+          entities[id] = this._updateEntity(entity, id);
+          return entities;
+        },
+        {}
+      );
+
+      //Destroy cached shape that are no longer present
+      //Only need to destroy shapes on "slow" updates (i.e., when
+      //shapes themselves have changed, as opposd to pan/zoom)
+      if (!fast) {
+        let destroyed = 0;
+        _.each(this.entities, (entity, id) => {
+          if (newEntities[id] === undefined) {
+            _.each(this.entities[id], (geom, field) => {
+              _.each(geom, (shape, idx) => {
+                if (shape) {
+                  destroyed += 1;
+                  shape.destroy();
+                }
+              });
+            });
+          }
+        });
+        if (destroyed > 0) console.log(`Destroyed ${destroyed} shapes`);
+      }
+
+      //Replace entities with the newly generated ones
+      this.entities = newEntities;
+
       stage.batchDraw();
     }
     return this;
@@ -281,18 +312,20 @@ export const CollectionLayer = Layer.extend({
       geometryCollection.geometries,
       (geom, geometry, idx) => {
         const hovered = this.hovered[id] && this.hovered[id][field];
+        const selected =
+          this.collection.selected && this.collection.selected[id];
         //Update the shape itself
         if (geometry.type === "Point") {
-          geom[idx] = this._renderPoint(geometry, geom[idx], hovered);
+          geom[idx] = this._renderPoint(geometry, geom[idx], hovered, selected);
         } else if (geometry.type === "LineString") {
-          geom[idx] = this._renderLine(geometry, geom[idx], hovered);
+          geom[idx] = this._renderLine(geometry, geom[idx], hovered, selected);
         }
         return geom;
       },
       geoms[field] || {}
     ));
   },
-  _renderPoint: function(geom, shape, hovered) {
+  _renderPoint: function(geom, shape, hovered, selected) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
     const rendered = _.reduce(
       this._allBounds,
@@ -325,7 +358,7 @@ export const CollectionLayer = Layer.extend({
           shape.geom = geom;
           shape.x(x);
           shape.y(y);
-          hovered ? hoverStyle(shape) : style(shape);
+          hovered ? hoverStyle(shape) : style(shape, selected);
           shape.show();
         }
         return rendered;
@@ -335,7 +368,7 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderLine: function(geom, shape, hovered) {
+  _renderLine: function(geom, shape, hovered, selected) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
     const rendered = _.reduce(
@@ -390,7 +423,7 @@ export const CollectionLayer = Layer.extend({
           shape.geom = geom;
           shape.points(points);
           shape.tension(0.5);
-          hovered ? hoverStyle(shape) : style(shape);
+          hovered ? hoverStyle(shape) : style(shape, selected);
           shape.show();
         }
         return rendered;
@@ -488,7 +521,10 @@ export const CollectionLayer = Layer.extend({
                   const geoms = this.entities[id][field];
                   _.each(geoms, (shape, idx) => {
                     if (shape) {
-                      style(shape);
+                      const selected =
+                        this.collection.selected &&
+                        this.collection.selected[id];
+                      style(shape, selected);
                       try {
                         shape.draw();
                       } catch (e) {}

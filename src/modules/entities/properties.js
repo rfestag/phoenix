@@ -58,7 +58,6 @@ export const createProperty = def =>
 export const updateProperty = (prop, value, time) => {
   prop.data = prop.data || [];
   prop.times = prop.times || [];
-  let updated = false;
   //If we have time, sort by it
   if (time) {
     const index = findIndex(prop.data, t => t <= time);
@@ -68,7 +67,6 @@ export const updateProperty = (prop, value, time) => {
       if (value !== prop.data[prop.data.length - 1]) {
         prop.times.push(time);
         prop.data.push(value);
-        updated = true;
       }
       //If this is somewhere in the middle of the array, put it there unless
       //we already have the value there
@@ -76,7 +74,6 @@ export const updateProperty = (prop, value, time) => {
       if (value !== prop.data[index]) {
         prop.times.splice(index, 0, time);
         prop.data.splice(index, 0, value);
-        updated = true;
       }
       //If it is at 0 (the only remaining case), put it at the beginning of the array.
       //If it is the same value as the beginning of the array, just change the first time
@@ -84,7 +81,6 @@ export const updateProperty = (prop, value, time) => {
       if (value !== prop.data[0]) {
         prop.times.unshift(time);
         prop.data.unshift(value);
-        updated = true;
       } else {
         prop.times[0] = time;
       }

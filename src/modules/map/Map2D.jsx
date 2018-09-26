@@ -4,35 +4,51 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
 import { Map, TileLayer, ScaleControl } from "react-leaflet";
-//import HeatmapLayer from 'react-leaflet-heatmap-layer';
+import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
 import _ from "lodash";
-//import { createSelector } from 'reselect'
+import { createSelector } from "reselect";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
 
-/*
-const collectionsSelector = state => state.collection.collections
+const collectionsSelector = state => state.collection.collections;
 const ptsSelector = collections => {
-  const result =  _.reduce(collections, (points, collection) => {
-    return _.reduce(collection.data, (points, entity) => {
-      return _.reduce(entity.geometries, (points, geometryCollection) => {
-        return _.reduce(geometryCollection.geometries, (points, g) => {
-          if (g.type === "Point") points.push({location: g.coordinates, value: 1})
-          else if (g.type === "LineString") points.push({location: g.coordinates[0], value: g.coordinates.length})
-          return points
-        }, points)
-      }, points)
-    }, points)
-  }, [])
-  return result
-}
+  const result = _.reduce(
+    collections,
+    (points, collection) => {
+      return _.reduce(
+        collection.data,
+        (points, entity) => {
+          return _.reduce(
+            entity.geometries,
+            (points, geometryCollection) => {
+              return _.reduce(
+                geometryCollection.geometries,
+                (points, g) => {
+                  if (g.type === "Point")
+                    points.push({ location: g.coordinates, value: 1 });
+                  else if (g.type === "LineString")
+                    points.push({
+                      location: g.coordinates[0],
+                      value: g.coordinates.length
+                    });
+                  return points;
+                },
+                points
+              );
+            },
+            points
+          );
+        },
+        points
+      );
+    },
+    []
+  );
+  return result;
+};
 
-const getHeatmapPoints = createSelector(
-  collectionsSelector,
-  ptsSelector,
-)
-*/
+const getHeatmapPoints = createSelector(collectionsSelector, ptsSelector);
 
 export class Map2D extends Component {
   constructor(props) {
@@ -96,14 +112,12 @@ export class Map2D extends Component {
             backgroundColor: "black"
           }}
         />
-        {/*
-        <HeatmapLayer
+        {/*<HeatmapLayer
           points={this.props.heatmapPoints}
           longitudeExtractor={m => m.location[0]}
           latitudeExtractor={m => m.location[1]}
           intensityExtractor={m => m.value}
-          maxZoom={5} />
-          */}
+        />*/}
         <TileLayer {...this.props.layer.settings} tileSize={512} />
         <ScaleControl position="bottomleft" />
         {_.map(this.props.collections, (collection, cid) => {
@@ -124,7 +138,7 @@ function mapStateToProps(state, props) {
     crs: state.map.crs,
     collections: state.collection.collections,
     //collections: getVisibleCollections(state, props),
-    //heatmapPoints: getHeatmapPoints(state),
+    heatmapPoints: getHeatmapPoints(state),
     layer: state.map.layer,
     panels: state.panel,
     zoom: state.map.zoom

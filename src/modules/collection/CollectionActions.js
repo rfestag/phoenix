@@ -5,6 +5,8 @@ export const SET_OBSERVATION_AGEOFF = "SET_AGEOFF";
 export const CREATE_COLLECTION = "CREATE_COLLECTION";
 export const DELETE_COLLECTION = "DELETE_COLLECTION";
 export const DELETE_FROM_COLLECTION = "DELETE_FROM_COLLECTION";
+export const SELECT_ENTITIES = "SELECT_ENTITIES";
+export const SET_SELECTED_ENTITIES = "SET_SELECTED_ENTITIES";
 export const UPDATE_COLLECTION = "UPDATE_COLLECTION";
 export const UPDATE_COLLECTION_FIELDS = "UPDATE_COLLECTION_FIELDS";
 export const SET_CURRENT_COLLECTION = "SET_CURRENT_COLLECTION";
@@ -35,6 +37,16 @@ export const setEntityAgeoff = (id, ageoff) => ({
   type: SET_ENTITY_AGEOFF,
   id,
   ageoff
+});
+export const selectEntities = (id, ids) => ({
+  type: SELECT_ENTITIES,
+  id,
+  ids
+});
+export const setSelectedEntities = (id, ids) => ({
+  type: SET_SELECTED_ENTITIES,
+  id,
+  ids
 });
 export const setObservationAgeoff = (id, ageoff) => ({
   type: SET_OBSERVATION_AGEOFF,

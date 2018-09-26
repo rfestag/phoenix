@@ -32,27 +32,9 @@ export const FORMATTERS = {
   }
 };
 
-export const getDefaultColumns = () => {
-  return [
-    {
-      headerName: "First seen",
-      field: "start",
-      _type: "time",
-      _getterName: "timeGetter",
-      _formatterName: "timeFormatter"
-    },
-    {
-      headerName: "Last seen",
-      field: "end",
-      _type: "time",
-      _getterName: "timeGetter",
-      _formatterName: "timeFormatter"
-    }
-  ];
-};
 export const createPropertyColumn = (field, sample, opts = {}) => {
   let columnDef = {
-    name: field,
+    field,
     headerName: field,
     hide: true,
     _getterName: "latestValueGetter"
@@ -73,6 +55,24 @@ export const createPropertyColumn = (field, sample, opts = {}) => {
   }
   return { ...columnDef, ...opts };
 };
+export const getDefaultColumns = () => {
+  return {
+    whenStart: createPropertyColumn("start", null, {
+      headerName: "First seen",
+      hide: false,
+      _type: "time",
+      _getterName: "timeGetter",
+      _formatterName: "timeFormatter"
+    }),
+    whenEnd: createPropertyColumn("end", null, {
+      headerName: "Last seen",
+      hide: false,
+      _type: "time",
+      _getterName: "timeGetter",
+      _formatterName: "timeFormatter"
+    })
+  };
+};
 export const createGeometryColumn = (field, value) => {};
 export const getPropertiesForCollection = (state, props) => {
   if (props.collection) {
@@ -92,6 +92,11 @@ export const getColumnDefs = createSelector(
   columns => {
     const defs = [SELECT_COLUMN].concat(
       _.map(columns, c => {
+        let column = { ...c, cellRendererFramework: ValueRenderer };
+        if (c._getterName) column.valueGetter = GETTERS[c._getterName];
+        if (c._formatterName)
+          column.valueFormatter = FORMATTERS[c._formatterName];
+        return column;
         return {
           ...c,
           cellRendererFramework: ValueRenderer,

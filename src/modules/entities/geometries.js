@@ -27,7 +27,17 @@ const defaultTrack = {
 };
 
 const crossesAntiMeridian = function(p1, p2) {
-  //TODO: Implement check. Need E->W and W->E
+  if (p1 === undefined) return 0;
+  const l1 = p1[0];
+  const l2 = p2[0];
+  //When the signs are different, add them together. If the sum
+  if (l1 > 0 && l2 < 0) {
+    //check for E->W cross
+    if (Math.abs(l1 - l2) > 180) return 1;
+  } else if (l1 < 0 && l2 > 0) {
+    //check for W->E cross
+    if (Math.abs(l2 - l1) > 180) return -1;
+  }
   return 0;
 };
 const interpolateTime = function(p1, t1, p2, t2, p3) {};
@@ -76,29 +86,31 @@ const updateTrack = (geometry, pt, print) => {
     updateTrack(geometry, pt, true);
     return geometry;
   }
-  /*
-  let prevPoint = segment.coordinates[segment.length-1]
-  let crossDirection = crossesAntiMeridian(prevPoint, pt)
-  let crossTime
-  //Crossed E -> W 
+  let prevPoint = segment.coordinates[segment.length - 1];
+  let crossDirection = crossesAntiMeridian(prevPoint, pt);
+  let crossTime;
+  //Crossed E -> W
   if (crossDirection > 0) {
     //TODO- Interpolate time
     //NOTE - This is untested. Just here to roughly describe what to do
-    updateTrack(geometry, [180, pt.coordinates[1]], crossTime)
-    geometry.geometries.push(createTrackPoint([-180, pt.coordinates[1]], crossTime))
-    updateTrack(geometry, pt)
-    return geometry
+    updateTrack(geometry, [180, pt.coordinates[1]], crossTime);
+    geometry.geometries.push(
+      createTrackPoint([-180, pt.coordinates[1]], crossTime)
+    );
+    updateTrack(geometry, pt);
+    return geometry;
   }
   //Crossed W => E
   if (crossDirection < 0) {
     //TODO- Interpolate time
     //NOTE - This is untested. Just here to roughly describe what to do
-    updateTrack(geometry, [-180, pt.coordinates[1]], crossTime)
-    geometry.geometries.push(createTrackPoint([180, pt.coordinates[1]], crossTime))
-    updateTrack(geometry, pt)
-    return geometry
+    updateTrack(geometry, [-180, pt.coordinates[1]], crossTime);
+    geometry.geometries.push(
+      createTrackPoint([180, pt.coordinates[1]], crossTime)
+    );
+    updateTrack(geometry, pt);
+    return geometry;
   }
-  */
   //Normal case - Append point to track, update times
   const time = pt.when.start;
   if (segment.times === undefined) console.log("Bad juju:", segment, pt);
