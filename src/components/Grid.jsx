@@ -6,6 +6,7 @@ import { AgGridReact } from "ag-grid-react";
 import { getColumnDefs } from "../modules/columns/Constants";
 import { setSelectedEntities } from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
+import _ from "lodash";
 
 const getData = (state, props) => props.collection.data;
 const getCollectionData = createSelector([getData], collection =>
@@ -23,7 +24,7 @@ export class Grid extends Component {
     /** The theme to use */
     theme: PropTypes.string,
     selected: PropTypes.object,
-    onSelectionChanged: PropTypes.function
+    onSelectionChanged: PropTypes.func
   };
   static defaultProps = {
     data: [],
@@ -42,7 +43,10 @@ export class Grid extends Component {
     }
   }
 
-  onSelectionChanged = e => {
+  //This requires debounce because all of the onSelectionChanged are fired, one
+  //node at a time, after multiple are selected (such as with onGridReady). This
+  //reduces them down to a single call that handles all of them
+  onSelectionChanged = _.debounce(e => {
     if (
       this.api &&
       this.props.onSelectionChanged &&
@@ -52,15 +56,13 @@ export class Grid extends Component {
       const ids = this.api.getSelectedRows().map(row => row.id);
       this.props.onSelectionChanged(this.props.collection.id, ids);
     }
-  };
+  });
   onGridReady = params => {
     this.api = params.api;
     this.columnApi = params.columnApi;
     this.batchUpdatingSelect = true;
     this.api.forEachNode(node => {
-      //For some reason, these fire, and then many onSelectionChanged are called
-      //Need better way
-      //if (this.props.selected[node.id]) node.setSelected(true)
+      if (this.props.selected[node.id]) node.setSelected(true);
     });
     this.batchUpdatingSelect = false;
   };
@@ -82,6 +84,7 @@ export class Grid extends Component {
           suppressRowClickSelection={true}
           getRowNodeId={data => data.id}
           onSelectionChanged={this.onSelectionChanged}
+          suppressPropertyNamesCheck={true}
         />
       </div>
     );

@@ -92,11 +92,6 @@ export const getColumnDefs = createSelector(
   columns => {
     const defs = [SELECT_COLUMN].concat(
       _.map(columns, c => {
-        let column = { ...c, cellRendererFramework: ValueRenderer };
-        if (c._getterName) column.valueGetter = GETTERS[c._getterName];
-        if (c._formatterName)
-          column.valueFormatter = FORMATTERS[c._formatterName];
-        return column;
         return {
           ...c,
           cellRendererFramework: ValueRenderer,

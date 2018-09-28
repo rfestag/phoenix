@@ -29,6 +29,8 @@ import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
 import LeftMenuBarButton from "./components/LeftMenuBarButton";
 import ColumnManager from "./modules/columns/ColumManager";
+import SettingsMenu from "./components/SettingsMenu";
+import HelpMenu from "./components/HelpMenu";
 
 fontawesome.library.add(search, rss, chart, brands, cancel, pause, play);
 
@@ -132,6 +134,10 @@ class App extends Component {
             size="2x"
             className="icon-brand"
           />
+          <ButtonGroup style={{ float: "right" }}>
+            <HelpMenu />
+            <SettingsMenu />
+          </ButtonGroup>
         </TopMenu>
         <Main>
           <LeftMenu>
