@@ -15,9 +15,11 @@ $border-color: #424242; //This shouldn't be necessary, but somehow is. Beware of
 //Bootstrap overrides
 $body-bg: #0f1416;
 $body-color: #bcc6c9;
+$yiq-text-light: #bcc6c9;
 $enable-rounded: false;
 $enable-shadows: false;
-$component-active-color: $accent-color;
+$component-active-bg: $accent-color;
+$component-active-color: #13191c;
 $secondary: #13191c;
 $active: $accent-color;
 $nav-tabs-link-active-color:  #13191c;
@@ -25,6 +27,12 @@ $nav-tabs-link-active-bg: $accent-color;
 $nav-tabs-link-hover-border-color: $accent-color;
 $nav-tabs-link-active-border-color: $accent-color;
 $nav-tabs-link-hover-color: #29353b;
+$dropdown-bg: $body-bg;
+$dropdown-link-color: $body-color;
+$dropdown-link-hover-bg: $accent-color;
+$dropdown-link-hover-color: $body-bg;
+$dropdown-link-active-bg: $body-bg;
+$dropdown-link-active-color: $body-color;
 
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
