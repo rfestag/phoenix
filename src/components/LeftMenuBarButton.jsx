@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
+import classnames from "classnames";
 import { Button } from "reactstrap";
 
 const StyledIcon = styled(FontAwesomeIcon)`
@@ -11,7 +12,6 @@ const StyledIcon = styled(FontAwesomeIcon)`
 
   display: block;
   position: absolute;
-  top: 50%;
   left: 50%;
   height: 50%;
   transform: translate(-50%, -50%);
@@ -34,12 +34,15 @@ const StyledButton = styled.div`
   &.active {
     color: ${props => props.theme.buttonHoverColor};
     background-color: rgba(255, 255, 255, 0.1);
-    border-left: 3px solid ${props => props.theme.accentColor};
+  }
+  &:focus,
+  &.active {
+    border-left: 3px solid ${props => props.theme.accentColor} !important;
   }
 `;
 
-const LeftMenuBarButton = ({ icon, onClick }) => (
-  <StyledButton onClick={onClick}>
+const LeftMenuBarButton = ({ icon, active, onClick }) => (
+  <StyledButton className={classnames({ active })} onClick={onClick}>
     <Button
       style={{
         height: "100%",
@@ -57,6 +60,7 @@ const LeftMenuBarButton = ({ icon, onClick }) => (
 );
 LeftMenuBarButton.propTypes = {
   icon: PropTypes.string.isRequired,
+  active: PropTypes.bool,
   onClick: PropTypes.any
 };
 export default LeftMenuBarButton;

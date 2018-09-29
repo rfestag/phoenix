@@ -31,6 +31,9 @@ export class Grid extends Component {
     columns: [],
     theme: "ag-theme-balham-dark"
   };
+  componentDidMount() {
+    console.log("Mounted grid");
+  }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.skipSelectChange) {
@@ -58,6 +61,7 @@ export class Grid extends Component {
     }
   });
   onGridReady = params => {
+    console.log("Grid ready");
     this.api = params.api;
     this.columnApi = params.columnApi;
     this.batchUpdatingSelect = true;

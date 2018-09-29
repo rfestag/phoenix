@@ -43,7 +43,7 @@ export class CollectionGridTabs extends React.Component {
   }
   render() {
     return (
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Nav tabs style={{ height: "42px" }}>
           {_.map(this.props.collections, (collection, id) => (
             <NavItem key={id}>

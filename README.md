@@ -67,6 +67,10 @@ but may contain Epics (see `redux-observable`), components, and constants. Gener
       - Set whether it is a user drawn layer
   - Support selection - Feature
     - Add box selection tool
+  - Support User Layers
+    - Drag/Drop file
+    - Manually add/remove
+    - Edit layer (shapes within layer)
   - Support shape drawing - Feature
     - Shapes
       - Label (Text only)
