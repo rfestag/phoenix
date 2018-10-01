@@ -1,5 +1,6 @@
 import { Source } from "./source";
-import { Observable } from "rxjs";
+import { interval } from "rxjs";
+import { map } from "rxjs/operators";
 import { createTrackPoint } from "../entities/geometries";
 
 /**
@@ -21,27 +22,31 @@ export class TestSource extends Source {
    * @return {Object} An RXJS Observable stream of *batches* of results.
    */
   query(def) {
-    return Observable.interval(1000).map(v => {
-      const data = [];
-      for (let i = 0; i < 100; i++) {
-        let time = Date.now();
-        let lat = { time, value: Math.random() * 180 - 90 };
-        let lng = { time, value: Math.random() * 360 - 180 };
-        let alt = { time, value: Math.random() * 50000 };
-        let position = { time, value: [lng.value, lat.value] };
-        let geometries = {
-          track: createTrackPoint([lng, lat], time)
-        };
+    console.log("Generating fake data");
+    return interval(1000).pipe(
+      map(v => {
+        const data = [];
+        /*
+        for (let i = 0; i < 100; i++) {
+          let time = Date.now();
+          let lat = { time, value: Math.random() * 180 - 90 };
+          let lng = { time, value: Math.random() * 360 - 180 };
+          let alt = { time, value: Math.random() * 50000 };
+          let geometries = {
+            track: createTrackPoint([lng.value, lat.value], time)
+          };
 
-        data[i] = {
-          id: i,
-          label: i,
-          time,
-          position,
-          properties: { lat, lng, Alt: alt }
-        };
-      }
-      return data;
-    });
+          data[i] = {
+            id: i,
+            label: i,
+            time,
+            geometries,
+            properties: { lat, lng, Alt: alt }
+          };
+        }
+        */
+        return data;
+      })
+    );
   }
 }

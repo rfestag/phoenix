@@ -7,6 +7,7 @@ import {
   PAUSE_QUERY,
   CANCEL_QUERY
 } from "./QueryActions";
+import _ from "lodash";
 
 const initialState = {};
 
@@ -23,8 +24,14 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
       //console.log("Got message from worker", e.data.length / 1000000 + "MB");
       //console.time("Parsing data");
       let data = JSON.parse(e.data);
+      console.time("emitting actions");
+      if (_.isArray(data)) {
+        _.each(data, action => observer.next(action));
+      } else {
+        observer.next(data);
+      }
+      console.timeEnd("emitting actions");
       //console.timeEnd("Parsing data");
-      observer.next(data);
     };
     port.onerror = function(e) {
       //TODO: We should put out some message that can be used to restart the worker,

@@ -13,8 +13,10 @@ import {
   CANCEL_QUERY
 } from "./QueryActions";
 import {
+  UPDATE_COLLECTION,
   createCollection,
   updateCollection,
+  batchUpdateCollections,
   updateCollectionFields
 } from "../collection/CollectionActions";
 import {
@@ -36,6 +38,7 @@ import "babel-polyfill";
 export function collectBy(field) {
   return source => {
     return source.pipe(
+      filter(events => events.length > 0),
       map(events =>
         //Events is an array of batched outputs from the source
         events.reduce(
@@ -69,7 +72,13 @@ export function mapToCollection(action$) {
 
         //We separate the query's observable from the source because we assume it 'cold',
         //and we don't want to restart it on subscription
-        adapter.pipe(bufferTime(3000), collectBy(d => d.id)).subscribe(source);
+        adapter
+          .pipe(
+            bufferTime(3000),
+            filter(d => d.length > 0),
+            collectBy(d => d.id)
+          )
+          .subscribe(source);
         source.pipe(buffer(pauseQuery), mergeAll()).subscribe(buffered);
 
         const collectionId = uuid();
@@ -97,6 +106,17 @@ self.onconnect = function(e) {
   };
 
   action$
-    .pipe(ofType(CREATE_QUERY), mapToCollection(action$))
+    .pipe(
+      ofType(CREATE_QUERY),
+      mapToCollection(action$),
+      bufferTime(1000),
+      filter(d => d.length > 0),
+      map(actions => {
+        const updates = actions.filter(a => a.type === UPDATE_COLLECTION);
+        const others = actions.filter(a => a.type !== UPDATE_COLLECTION);
+        return others.concat(batchUpdateCollections(updates));
+      }),
+      mergeAll()
+    )
     .subscribe(updates => port.postMessage(JSON.stringify(updates)));
 };

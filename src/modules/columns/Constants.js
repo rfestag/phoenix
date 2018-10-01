@@ -75,7 +75,11 @@ export const getDefaultColumns = () => {
 };
 export const createGeometryColumn = (field, value) => {};
 export const getPropertiesForCollection = (state, props) => {
-  if (props.collection) {
+  if (
+    props.collection &&
+    props.collection.fields &&
+    props.collection.fields.properties
+  ) {
     return props.collection.fields.properties;
   }
   return {};

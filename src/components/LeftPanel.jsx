@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import QueryPanel from "./QueryPanel";
 import { TabContent, TabPane } from "reactstrap";
 import {
   QUERY_PANE,
@@ -15,7 +16,9 @@ export default class LeftPanel extends Component {
   render() {
     return (
       <TabContent activeTab={this.props.activePane} style={{ flex: "1" }}>
-        <TabPane tabId={QUERY_PANE}>TODO: Query Panel</TabPane>
+        <TabPane tabId={QUERY_PANE}>
+          <QueryPanel />
+        </TabPane>
         <TabPane tabId={ENTITY_PANE}>TODO: Entity Panel</TabPane>
         <TabPane tabId={FILTER_PANE}>TODO: Filter Panel</TabPane>
       </TabContent>

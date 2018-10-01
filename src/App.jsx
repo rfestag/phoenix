@@ -4,15 +4,16 @@ import fontawesome from "@fortawesome/fontawesome";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import brands from "@fortawesome/fontawesome-free-brands";
 import search from "@fortawesome/fontawesome-free-solid/faSearch";
-import rss from "@fortawesome/fontawesome-free-solid/faRss";
+import columns from "@fortawesome/fontawesome-free-solid/faColumns";
 import filter from "@fortawesome/fontawesome-free-solid/faFilter";
 import chart from "@fortawesome/fontawesome-free-solid/faChartBar";
 import user from "@fortawesome/fontawesome-free-solid/faUser";
 import cancel from "@fortawesome/fontawesome-free-solid/faTimes";
 import pause from "@fortawesome/fontawesome-free-solid/faPause";
 import play from "@fortawesome/fontawesome-free-solid/faPlay";
+import left from "@fortawesome/fontawesome-free-solid/faChevronLeft";
+import right from "@fortawesome/fontawesome-free-solid/faChevronRight";
 import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
-import CollapsibleElement from "./modules/panel/CollapsibleElement";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
 import CollectionGridTabs from "./components/CollectionGridTabs";
@@ -21,7 +22,6 @@ import {
   toggleEntityPane,
   toggleFilterPane,
   toggleLayerPane,
-  toggleColumnPane,
   toggleGridPane
 } from "./modules/panel/PanelActions";
 import {
@@ -30,7 +30,7 @@ import {
   startQuery,
   stopQuery
 } from "./modules/query/QueryActions";
-import { ButtonGroup, Nav, NavItem, NavLink } from "reactstrap";
+import { ButtonGroup, Nav, NavItem } from "reactstrap";
 import styled from "styled-components";
 import PropTypes from "prop-types";
 import Banner from "./components/Banner";
@@ -41,18 +41,19 @@ import SettingsMenu from "./components/SettingsMenu";
 import HelpMenu from "./components/HelpMenu";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
-import classnames from "classnames";
 
 fontawesome.library.add(
   search,
-  rss,
   filter,
+  columns,
   user,
   chart,
   brands,
   cancel,
   pause,
-  play
+  play,
+  left,
+  right
 );
 
 const Outer = styled.div`
@@ -86,7 +87,6 @@ function mapDispatchToProps(dispatch) {
     toggleQueryPane: () => dispatch(toggleQueryPane()),
     toggleEntityPane: () => dispatch(toggleEntityPane()),
     toggleFilterPane: () => dispatch(toggleFilterPane()),
-    toggleColumnPane: () => dispatch(toggleColumnPane()),
     toggleLayerPane: () => dispatch(toggleLayerPane()),
     toggleGridPane: () => dispatch(toggleGridPane()),
     createQuery: (src, query, name) => dispatch(createQuery(src, query, name)),
@@ -103,7 +103,6 @@ class App extends Component {
     toggleQueryPane: PropTypes.func.isRequired,
     toggleEntityPane: PropTypes.func.isRequired,
     toggleFilterPane: PropTypes.func.isRequired,
-    toggleColumnPane: PropTypes.func.isRequired,
     toggleLayerPane: PropTypes.func.isRequired,
     toggleGridPane: PropTypes.func.isRequired,
     createQuery: PropTypes.func.isRequired,
@@ -180,12 +179,6 @@ class App extends Component {
                   active={this.props.panel.LEFT === "FILTER"}
                   onClick={() => this.props.toggleFilterPane()}
                   icon="filter"
-                />
-              </NavItem>
-              <NavItem>
-                <LeftMenuBarButton
-                  onClick={() => this.props.toggleColumnPane()}
-                  icon="rss"
                 />
               </NavItem>
               <NavItem>

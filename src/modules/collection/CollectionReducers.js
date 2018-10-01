@@ -3,6 +3,7 @@ import {
   CREATE_COLLECTION,
   DELETE_COLLECTION,
   UPDATE_COLLECTION,
+  BATCH_UPDATE_COLLECTIONS,
   UPDATE_COLLECTION_FIELDS,
   DELETE_FROM_COLLECTION,
   SELECT_ENTITIES,
@@ -14,6 +15,27 @@ import { updateEntity } from "../entities/entities";
 import { getDefaultColumns } from "../columns/Constants";
 const initialState = { collections: {} };
 
+function updateCollection(collection, action) {
+  let fields = {
+    properties: { ...collection.fields.properties },
+    geometries: { ...collection.fields.geometries }
+  };
+  let data = _.reduce(
+    action.data,
+    (data, updates, id) => {
+      const [updatedEntity, updatedFields] = updateEntity(
+        data[id],
+        updates,
+        fields
+      );
+      data[id] = updatedEntity;
+      fields = updatedFields;
+      return data;
+    },
+    { ...collection.data }
+  );
+  return { ...collection, fields, data };
+}
 export default function(state = initialState, action) {
   const id = action.id;
   let collection;
@@ -47,31 +69,28 @@ export default function(state = initialState, action) {
         console.error("Cannot delete collection (does not exist)", id);
         return state;
       }
+    case BATCH_UPDATE_COLLECTIONS:
+      console.log(action);
+      console.time("batch update");
+      const updatedCollections = _.reduce(
+        action.allUpdates,
+        (collections, action) => {
+          const collection = collections[action.id];
+          if (collection)
+            collections[action.id] = updateCollection(collection, action);
+          return collections;
+        },
+        { ...state.collections }
+      );
+      console.timeEnd("batch update");
+      return { ...state, collections: updatedCollections };
     case UPDATE_COLLECTION:
       collection = state.collections[id];
       if (collection) {
-        //console.time("Update Collection");
         console.time("update entities");
-        let fields = {
-          properties: { ...collection.fields.properties },
-          geometries: { ...collection.fields.geometries }
-        };
-        let data = _.reduce(
-          action.data,
-          (data, updates, id) => {
-            const [updatedEntity, updatedFields] = updateEntity(
-              data[id],
-              updates,
-              fields
-            );
-            data[id] = updatedEntity;
-            fields = updatedFields;
-            return data;
-          },
-          { ...collection.data }
-        );
+        //console.time("Update Collection");
+        collection = updateCollection(collection, action);
         console.timeEnd("update entities");
-        collection = { ...collection, fields, data };
         return {
           ...state,
           collections: { ...state.collections, [id]: collection }

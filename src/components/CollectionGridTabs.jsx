@@ -6,64 +6,114 @@ import Grid from "./Grid";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
+//import styled from "styled-components";
+import { setCurrentCollection } from "../modules/collection/CollectionActions";
+import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { Button } from "reactstrap";
+import { toggleColumnPane } from "../modules/panel/PanelActions";
 
 export class CollectionGridTabs extends React.Component {
   static propTypes = {
-    collections: PropTypes.object.isRequired
+    collections: PropTypes.object.isRequired,
+    activeTab: PropTypes.string,
+    onTabChange: PropTypes.func,
+    onColumManagerClicked: PropTypes.func
   };
   constructor(props) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.state = {
-      activeTab: Object.keys(this.props.collections)[0]
+      position: 0,
+      sliding: false
     };
   }
-  componentDidUpdate(prevProps, prevState) {
-    //Check to see if the activeTab is invalid (the collection was removed)
+  getOrder(id) {
     const collections = Object.keys(this.props.collections);
-    if (!_.includes(collections, this.state.activeTab)) {
-      const oldCollections = Object.keys(prevProps.collections);
-      //If it was, and it wasn't the first tab, set it to the tab before the deleted tab
-      //Otherwise, set it to the tab after the deleted tab (which would result in undefined if no such tab)
-      let i = oldCollections.indexOf(this.state.activeTab);
-      if (i > 0) {
-        this.setState({ activeTab: oldCollections[i - 1] });
-      } else {
-        this.setState({ activeTab: oldCollections[i + 1] });
-      }
-    }
+    const itemIndex = collections.indexOf(id);
+    const { position } = this.state;
+    return itemIndex - position;
   }
-  toggle(tab) {
-    if (this.state.activeTab !== tab) {
-      this.setState({
-        activeTab: tab
-      });
+  prevDisabled = () => {
+    return this.state.position === 0;
+  };
+  nextDisabled = () => {
+    return (
+      this.state.position === Object.keys(this.props.collections).length - 1
+    );
+  };
+  nextTab = () => {
+    const { position } = this.state;
+    const collections = Object.keys(this.props.collections);
+    const numItems = collections.length || 1;
+
+    if (position !== numItems - 1) {
+      this.setState({ position: position + 1 });
     }
-  }
+  };
+  prevTab = () => {
+    const { position } = this.state;
+    const collections = Object.keys(this.props.collections);
+
+    if (position !== 0) {
+      this.setState({ position: position - 1 });
+    }
+  };
   render() {
+    console.log("Tabs", this.props);
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <Nav tabs style={{ height: "42px" }}>
-          {_.map(this.props.collections, (collection, id) => (
-            <NavItem key={id}>
-              <NavLink
-                className={classnames({ active: this.state.activeTab === id })}
-                onClick={() => {
-                  this.toggle(id);
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
+            <FontAwesomeIcon icon="chevron-left" />
+          </Button>
+          <Nav
+            tabs
+            style={{
+              alignContent: "flex-start",
+              flex: "1",
+              height: "42px",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden"
+            }}
+          >
+            {_.map(this.props.collections, (collection, id) => (
+              <NavItem
+                key={id}
+                style={{
+                  flex: "1 0 100%",
+                  flexBasis: "80%",
+                  order: this.getOrder(id),
+                  display: this.getOrder(id) < 0 ? "none" : ""
                 }}
               >
-                {collection.name}
-              </NavLink>
-            </NavItem>
-          ))}
-        </Nav>
-        <TabContent activeTab={this.state.activeTab} style={{ flex: "1" }}>
-          {_.map(this.props.collections, (collection, id) => (
-            <TabPane tabId={id} key={id} style={{ height: "100%" }}>
-              <Grid collectionId={id} collection={collection} />
-            </TabPane>
-          ))}
+                <NavLink
+                  className={classnames({
+                    active: this.props.activeTab === id
+                  })}
+                  onClick={() => {
+                    this.props.onTabChange(id);
+                  }}
+                >
+                  {collection.name}
+                </NavLink>
+              </NavItem>
+            ))}
+          </Nav>
+          <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
+            <FontAwesomeIcon icon="chevron-right" />
+          </Button>
+          <Button onClick={this.props.onColumManagerClicked}>
+            <FontAwesomeIcon icon="columns" />
+          </Button>
+        </div>
+        <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>
+          <TabPane tabId={this.props.activeTab} style={{ height: "100%" }}>
+            <Grid
+              collectionId={this.props.activeTab}
+              collection={this.props.collections[this.props.activeTab] || {}}
+            />
+          </TabPane>
         </TabContent>
       </div>
     );
@@ -71,11 +121,18 @@ export class CollectionGridTabs extends React.Component {
 }
 function mapStateToProps(state) {
   return {
+    activeTab: state.collection.current,
     collections: state.collection.collections
   };
 }
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({}, dispatch);
+  return bindActionCreators(
+    {
+      onTabChange: setCurrentCollection,
+      onColumManagerClicked: toggleColumnPane
+    },
+    dispatch
+  );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(CollectionGridTabs);
