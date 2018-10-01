@@ -13,3 +13,9 @@
 .dropdown-menu {
   top: -5px !important;
 }
+.nav-link .dropdown-toggle {
+  &:focus, 
+  &:hover {
+    background-color: inherit !important;
+  }
+}

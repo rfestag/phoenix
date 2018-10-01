@@ -34,5 +34,9 @@ $dropdown-link-hover-color: $body-bg;
 $dropdown-link-active-bg: $body-bg;
 $dropdown-link-active-color: $body-color;
 
+$theme-colors: (
+  "accent": $accent-color
+);
+
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

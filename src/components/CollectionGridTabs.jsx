@@ -6,12 +6,24 @@ import Grid from "./Grid";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
-//import styled from "styled-components";
+import styled from "styled-components";
 import { setCurrentCollection } from "../modules/collection/CollectionActions";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import { Button } from "reactstrap";
 import { toggleColumnPane } from "../modules/panel/PanelActions";
+import TabMenu from "./TabMenu";
 
+const OuterPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const Tabs = styled.div`
+  display: flex;
+  flex-direction: row;
+  background-color: ${props => props.theme.secondary};
+`;
 export class CollectionGridTabs extends React.Component {
   static propTypes = {
     collections: PropTypes.object.isRequired,
@@ -61,8 +73,8 @@ export class CollectionGridTabs extends React.Component {
   render() {
     console.log("Tabs", this.props);
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "row" }}>
+      <OuterPanel>
+        <Tabs>
           <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
             <FontAwesomeIcon icon="chevron-left" />
           </Button>
@@ -91,11 +103,17 @@ export class CollectionGridTabs extends React.Component {
                   className={classnames({
                     active: this.props.activeTab === id
                   })}
-                  onClick={() => {
-                    this.props.onTabChange(id);
-                  }}
+                  style={{ padding: ".5rem 0 .5rem 5px" }}
                 >
-                  {collection.name}
+                  <TabMenu active={this.props.activeTab === id}>
+                    <span
+                      onClick={() => {
+                        this.props.onTabChange(id);
+                      }}
+                    >
+                      {collection.name}
+                    </span>
+                  </TabMenu>
                 </NavLink>
               </NavItem>
             ))}
@@ -106,7 +124,7 @@ export class CollectionGridTabs extends React.Component {
           <Button onClick={this.props.onColumManagerClicked}>
             <FontAwesomeIcon icon="columns" />
           </Button>
-        </div>
+        </Tabs>
         <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>
           <TabPane tabId={this.props.activeTab} style={{ height: "100%" }}>
             <Grid
@@ -115,7 +133,7 @@ export class CollectionGridTabs extends React.Component {
             />
           </TabPane>
         </TabContent>
-      </div>
+      </OuterPanel>
     );
   }
 }
