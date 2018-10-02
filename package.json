@@ -59,7 +59,7 @@
     "react-scripts": "1.1.4",
     "react-styleguidist": "^7.0.17",
     "react-transition-group": "^2.4.0",
-    "reactstrap": "^6.2.0",
+    "reactstrap": "^6.4.0",
     "redux": "^3.0.0",
     "redux-batched-actions": "^0.4.1",
     "redux-devtools-extension": "^2.13.2",

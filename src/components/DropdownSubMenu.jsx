@@ -1,11 +1,10 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { UncontrolledButtonDropdown as Dropdown } from "reactstrap";
 
 const DropdownSubMenu = ({ direction, children }) => (
   <Dropdown
     direction={direction || "right"}
-    className=""
     style={{ width: "100%" }}
     setActiveFromChild
   >

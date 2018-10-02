@@ -19,11 +19,26 @@ const OuterPanel = styled.div`
   height: 100%;
 `;
 
-const Tabs = styled.div`
+const TabCarousel = styled.div`
   display: flex;
   flex-direction: row;
   background-color: ${props => props.theme.secondary};
 `;
+
+const Tabs = styled(Nav)`
+  align-content: flex-start;
+  flex: 1;
+  height: 42px;
+  display: flex;
+  flex-direction: column;
+`;
+const Tab = styled(NavItem)`
+  flex: 1 0 100%;
+  flex-basis: 80%;
+  order: ${props => props.order};
+  display: ${props => (props.order < 0 ? "none" : "")};
+`;
+
 export class CollectionGridTabs extends React.Component {
   static propTypes = {
     collections: PropTypes.object.isRequired,
@@ -71,60 +86,43 @@ export class CollectionGridTabs extends React.Component {
     }
   };
   render() {
-    console.log("Tabs", this.props);
     return (
       <OuterPanel>
-        <Tabs>
+        <TabCarousel>
           <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
             <FontAwesomeIcon icon="chevron-left" />
           </Button>
-          <Nav
-            tabs
-            style={{
-              alignContent: "flex-start",
-              flex: "1",
-              height: "42px",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden"
-            }}
-          >
+          <Tabs tabs>
             {_.map(this.props.collections, (collection, id) => (
-              <NavItem
-                key={id}
-                style={{
-                  flex: "1 0 100%",
-                  flexBasis: "80%",
-                  order: this.getOrder(id),
-                  display: this.getOrder(id) < 0 ? "none" : ""
-                }}
-              >
+              <Tab key={id} order={this.getOrder(id)}>
                 <NavLink
                   className={classnames({
                     active: this.props.activeTab === id
                   })}
                   style={{ padding: ".5rem 0 .5rem 5px" }}
                 >
-                  <TabMenu active={this.props.activeTab === id}>
-                    <span
-                      onClick={() => {
-                        this.props.onTabChange(id);
-                      }}
-                    >
-                      {collection.name}
-                    </span>
-                  </TabMenu>
+                  <ul>
+                    <TabMenu active={this.props.activeTab === id}>
+                      <span
+                        onClick={() => {
+                          this.props.onTabChange(id);
+                        }}
+                      >
+                        {collection.name}
+                      </span>
+                    </TabMenu>
+                  </ul>
                 </NavLink>
-              </NavItem>
+              </Tab>
             ))}
-          </Nav>
+          </Tabs>
           <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
             <FontAwesomeIcon icon="chevron-right" />
           </Button>
           <Button onClick={this.props.onColumManagerClicked}>
             <FontAwesomeIcon icon="columns" />
           </Button>
-        </Tabs>
+        </TabCarousel>
         <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>
           <TabPane tabId={this.props.activeTab} style={{ height: "100%" }}>
             <Grid

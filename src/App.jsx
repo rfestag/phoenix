@@ -169,11 +169,13 @@ class App extends Component {
                   icon="search"
                 />
               </NavItem>
-              <LeftMenuBarButton
-                active={this.props.panel.LEFT === "ENTITY"}
-                onClick={() => this.props.toggleEntityPane()}
-                icon="user"
-              />
+              <NavItem style={{ width: "100%" }}>
+                <LeftMenuBarButton
+                  active={this.props.panel.LEFT === "ENTITY"}
+                  onClick={() => this.props.toggleEntityPane()}
+                  icon="user"
+                />
+              </NavItem>
               <NavItem>
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "FILTER"}
