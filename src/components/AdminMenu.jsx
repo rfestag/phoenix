@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
-import ReactModal from "react-modal-resizable-draggable";
 import Dialog from "./Dialog";
 
 class AdminMenu extends React.Component {
@@ -35,7 +34,7 @@ class AdminMenu extends React.Component {
         </Dropdown>
         <Dialog
           initWidth={800}
-          initHeight={200}
+          initHeight={250}
           isOpen={this.state.showMetrics}
           title="Performance Metrics"
           onClose={this.close}

@@ -16,7 +16,6 @@ export default function(state = initialState, action) {
     case COLLAPSE_PANEL:
       return { ...state, [action.panel]: undefined };
     case TOGGLE_PANE:
-      console.log("Toggling", action, state);
       if (state[action.panel] === action.pane)
         return { ...state, [action.panel]: undefined };
       else return { ...state, [action.panel]: action.pane };

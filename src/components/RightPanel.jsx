@@ -4,7 +4,7 @@ import ColumnManager from "../modules/columns/ColumManager";
 
 export default class RightPanel extends Component {
   static propTypes = {
-    panel: PropTypes.object.isRequired
+    panel: PropTypes.object
   };
 
   render() {
