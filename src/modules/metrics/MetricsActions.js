@@ -1,6 +1,6 @@
 /* Types */
-export const TIMING_METRIC = "TIMING_METRIC";
-export const COUNT_METRIC = "COUNT_METRIC";
+export const TIMING_METRIC = "METRIC_TIMING";
+export const COUNT_METRIC = "METRIC_COUNT";
 
 /* Actions */
 export const emitTimingMetric = (metric, duration) => ({

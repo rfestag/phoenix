@@ -38,6 +38,7 @@ import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
 import LeftMenuBarButton from "./components/LeftMenuBarButton";
 import SettingsMenu from "./components/SettingsMenu";
+import AdminMenu from "./components/AdminMenu";
 import HelpMenu from "./components/HelpMenu";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
@@ -155,6 +156,7 @@ class App extends Component {
             className="icon-brand"
           />
           <ButtonGroup style={{ float: "right" }}>
+            <AdminMenu />
             <HelpMenu />
             <SettingsMenu />
           </ButtonGroup>
