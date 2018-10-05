@@ -1,0 +1,31 @@
+.flexible-modal {
+  position: fixed;
+  z-index: 500;
+  background-color: $body-bg;
+  border: solid 1px $split-border;
+}
+.flexible-modal-mask,
+.flexible-modal-drag-area-right,
+.flexible-modal-drag-area-left
+{
+  display: none; //We do this because we don't want a mask for this thing
+}
+.flexible-modal-resizer {
+  position:absolute;
+  right:0;
+  bottom:0;
+  cursor:se-resize;
+  margin:5px;
+  border-bottom: solid 2px #333;
+  border-right: solid 2px #333;
+}
+.flexible-modal-drag-area{
+  background-color: $secondary;
+  color: $body-color;
+  border-left: solid 1px $split-border;
+  height: $dialog-title-bar-height;
+  position:absolute;
+  right:0;
+  top:0;
+  cursor:move;
+}
