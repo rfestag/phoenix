@@ -33,16 +33,15 @@ class AdminMenu extends React.Component {
             <DropdownItem onClick={this.toggle}>Metrics</DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <ReactModal
+        <Dialog
           initWidth={800}
           initHeight={200}
-          onRequestClose={this.close}
           isOpen={this.state.showMetrics}
+          title="Performance Metrics"
+          onClose={this.close}
         >
-          <Dialog title="Performance Metrics" onClose={this.close}>
-            <MetricsTable />
-          </Dialog>
-        </ReactModal>
+          <MetricsTable />
+        </Dialog>
       </div>
     );
   }

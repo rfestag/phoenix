@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "reactstrap";
 import styled from "styled-components";
+import ReactModal from "react-modal-resizable-draggable";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -30,18 +31,21 @@ const Contents = styled.div`
   height: calc(100% - ${props => props.theme.dialogTitleBarHeight});
 `;
 
-const Dialog = ({ onClose, title, children }) => (
-  <Wrapper>
-    <TitleBar>
-      <CloseButton onClick={onClose} size="lg" close="true">
-        &times;
-      </CloseButton>
-      <Title>{title}</Title>
-    </TitleBar>
-    <Contents>{children}</Contents>
-  </Wrapper>
+const Dialog = ({ onClose, title, children, ...props }) => (
+  <ReactModal {...props}>
+    <Wrapper>
+      <TitleBar>
+        <CloseButton onClick={onClose} size="lg" close="true">
+          &times;
+        </CloseButton>
+        <Title>{title}</Title>
+      </TitleBar>
+      <Contents>{children}</Contents>
+    </Wrapper>
+  </ReactModal>
 );
 Dialog.propTypes = {
+  props: PropTypes.object,
   onClose: PropTypes.func.isRequired,
   children: PropTypes.any,
   title: PropTypes.string
