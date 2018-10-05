@@ -33,7 +33,7 @@ const Tabs = styled(Nav)`
   flex-direction: column;
 `;
 const Tab = styled(NavItem)`
-  flex: 1 0 100%;
+  flex: 1 0;
   flex-basis: 80%;
   order: ${props => props.order};
   display: ${props => (props.order < 0 ? "none" : "")};
@@ -99,19 +99,17 @@ export class CollectionGridTabs extends React.Component {
                   className={classnames({
                     active: this.props.activeTab === id
                   })}
-                  style={{ padding: ".5rem 0 .5rem 5px" }}
+                  style={{ padding: ".5rem 0 .5rem 1rem" }}
                 >
-                  <ul>
-                    <TabMenu active={this.props.activeTab === id}>
-                      <span
-                        onClick={() => {
-                          this.props.onTabChange(id);
-                        }}
-                      >
-                        {collection.name}
-                      </span>
-                    </TabMenu>
-                  </ul>
+                  <TabMenu active={this.props.activeTab === id}>
+                    <span
+                      onClick={() => {
+                        this.props.onTabChange(id);
+                      }}
+                    >
+                      {collection.name}
+                    </span>
+                  </TabMenu>
                 </NavLink>
               </Tab>
             ))}

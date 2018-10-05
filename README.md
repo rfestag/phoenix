@@ -120,3 +120,10 @@ but may contain Epics (see `redux-observable`), components, and constants. Gener
 - Entity Viewer
   - List
   - Details
+
+
+RELOAD logic - Can we reload a user's state when they come back?
+  Actions
+    Query related actions load data. Keep those details of create/delete
+    Apply filter. Keep history of filters added/removed/changed by user
+    Delete data. Keep history of ids deleted

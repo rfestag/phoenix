@@ -10,7 +10,6 @@ import _ from "lodash";
 
 const getData = (state, props) => props.collection.data;
 const getCollectionData = createSelector([getData], collection => {
-  console.log("Getting values for", collection);
   return collection === undefined ? [] : Object.values(collection);
 });
 const getSelected = (state, props) => props.collection.selected || {};

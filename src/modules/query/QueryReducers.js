@@ -5,7 +5,8 @@ import {
   CREATE_QUERY,
   RESUME_QUERY,
   PAUSE_QUERY,
-  CANCEL_QUERY
+  CANCEL_QUERY,
+  DELETE_QUERY
 } from "./QueryActions";
 import _ from "lodash";
 
@@ -24,13 +25,11 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
       //console.log("Got message from worker", e.data.length / 1000000 + "MB");
       //console.time("Parsing data");
       let data = JSON.parse(e.data);
-      console.time("emitting actions");
       if (_.isArray(data)) {
         _.each(data, action => observer.next(action));
       } else {
         observer.next(data);
       }
-      console.timeEnd("emitting actions");
       //console.timeEnd("Parsing data");
     };
     port.onerror = function(e) {
@@ -46,7 +45,15 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
 
   //Here, we take all whitelisted actions, and pass them to the worker
   action$
-    .pipe(ofType(CREATE_QUERY, RESUME_QUERY, PAUSE_QUERY, CANCEL_QUERY))
+    .pipe(
+      ofType(
+        CREATE_QUERY,
+        RESUME_QUERY,
+        PAUSE_QUERY,
+        DELETE_QUERY,
+        CANCEL_QUERY
+      )
+    )
     .subscribe(action => port.postMessage(JSON.stringify(action)));
 
   //Finally, we start the port and return the observable. The observable is returned
@@ -60,6 +67,7 @@ export const handleCreateQuery = (state, action) => {
     ...state,
     [action.id]: {
       paused: false,
+      done: false,
       source: action.source,
       query: action.query
     }
@@ -72,6 +80,9 @@ export const handlePauseQuery = (state, action) => {
   return { ...state, [action.id]: { ...state[action.id], paused: true } };
 };
 export const handleCancelQuery = (state, action) => {
+  return { ...state, [action.id]: { ...state[action.id], done: true } };
+};
+export const handleDeleteQuery = (state, action) => {
   const { [action.id]: toRemove, ...newState } = state;
   return newState;
 };
@@ -85,6 +96,8 @@ export default function(state = initialState, action) {
       return handlePauseQuery(state, action);
     case CANCEL_QUERY:
       return handleCancelQuery(state, action);
+    case DELETE_QUERY:
+      return handleDeleteQuery(state, action);
     default:
       return state;
   }

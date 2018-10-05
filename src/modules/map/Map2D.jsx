@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
+import { emitTimingMetric } from "../metrics/MetricsActions";
 import { Map, TileLayer, ScaleControl } from "react-leaflet";
 import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
@@ -122,7 +123,12 @@ export class Map2D extends Component {
         <ScaleControl position="bottomleft" />
         {_.map(this.props.collections, (collection, cid) => {
           return (
-            <CollectionLayer key={cid} collection={collection} minZoom={5} />
+            <CollectionLayer
+              key={cid}
+              collection={collection}
+              onRender={this.props.emitTimingMetric}
+              minZoom={5}
+            />
           );
         })}
       </Map>
@@ -148,7 +154,9 @@ function mapStateToProps(state, props) {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      ...MapActions
+      ...MapActions,
+      emitTimingMetric: (metric, duration) =>
+        dispatch(emitTimingMetric(metric, duration))
     },
     dispatch
   );

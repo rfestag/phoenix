@@ -10,6 +10,7 @@ export const SET_SELECTED_ENTITIES = "SET_SELECTED_ENTITIES";
 export const UPDATE_COLLECTION = "UPDATE_COLLECTION";
 export const BATCH_UPDATE_COLLECTIONS = "BATCH_UPDATE_COLLECTIONS";
 export const UPDATE_COLLECTION_FIELDS = "UPDATE_COLLECTION_FIELDS";
+export const SUBSCRIBE_TO_QUERY = "SUBSCRIBE_TO_QUERY";
 export const SET_CURRENT_COLLECTION = "SET_CURRENT_COLLECTION";
 export const SET_FOCUSED_ENTITY = "SET_FOCUSED_ENTITY";
 
@@ -24,14 +25,20 @@ export const deleteCollection = id => ({
   type: DELETE_COLLECTION,
   id
 });
-export const updateCollection = (id, data) => ({
+export const updateCollection = (id, qid, data) => ({
   type: UPDATE_COLLECTION,
   id,
+  qid,
   data
 });
 export const batchUpdateCollections = allUpdates => ({
   type: BATCH_UPDATE_COLLECTIONS,
   allUpdates
+});
+export const subscribeToQuery = (id, qid) => ({
+  type: SUBSCRIBE_TO_QUERY,
+  id,
+  qid
 });
 export const deleteFromCollection = (id, ids) => ({
   type: DELETE_FROM_COLLECTION,

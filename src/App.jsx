@@ -27,8 +27,8 @@ import {
 import {
   createQuery,
   cancelQuery,
-  startQuery,
-  stopQuery
+  resumeQuery,
+  pauseQuery
 } from "./modules/query/QueryActions";
 import { ButtonGroup, Nav, NavItem } from "reactstrap";
 import styled from "styled-components";
@@ -91,8 +91,8 @@ function mapDispatchToProps(dispatch) {
     toggleGridPane: () => dispatch(toggleGridPane()),
     createQuery: (src, query, name) => dispatch(createQuery(src, query, name)),
     cancelQuery: id => dispatch(cancelQuery(id)),
-    startQuery: id => dispatch(startQuery(id)),
-    stopQuery: id => dispatch(stopQuery(id))
+    resumeQuery: id => dispatch(resumeQuery(id)),
+    pauseQuery: id => dispatch(pauseQuery(id))
   };
 }
 
@@ -107,8 +107,8 @@ class App extends Component {
     toggleGridPane: PropTypes.func.isRequired,
     createQuery: PropTypes.func.isRequired,
     cancelQuery: PropTypes.func.isRequired,
-    startQuery: PropTypes.func.isRequired,
-    stopQuery: PropTypes.func.isRequired
+    resumeQuery: PropTypes.func.isRequired,
+    pauseQuery: PropTypes.func.isRequired
   };
 
   componentDidMount() {
@@ -124,8 +124,8 @@ class App extends Component {
     console.log(this.props.query);
     if (id)
       this.props.query[id].paused
-        ? this.props.startQuery(id)
-        : this.props.stopQuery(id);
+        ? this.props.resumeQuery(id)
+        : this.props.pauseQuery(id);
     else console.log("No queries", this.props.query);
   }
   id() {

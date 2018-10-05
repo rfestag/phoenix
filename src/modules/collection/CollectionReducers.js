@@ -70,8 +70,6 @@ export default function(state = initialState, action) {
         return state;
       }
     case BATCH_UPDATE_COLLECTIONS:
-      console.log(action);
-      console.time("batch update");
       const updatedCollections = _.reduce(
         action.allUpdates,
         (collections, action) => {
@@ -82,15 +80,11 @@ export default function(state = initialState, action) {
         },
         { ...state.collections }
       );
-      console.timeEnd("batch update");
       return { ...state, collections: updatedCollections };
     case UPDATE_COLLECTION:
       collection = state.collections[id];
       if (collection) {
-        console.time("update entities");
-        //console.time("Update Collection");
         collection = updateCollection(collection, action);
-        console.timeEnd("update entities");
         return {
           ...state,
           collections: { ...state.collections, [id]: collection }
@@ -136,7 +130,6 @@ export default function(state = initialState, action) {
           selected[id] = true;
           return selected;
         }, {});
-        console.log(collection.selected);
         return {
           ...state,
           collections: { ...state.collections, [id]: { ...collection } }

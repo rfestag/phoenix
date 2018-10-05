@@ -315,10 +315,10 @@ export const CollectionLayer = Layer.extend({
         const selected =
           this.collection.selected && this.collection.selected[id];
         //Update the shape itself
-        if (geometry.type === "Point") {
-          geom[idx] = this._renderPoint(geometry, geom[idx], hovered, selected);
-        } else if (geometry.type === "LineString") {
+        if (geometry.etype === "Track" || geometry.type === "LineString") {
           geom[idx] = this._renderLine(geometry, geom[idx], hovered, selected);
+        } else if (geometry.type === "Point") {
+          geom[idx] = this._renderPoint(geometry, geom[idx], hovered, selected);
         }
         return geom;
       },
@@ -380,9 +380,13 @@ export const CollectionLayer = Layer.extend({
           rendered = true;
           const zoom = this._map.getZoom();
           let points = [];
+          const coordinates =
+            geom.type === "Point"
+              ? [geom.coordinates, geom.coordinates]
+              : geom.coordinates;
           if (zoom < MIN_SIMPLIFY_ZOOM) {
-            const p1 = geom.coordinates[0];
-            const p2 = geom.coordinates[geom.coordinates.length - 1];
+            const p1 = coordinates[0];
+            const p2 = coordinates[coordinates.length - 1];
             const pt1 = this._map.latLngToLayerPoint(
               new LatLng(p1[1], p1[0] + transform, p1[2])
             );
@@ -396,7 +400,8 @@ export const CollectionLayer = Layer.extend({
               Math.floor(pt2.y)
             ];
           } else {
-            points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
+            //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
+            points = coordinates.reduce((pts, p) => {
               const pt = this._map.latLngToLayerPoint(
                 new LatLng(p[1], p[0] + transform, p[2])
               );
@@ -404,6 +409,12 @@ export const CollectionLayer = Layer.extend({
               pts.push(Math.floor(pt.y));
               return pts;
             }, points);
+          }
+          //Special case - if this is a track of one point so far,
+          //we tweak the points to make it visible
+          if (geom.type === "Point") {
+            points[2] += 1;
+            points[3] += 1;
           }
           if (shape && shape.constructor !== Line) {
             shape.destroy();
@@ -570,12 +581,13 @@ class ReactCollectionLayer extends MapLayer {
     return new CollectionLayer(props.collection.data, this.getOptions(props));
   }
   updateLeafletElement(fromProps, toProps) {
-    console.time("layer update");
+    const start = Date.now();
     super.updateLeafletElement(fromProps, toProps);
     if (fromProps.collection !== toProps.collection) {
       this.leafletElement.setCollection(toProps.collection);
     }
-    console.timeEnd("layer update");
+    if (this.props.onRender)
+      this.props.onRender("MAP_RENDER", Date.now() - start);
   }
 }
 

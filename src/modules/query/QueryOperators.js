@@ -2,7 +2,12 @@ import { concat } from "rxjs/observable/concat";
 import { of } from "rxjs/observable/of";
 import { ofType } from "redux-observable";
 import { filter, map } from "rxjs/operators";
-import { CANCEL_QUERY, RESUME_QUERY, PAUSE_QUERY } from "./QueryActions";
+import {
+  CANCEL_QUERY,
+  RESUME_QUERY,
+  DELETE_QUERY,
+  PAUSE_QUERY
+} from "./QueryActions";
 
 /**
  * An operator that should be applied to a stream of Redux actions. It monitors
@@ -12,7 +17,10 @@ import { CANCEL_QUERY, RESUME_QUERY, PAUSE_QUERY } from "./QueryActions";
  */
 export const queryCancelled = id => {
   return action$ =>
-    action$.pipe(ofType(CANCEL_QUERY), filter(action => action.id === id));
+    action$.pipe(
+      ofType(DELETE_QUERY, CANCEL_QUERY),
+      filter(action => action.id === id)
+    );
 };
 
 /**

@@ -12,7 +12,7 @@ const TabMenu = ({ children, active }) => (
     {children}
     <DropdownToggle
       color={active ? "accent" : "secondary"}
-      style={{ padding: "0 5px" }}
+      style={{ padding: "0 5px 0 0" }}
       caret
     />
     <DropdownMenu right>
@@ -26,7 +26,7 @@ const TabMenu = ({ children, active }) => (
 );
 
 TabMenu.propTypes = {
-  active: PropTypes.string,
+  active: PropTypes.bool,
   children: PropTypes.any
 };
 

@@ -10,7 +10,8 @@ import {
   CREATE_QUERY,
   RESUME_QUERY,
   PAUSE_QUERY,
-  CANCEL_QUERY
+  CANCEL_QUERY,
+  DELETE_QUERY
 } from "./QueryActions";
 import {
   UPDATE_COLLECTION,
@@ -89,7 +90,7 @@ export function mapToCollection(action$) {
           ),
           pauseQuery.pipe(
             switchMap(paused => (paused ? buffered : source)),
-            map(data => updateCollection(collectionId, data)),
+            map(data => updateCollection(collectionId, id, data)),
             takeUntil(isComplete)
           )
         );

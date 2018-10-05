@@ -6,7 +6,6 @@ import _ from "lodash";
 import moment from "moment";
 
 export const ageOffEpic = (action$, state$) => {
-  console.log(action$, state$);
   return interval(30000).pipe(
     withLatestFrom(state$),
     mergeMap(([, state]) => {
@@ -35,7 +34,6 @@ export const ageOffEpic = (action$, state$) => {
         },
         []
       );
-      console.log("Should delete", actions);
       return of(...actions);
     })
   );
