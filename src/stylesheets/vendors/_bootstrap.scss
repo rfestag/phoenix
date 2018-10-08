@@ -10,6 +10,9 @@
 .dropdown-toggle:focus {
   box-shadow: none !important;
 }
+.btn:focus {
+  box-shadow: none !important;
+}
 .dropdown-menu {
   top: -5px !important;
 }
@@ -18,4 +21,8 @@
   &:hover {
     background-color: inherit !important;
   }
+}
+.btn.active {
+  background-color: $component-active-bg !important;
+  color: $component-active-color !important;
 }

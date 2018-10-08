@@ -13,11 +13,27 @@ const metrics = createSelector([getMetrics, getStart], (metrics, start) => {
   const runtime = Date.now() - start;
   let result = _.map(metrics, (v, metric) => ({
     metric,
-    totalTime: v.total / runtime,
+    percent: v.total / runtime,
     ...v
   }));
   return result;
 });
+
+const numberFormatter = ({ columnData = { defaultValue: "" }, cellData }) => {
+  const { defaultValue, fixed } = columnData;
+  if (cellData === null) return defaultValue;
+  if (!cellData.toPrecision || fixed === undefined) return cellData;
+  return cellData.toFixed(fixed);
+};
+const percentFormatter = ({
+  columnData = { defaultValue: "", fixed: 2 },
+  cellData
+}) => {
+  const { defaultValue, fixed } = columnData;
+  if (cellData === null) return defaultValue;
+  if (!cellData.toFixed || fixed === undefined) return cellData + "%";
+  return cellData.toFixed(fixed) + "%";
+};
 export const MetricsTable = ({ data }) => {
   return (
     <div style={{ width: "100%", height: "100%", paddingTop: 10 }}>
@@ -30,13 +46,46 @@ export const MetricsTable = ({ data }) => {
             rowHeight={24}
             headerHeight={24}
           >
-            <Column label="Metric" dataKey="metric" width={400} />
-            <Column label="Min" dataKey="min" width={100} />
-            <Column label="Max" dataKey="max" width={100} />
-            <Column label="Avg" dataKey="avg" width={100} />
-            <Column label="Count" dataKey="count" width={100} />
-            <Column label="Total" dataKey="total" width={100} />
-            <Column label="Total Time" dataKey="totalTime" width={100} />
+            <Column label="Metric" dataKey="metric" width={300} />
+            <Column
+              label="Min"
+              dataKey="min"
+              width={50}
+              columnData={{ fixed: 1 }}
+              cellRenderer={numberFormatter}
+            />
+            <Column
+              label="Max"
+              dataKey="max"
+              width={60}
+              columnData={{ fixed: 1 }}
+              cellRenderer={numberFormatter}
+            />
+            <Column
+              label="Avg"
+              dataKey="avg"
+              width={50}
+              columnData={{ fixed: 1 }}
+              cellRenderer={numberFormatter}
+            />
+            <Column
+              label="Count"
+              dataKey="count"
+              width={75}
+              cellRenderer={numberFormatter}
+            />
+            <Column
+              label="Total"
+              dataKey="total"
+              width={75}
+              cellRenderer={numberFormatter}
+            />
+            <Column
+              label="% Time"
+              dataKey="percent"
+              width={150}
+              cellRenderer={percentFormatter}
+            />
           </VirtualTable>
         )}
       </AutoSizer>

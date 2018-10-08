@@ -1,18 +1,20 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import fontawesome from "@fortawesome/fontawesome";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import brands from "@fortawesome/fontawesome-free-brands";
-import search from "@fortawesome/fontawesome-free-solid/faSearch";
-import columns from "@fortawesome/fontawesome-free-solid/faColumns";
-import filter from "@fortawesome/fontawesome-free-solid/faFilter";
-import chart from "@fortawesome/fontawesome-free-solid/faChartBar";
-import user from "@fortawesome/fontawesome-free-solid/faUser";
-import cancel from "@fortawesome/fontawesome-free-solid/faTimes";
-import pause from "@fortawesome/fontawesome-free-solid/faPause";
-import play from "@fortawesome/fontawesome-free-solid/faPlay";
-import left from "@fortawesome/fontawesome-free-solid/faChevronLeft";
-import right from "@fortawesome/fontawesome-free-solid/faChevronRight";
+import { library, dom } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSearch,
+  faColumns,
+  faFilter,
+  faChartBar,
+  faUser,
+  faTimes,
+  faPause,
+  faPlay,
+  faChevronLeft,
+  faChevronRight
+} from "@fortawesome/free-solid-svg-icons";
+import { faPhoenixSquadron } from "@fortawesome/free-brands-svg-icons";
 import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
@@ -43,18 +45,18 @@ import HelpMenu from "./components/HelpMenu";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
 
-fontawesome.library.add(
-  search,
-  filter,
-  columns,
-  user,
-  chart,
-  brands,
-  cancel,
-  pause,
-  play,
-  left,
-  right
+library.add(
+  faSearch,
+  faColumns,
+  faFilter,
+  faChartBar,
+  faUser,
+  faTimes,
+  faPause,
+  faPlay,
+  faChevronLeft,
+  faChevronRight,
+  faPhoenixSquadron
 );
 
 const Outer = styled.div`
@@ -234,7 +236,7 @@ class App extends Component {
               {this.props.panel.RIGHT && <ReflexSplitter propagate={true} />}
               {this.props.panel.RIGHT && (
                 <ReflexElement maxSize={400} threshold={60}>
-                  <RightPanel />
+                  <RightPanel activePane={this.props.panel.RIGHT} />
                 </ReflexElement>
               )}
             </ReflexContainer>

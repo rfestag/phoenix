@@ -1,8 +1,11 @@
 .flexible-modal {
   position: fixed;
-  z-index: 500;
+  z-index: 600;
   background-color: $body-bg;
   border: solid 1px $split-border;
+  &[draggable=true] {
+    user-select: none;
+  }
 }
 .flexible-modal-mask,
 .flexible-modal-drag-area-right,

@@ -7,6 +7,7 @@ $banner-bg: #29353b;
 $split-bg:#13191c;
 $split-size: 8px;
 $split-border: #29353b;
+$map-control-bg: rgba(#13191c, .9);
 
 //AG-Grid variables
 $icons-path: "~ag-grid/src/styles/balham-icons/";
@@ -15,6 +16,8 @@ $border-color: #424242; //This shouldn't be necessary, but somehow is. Beware of
 //Bootstrap overrides
 $body-bg: #0f1416;
 $body-color: #bcc6c9;
+$input-bg: #29353b;
+$input-color: #bcc6c9;
 $close-color: #bcc6c9;
 $yiq-text-light: #bcc6c9;
 $enable-rounded: false;
@@ -38,7 +41,8 @@ $modal-content-bg: $body-bg;
 $dialog-title-bar-height: 48px;
 
 $theme-colors: (
-  "accent": $accent-color
+  "accent": $accent-color,
+  "map-control": $map-control-bg,
 );
 
 @import "bootstrap/scss/functions";

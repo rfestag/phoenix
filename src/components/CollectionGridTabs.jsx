@@ -8,9 +8,13 @@ import { connect } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import styled from "styled-components";
 import { setCurrentCollection } from "../modules/collection/CollectionActions";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "reactstrap";
-import { toggleColumnPane } from "../modules/panel/PanelActions";
+import {
+  RIGHT_PANEL,
+  COLUMN_PANE,
+  toggleColumnPane
+} from "../modules/panel/PanelActions";
 import TabMenu from "./TabMenu";
 
 const OuterPanel = styled.div`
@@ -43,6 +47,7 @@ export class CollectionGridTabs extends React.Component {
   static propTypes = {
     collections: PropTypes.object.isRequired,
     activeTab: PropTypes.string,
+    columnPaneActive: PropTypes.string,
     onTabChange: PropTypes.func,
     onColumManagerClicked: PropTypes.func
   };
@@ -117,7 +122,10 @@ export class CollectionGridTabs extends React.Component {
           <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
             <FontAwesomeIcon icon="chevron-right" />
           </Button>
-          <Button onClick={this.props.onColumManagerClicked}>
+          <Button
+            active={this.props.columnPaneActive}
+            onClick={this.props.onColumManagerClicked}
+          >
             <FontAwesomeIcon icon="columns" />
           </Button>
         </TabCarousel>
@@ -135,6 +143,7 @@ export class CollectionGridTabs extends React.Component {
 }
 function mapStateToProps(state) {
   return {
+    columnPaneActive: state.panel[RIGHT_PANEL] === COLUMN_PANE,
     activeTab: state.collection.current,
     collections: state.collection.collections
   };

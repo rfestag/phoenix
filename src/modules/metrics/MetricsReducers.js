@@ -11,7 +11,7 @@ export default function(state = initialState, action) {
       let duration = action.duration;
       let { min, max, avg, count, total } = state.timing[metric] || {
         min: Number.MAX_VALUE,
-        max: Number.MIN_VALUE,
+        max: -Number.MIN_VALUE,
         avg: 0,
         count: 0,
         total: 0

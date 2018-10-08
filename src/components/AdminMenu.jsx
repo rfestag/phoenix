@@ -33,7 +33,7 @@ class AdminMenu extends React.Component {
           </DropdownMenu>
         </Dropdown>
         <Dialog
-          initWidth={800}
+          initWidth={850}
           initHeight={250}
           isOpen={this.state.showMetrics}
           title="Performance Metrics"

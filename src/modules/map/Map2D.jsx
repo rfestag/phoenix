@@ -4,13 +4,16 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
-import { Map, TileLayer, ScaleControl } from "react-leaflet";
+import { Map, TileLayer, FeatureGroup } from "react-leaflet";
 import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
+import MapToolbar from "./MapToolbar";
 import _ from "lodash";
 import { createSelector } from "reselect";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
+import EditControl from "./EditControl";
+import ViewControl from "./ViewControl";
 
 const collectionsSelector = state => state.collection.collections;
 const ptsSelector = collections => {
@@ -79,14 +82,8 @@ export class Map2D extends Component {
   style = () => {
     return { color: "red" };
   };
-  _onEditPath = e => {
-    console.log(e);
-  };
-  _onCreate = e => {
-    console.log(e);
-  };
-  _onDeleted = e => {
-    console.log(e);
+  featureChanged = feature => {
+    console.log("Feature changed!", feature);
   };
 
   render() {
@@ -99,20 +96,13 @@ export class Map2D extends Component {
         zoom={this.props.zoom}
         preferCanvas={true}
         zoomControl={false}
+        attributionControl={false}
         worldCopyJump={true}
         minZoom={3}
         style={{ width: "100%", height: "100%" }}
       >
-        <div
-          style={{
-            width: "100%",
-            height: 32,
-            position: "absolute",
-            top: 0,
-            zIndex: 100,
-            backgroundColor: "black"
-          }}
-        />
+        <MapToolbar />
+        <ViewControl />
         {/*<HeatmapLayer
           points={this.props.heatmapPoints}
           longitudeExtractor={m => m.location[0]}
@@ -120,7 +110,6 @@ export class Map2D extends Component {
           intensityExtractor={m => m.value}
         />*/}
         <TileLayer {...this.props.layer.settings} tileSize={512} />
-        <ScaleControl position="bottomleft" />
         {_.map(this.props.collections, (collection, cid) => {
           return (
             <CollectionLayer
