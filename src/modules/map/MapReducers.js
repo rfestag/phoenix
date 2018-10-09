@@ -40,7 +40,7 @@ const projections = [
     name: "Web Mercator",
     projection: "EPSG:3857",
     crs: L.CRS.EPSG3857,
-    settings: { center: [0, 0], minZoom: 2, maxZoom: 16 }
+    settings: { center: [0, 0], minZoom: 0, maxZoom: 16 }
   },
   {
     name: "Arctic LAEA on 10°E",
@@ -53,16 +53,58 @@ let baseLayers = [
   {
     name: "Night",
     projection: "EPSG:3857",
+    type: "tile",
+    settings: {
+      zoomOffset: -1,
+      tileSize: 512,
+      url:
+        "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}{r}.png"
+    }
+  },
+  {
+    name: "World Imagery",
+    projection: "EPSG:3857",
+    type: "tile",
     settings: {
       tileSize: 512,
-      zoomOffset: -1,
       url:
-        "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png"
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    }
+  },
+  {
+    name: "Gray Canvas",
+    projection: "EPSG:3857",
+    type: "tile",
+    settings: {
+      tileSize: 512,
+      url:
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+    }
+  },
+  {
+    name: "Earth at Night",
+    projection: "EPSG:3857",
+    type: "tile",
+    settings: {
+      tileSize: 512,
+      url:
+        "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}"
+    }
+  },
+  {
+    name: "Open Street Map",
+    projection: "EPSG:3857",
+    type: "tile",
+    settings: {
+      maxZoom: 19,
+      tileSize: 512,
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     }
   },
   {
     name: "Polar",
     projection: "ESPG:3575",
+    type: "tile",
     settings: {
       tileSize: 512,
       url: "https://tile.gbif.org/3575/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic".replace(

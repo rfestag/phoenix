@@ -22,5 +22,5 @@ export const removeBaselayer = layer => ({ type: REMOVE_BASELAYER, layer });
 
 export const showOverlay = layer => ({ type: SHOW_OVERLAY, layer });
 export const hideOverlay = layer => ({ type: HIDE_OVERLAY, layer });
-export const addOverlayer = layer => ({ type: ADD_OVERLAY, layer });
+export const addOverlay = layer => ({ type: ADD_OVERLAY, layer });
 export const removeOverlay = layer => ({ type: REMOVE_OVERLAY, layer });

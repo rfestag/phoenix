@@ -7,6 +7,8 @@ $banner-bg: #29353b;
 $split-bg:#13191c;
 $split-size: 8px;
 $split-border: #29353b;
+$collapse-header-bg: #29353b;
+$collapse-header-hover-bg: darken(#29353b, .5);
 $map-control-bg: rgba(#13191c, .9);
 
 //AG-Grid variables
@@ -19,6 +21,7 @@ $body-color: #bcc6c9;
 $input-bg: #29353b;
 $input-color: #bcc6c9;
 $close-color: #bcc6c9;
+$list-group-bg: #0f1416;
 $yiq-text-light: #bcc6c9;
 $enable-rounded: false;
 $enable-shadows: false;
