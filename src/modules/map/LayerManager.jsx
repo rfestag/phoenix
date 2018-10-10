@@ -20,6 +20,11 @@ import {
   SwitchableCollapse
 } from "../../components/SwitchableCollapse";
 
+const AnimatedCollapse = styled(Collapse)`
+  .collapsing {
+  }
+`;
+
 export class LayerList extends Component {
   constructor(props) {
     super(props);
@@ -47,8 +52,11 @@ export class LayerList extends Component {
     return (
       <div
         style={{
+          //flex: 0
           display: "flex",
+          //flex: '0 1',
           flex: this.props.open ? 1 : 0,
+          minHeight: 43,
           flexDirection: "column"
         }}
       >

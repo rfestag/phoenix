@@ -37,8 +37,9 @@ const Tabs = styled(Nav)`
   flex-direction: column;
 `;
 const Tab = styled(NavItem)`
-  flex: 1 0;
-  flex-basis: 80%;
+  flex: 0 1;
+  max-width: 250px;
+  min-width: 100px;
   order: ${props => props.order};
   display: ${props => (props.order < 0 ? "none" : "")};
 `;
