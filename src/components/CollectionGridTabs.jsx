@@ -85,7 +85,6 @@ export class CollectionGridTabs extends React.Component {
   };
   prevTab = () => {
     const { position } = this.state;
-    const collections = Object.keys(this.props.collections);
 
     if (position !== 0) {
       this.setState({ position: position - 1 });

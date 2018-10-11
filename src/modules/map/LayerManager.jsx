@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import styled from "styled-components";
-import { RIGHT_PANEL, collapsePanel } from "../panel/PanelActions";
 import {
   setBaselayer,
   addBaselayer,
@@ -19,11 +17,6 @@ import {
   CollapseHeader,
   SwitchableCollapse
 } from "../../components/SwitchableCollapse";
-
-const AnimatedCollapse = styled(Collapse)`
-  .collapsing {
-  }
-`;
 
 export class LayerList extends Component {
   constructor(props) {

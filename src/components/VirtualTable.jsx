@@ -1,6 +1,5 @@
 import "react-virtualized/styles.css";
 import React, { Component } from "react";
-import PropTypes from "prop-types";
 import { Table, SortDirection } from "react-virtualized";
 import { createSelector } from "reselect";
 import _ from "lodash";

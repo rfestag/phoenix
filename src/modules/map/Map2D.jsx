@@ -5,14 +5,14 @@ import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
 import { Map, TileLayer, FeatureGroup } from "react-leaflet";
-import HeatmapLayer from "react-leaflet-heatmap-layer";
+//import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
 import _ from "lodash";
 import { createSelector } from "reselect";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
-import EditControl from "./EditControl";
+//import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
 
 const collectionsSelector = state => state.collection.collections;
