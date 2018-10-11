@@ -14,6 +14,7 @@ import { createSelector } from "reselect";
 import L from "leaflet";
 //import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
+import MiniMap from "./MiniMap";
 
 const collectionsSelector = state => state.collection.collections;
 const ptsSelector = collections => {
@@ -59,6 +60,11 @@ export class Map2D extends Component {
     super(props);
     this.map = React.createRef();
     this.canvas = L.canvas();
+    this.state = {
+      miniMapActive: false,
+      center: props.center,
+      zoom: props.zoom
+    };
   }
   static propTypes = {
     crs: PropTypes.object.isRequired,
@@ -68,6 +74,24 @@ export class Map2D extends Component {
     layer: PropTypes.object.isRequired
   };
 
+  componentDidMount() {
+    const map = this.map.current && this.map.current.leafletElement;
+    const self = this;
+    map.invalidateSize();
+    map.on("zoomend", function() {
+      console.log(map.getBounds());
+      self.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
+    });
+    map.on("moveend", function() {
+      console.log(map.getBounds());
+      self.setState({ center: map.getCenter(), bounds: map.getBounds() });
+    });
+    self.setState({
+      center: map.getCenter(),
+      zoom: map.getZoom() - 4,
+      bounds: map.getBounds()
+    });
+  }
   componentDidUpdate(prevProps, prevState) {
     if (this.props !== prevProps) {
       this.resize();
@@ -81,6 +105,9 @@ export class Map2D extends Component {
   }
   style = () => {
     return { color: "red" };
+  };
+  toggleMiniMap = () => {
+    this.setState({ miniMapActive: !this.state.miniMapActive });
   };
   featureChanged = feature => {
     console.log("Feature changed!", feature);
@@ -102,7 +129,10 @@ export class Map2D extends Component {
         style={{ width: "100%", height: "100%" }}
       >
         <MapToolbar />
-        <ViewControl />
+        <ViewControl
+          miniMapActive={this.state.miniMapActive}
+          toggleMiniMap={this.toggleMiniMap}
+        />
         {/*<HeatmapLayer
           points={this.props.heatmapPoints}
           longitudeExtractor={m => m.location[0]}
@@ -120,6 +150,16 @@ export class Map2D extends Component {
             />
           );
         })}
+        <MiniMap
+          crs={this.props.crs.crs}
+          worldCopyJump={true}
+          center={this.state.center}
+          zoom={this.state.zoom}
+          active={this.state.miniMapActive}
+          bounds={this.state.bounds}
+        >
+          <TileLayer {...this.props.layer.settings} />
+        </MiniMap>
       </Map>
     );
   }

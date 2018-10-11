@@ -108,14 +108,12 @@ ViewControl.propTypes = {
 function mapStateToProps(state) {
   return {
     layerManagerActive: state.panel[RIGHT_PANEL] === LAYER_PANE,
-    miniMapActive: state.panel[RIGHT_PANEL] === LAYER_PANE,
     map: state.map
   };
 }
 function mapDispatchToProps(dispatch) {
   return {
-    toggleLayerManager: () => dispatch(toggleLayerPane()),
-    toggleMiniMap: () => dispatch(toggleLayerPane())
+    toggleLayerManager: () => dispatch(toggleLayerPane())
   };
 }
 
