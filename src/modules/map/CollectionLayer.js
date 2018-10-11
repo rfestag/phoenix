@@ -14,7 +14,7 @@ import _ from "lodash";
 import * as turf from "@turf/turf";
 
 const MIN_SIMPLIFY_ZOOM = 6;
-const MAX_SIMPLIFY_ZOOM = 8;
+//const MAX_SIMPLIFY_ZOOM = 8;
 
 function touchBounds(geom, bounds) {
   const bbox = geom.bbox;
@@ -129,18 +129,6 @@ function style(shape, selected) {
 function hoverStyle(shape) {
   shape.stroke("yellow");
   shape.moveToTop();
-}
-function simplifyByZoom(geom, zoom) {
-  return geom;
-  /*
-  if (geom.coordinates.length < 5 || zoom > MAX_SIMPLIFY_ZOOM) return geom
-  let tolerance
-  if (zoom === 8) tolerance = 0.01
-  else if (zoom === 7) tolerance = 0.05
-  else if (zoom === 6) tolerance = 0.1
-  else if (zoom === 5) tolerance = 5
-  return turf.simplify(geom, {tolerance})
-  */
 }
 export const CollectionLayer = Layer.extend({
   options: {

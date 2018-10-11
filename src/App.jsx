@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { library, dom } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faSearch,
   faColumns,
   faFilter,
-  faChartBar,
+  faTable,
   faUser,
   faTimes,
   faPause,
@@ -14,7 +13,6 @@ import {
   faChevronLeft,
   faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
-import { faPhoenixSquadron } from "@fortawesome/free-brands-svg-icons";
 import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
@@ -26,22 +24,14 @@ import {
   toggleLayerPane,
   toggleGridPane
 } from "./modules/panel/PanelActions";
-import {
-  createQuery,
-  cancelQuery,
-  resumeQuery,
-  pauseQuery
-} from "./modules/query/QueryActions";
-import { ButtonGroup, Nav, NavItem } from "reactstrap";
+import { createQuery } from "./modules/query/QueryActions";
+import { Nav, NavItem } from "reactstrap";
 import styled from "styled-components";
 import PropTypes from "prop-types";
 import Banner from "./components/Banner";
 import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
 import LeftMenuBarButton from "./components/LeftMenuBarButton";
-import SettingsMenu from "./components/SettingsMenu";
-import AdminMenu from "./components/AdminMenu";
-import HelpMenu from "./components/HelpMenu";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
 
@@ -49,14 +39,13 @@ library.add(
   faSearch,
   faColumns,
   faFilter,
-  faChartBar,
+  faTable,
   faUser,
   faTimes,
   faPause,
   faPlay,
   faChevronLeft,
-  faChevronRight,
-  faPhoenixSquadron
+  faChevronRight
 );
 
 const Outer = styled.div`
@@ -74,9 +63,6 @@ const Main = styled.div`
 const Content = styled.div`
   flex: 1 1;
 `;
-const Brand = styled(FontAwesomeIcon)`
-  color: ${props => props.theme.accentColor};
-`;
 
 function mapStateToProps(state) {
   return {
@@ -92,10 +78,7 @@ function mapDispatchToProps(dispatch) {
     toggleFilterPane: () => dispatch(toggleFilterPane()),
     toggleLayerPane: () => dispatch(toggleLayerPane()),
     toggleGridPane: () => dispatch(toggleGridPane()),
-    createQuery: (src, query, name) => dispatch(createQuery(src, query, name)),
-    cancelQuery: id => dispatch(cancelQuery(id)),
-    resumeQuery: id => dispatch(resumeQuery(id)),
-    pauseQuery: id => dispatch(pauseQuery(id))
+    createQuery: (src, query, name) => dispatch(createQuery(src, query, name))
   };
 }
 
@@ -108,10 +91,7 @@ class App extends Component {
     toggleFilterPane: PropTypes.func.isRequired,
     toggleLayerPane: PropTypes.func.isRequired,
     toggleGridPane: PropTypes.func.isRequired,
-    createQuery: PropTypes.func.isRequired,
-    cancelQuery: PropTypes.func.isRequired,
-    resumeQuery: PropTypes.func.isRequired,
-    pauseQuery: PropTypes.func.isRequired
+    createQuery: PropTypes.func.isRequired
   };
 
   componentDidMount() {
@@ -119,50 +99,12 @@ class App extends Component {
       this.props.createQuery("ADSBApollo", {}, "ADSB Exchange");
     }
   }
-  startNewTest = () => {
-    this.props.createQuery("Test", {});
-  };
-  toggleQuery() {
-    const id = Object.keys(this.props.query)[0];
-    console.log(this.props.query);
-    if (id)
-      this.props.query[id].paused
-        ? this.props.resumeQuery(id)
-        : this.props.pauseQuery(id);
-    else console.log("No queries", this.props.query);
-  }
-  id() {
-    return Object.keys(this.props.query)[0];
-  }
-
-  onMapResize() {
-    //this.map.resize();
-  }
-  cancelQuery() {
-    console.log(this.props.query);
-    const id = Object.keys(this.props.query)[0];
-    console.log("Cancelling", id);
-    this.props.cancelQuery(id);
-  }
 
   render() {
-    let id = Object.keys(this.props.query)[0];
-    let icon = id ? (this.props.query[id].paused ? "play" : "pause") : null;
     return (
       <Outer>
         <Banner>Phoenix GIS</Banner>
-        <TopMenu>
-          <Brand
-            icon={["fab", "phoenix-squadron"]}
-            size="2x"
-            className="icon-brand"
-          />
-          <ButtonGroup style={{ float: "right" }}>
-            <AdminMenu />
-            <HelpMenu />
-            <SettingsMenu />
-          </ButtonGroup>
-        </TopMenu>
+        <TopMenu />
         <Main>
           <LeftMenu>
             <Nav tabs>
@@ -190,23 +132,10 @@ class App extends Component {
               <NavItem>
                 <LeftMenuBarButton
                   onClick={() => this.props.toggleGridPane()}
-                  icon="chart-bar"
+                  icon="table"
                 />
               </NavItem>
             </Nav>
-
-            <ButtonGroup vertical>
-              <LeftMenuBarButton
-                onClick={() => this.cancelQuery()}
-                icon="times"
-              />
-              {icon && (
-                <LeftMenuBarButton
-                  onClick={() => this.toggleQuery()}
-                  icon={icon}
-                />
-              )}
-            </ButtonGroup>
           </LeftMenu>
           <Content>
             <ReflexContainer orientation="vertical">
@@ -218,7 +147,7 @@ class App extends Component {
               {this.props.panel.LEFT && <ReflexSplitter propogate={true} />}
               <ReflexElement>
                 <ReflexContainer orientation="horizontal">
-                  <ReflexElement minSize={100} onResize={this.onMapResize}>
+                  <ReflexElement minSize={100}>
                     <ErrorBoundary>
                       <Map2D ref={this.map} />
                     </ErrorBoundary>

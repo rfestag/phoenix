@@ -1,7 +1,7 @@
 import "react-virtualized/styles.css";
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { AutoSizer, Table, Column, SortDirection } from "react-virtualized";
+import { AutoSizer, Column } from "react-virtualized";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
 import _ from "lodash";

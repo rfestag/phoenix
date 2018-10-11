@@ -36,9 +36,10 @@ const Wrapper = styled.div`
   display: flex;
 `;
 const AOISearch = styled(Input)`
-  width: 300px;
   float: right;
-  background-color: ${props => props.theme.bannerBg};
+  width: 300px !important;
+  border: none !important;
+  box-shadow: none !important;
 `;
 const Filler = styled.div`
   flex: 1;
@@ -77,10 +78,7 @@ const MapToolbar = ({ children }) => (
         <FontAwesomeIcon icon="crosshairs" />
       </ToolbarButton>
     </ButtonGroup>
-    <Input
-      placeholder="Search areas of interest..."
-      style={{ width: 300, border: "none", boxShadow: "none" }}
-    />
+    <AOISearch placeholder="Search areas of interest" />
   </Wrapper>
 );
 MapToolbar.propTypes = {
