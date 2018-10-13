@@ -176,7 +176,18 @@ export const CollectionLayer = Layer.extend({
     const map = this._map;
 
     if (map) {
-      this._allBounds = getBoundsAndTransforms(this._map.getBounds());
+      let mapBounds;
+      try {
+        mapBounds = this._map.getBounds();
+      } catch (e) {
+        //The only case this seems to happen is with Polar (3575) projection. Hard coding
+        //to its bounds for now. Should change this
+        mapBounds = {
+          _northEast: { lng: 180, lat: 90 },
+          _southWest: { lng: -180, lat: 45 }
+        };
+      }
+      this._allBounds = getBoundsAndTransforms(mapBounds);
       var p = this.options.padding,
         msize = this._map.getSize(),
         min = this._map
@@ -435,117 +446,121 @@ export const CollectionLayer = Layer.extend({
   _onMouseMove: function(e) {
     //console.time("hover");
     if (this.dragging) return;
-    const map = this._map;
-    const t = 8; //Threshold
-    const nw = map.layerPointToLatLng(
-      new Point(e.layerPoint.x - t, e.layerPoint.y - t)
-    );
-    const ne = map.layerPointToLatLng(
-      new Point(e.layerPoint.x + t, e.layerPoint.y - t)
-    );
-    const se = map.layerPointToLatLng(
-      new Point(e.layerPoint.x + t, e.layerPoint.y + t)
-    );
-    const sw = map.layerPointToLatLng(
-      new Point(e.layerPoint.x - t, e.layerPoint.y + t)
-    );
-    /*
-    const clickBox = {
-      type: "Polygon",
-      coordinates: [
-        [
-          [nw.lng, nw.lat],
-          [ne.lng, ne.lat],
-          [se.lng, se.lat],
-          [sw.lng, sw.lat],
-          [nw.lng, nw.lat]
-        ]
-      ]
-    };
-    */
-    const clickBounds = { _northEast: ne, _southWest: sw };
-    const allBounds = getBoundsAndTransforms(clickBounds);
-    const allBoxes = allBounds.map(bt => {
-      const [bounds, transform] = bt;
-      return [
-        transform,
-        bounds,
-        {
-          type: "Polygon",
-          coordinates: [
-            [
-              [nw.lng + transform, nw.lat],
-              [ne.lng + transform, ne.lat],
-              [se.lng + transform, se.lat],
-              [sw.lng + transform, sw.lat],
-              [nw.lng + transform, nw.lat]
-            ]
+    try {
+      const map = this._map;
+      const t = 8; //Threshold
+      const nw = map.layerPointToLatLng(
+        new Point(e.layerPoint.x - t, e.layerPoint.y - t)
+      );
+      const ne = map.layerPointToLatLng(
+        new Point(e.layerPoint.x + t, e.layerPoint.y - t)
+      );
+      const se = map.layerPointToLatLng(
+        new Point(e.layerPoint.x + t, e.layerPoint.y + t)
+      );
+      const sw = map.layerPointToLatLng(
+        new Point(e.layerPoint.x - t, e.layerPoint.y + t)
+      );
+      /*
+      const clickBox = {
+        type: "Polygon",
+        coordinates: [
+          [
+            [nw.lng, nw.lat],
+            [ne.lng, ne.lat],
+            [se.lng, se.lat],
+            [sw.lng, sw.lat],
+            [nw.lng, nw.lat]
           ]
-        }
-      ];
-    });
-    //TODO: Instead of create just an allBounds, I need an allBox and allGeos. Better,
-    //create an array that has all three in them, since they are based on allBounds translate
-    let didHover = false;
-    //const pt = e.latlng //this._map.layerPointToLatLng(e);
-    this.hovered = _.reduce(
-      this.collection.data,
-      (hits, entity, id) => {
-        return _.reduce(
-          entity.geometries,
-          (hits, gc, field) => {
-            return _.reduce(
-              gc.geometries,
-              (hits, geometry, idx) => {
-                if (this._closeTo(geometry, allBoxes)) {
-                  didHover = true;
-                  hits[id] = { [field]: true };
-                  if (this.entities[id] && this.entities[id][field]) {
+        ]
+      };
+      */
+      const clickBounds = { _northEast: ne, _southWest: sw };
+      const allBounds = getBoundsAndTransforms(clickBounds);
+      const allBoxes = allBounds.map(bt => {
+        const [bounds, transform] = bt;
+        return [
+          transform,
+          bounds,
+          {
+            type: "Polygon",
+            coordinates: [
+              [
+                [nw.lng + transform, nw.lat],
+                [ne.lng + transform, ne.lat],
+                [se.lng + transform, se.lat],
+                [sw.lng + transform, sw.lat],
+                [nw.lng + transform, nw.lat]
+              ]
+            ]
+          }
+        ];
+      });
+      //TODO: Instead of create just an allBounds, I need an allBox and allGeos. Better,
+      //create an array that has all three in them, since they are based on allBounds translate
+      let didHover = false;
+      //const pt = e.latlng //this._map.layerPointToLatLng(e);
+      this.hovered = _.reduce(
+        this.collection.data,
+        (hits, entity, id) => {
+          return _.reduce(
+            entity.geometries,
+            (hits, gc, field) => {
+              return _.reduce(
+                gc.geometries,
+                (hits, geometry, idx) => {
+                  if (this._closeTo(geometry, allBoxes)) {
+                    didHover = true;
+                    hits[id] = { [field]: true };
+                    if (this.entities[id] && this.entities[id][field]) {
+                      const geoms = this.entities[id][field];
+                      _.each(geoms, (shape, idx) => {
+                        //Only redraw if it changed from not hovered to hovered
+                        if (
+                          shape &&
+                          (!this.hovered[id] || !this.hovered[id][field])
+                        ) {
+                          hoverStyle(shape);
+                          try {
+                            shape.draw();
+                          } catch (e) {}
+                        }
+                      });
+                    }
+                  } else if (this.hovered[id] && this.hovered[id][field]) {
+                    //It is no longer a hover, re-style
                     const geoms = this.entities[id][field];
                     _.each(geoms, (shape, idx) => {
-                      //Only redraw if it changed from not hovered to hovered
-                      if (
-                        shape &&
-                        (!this.hovered[id] || !this.hovered[id][field])
-                      ) {
-                        hoverStyle(shape);
+                      if (shape) {
+                        const selected =
+                          this.collection.selected &&
+                          this.collection.selected[id];
+                        style(shape, selected);
                         try {
                           shape.draw();
                         } catch (e) {}
                       }
                     });
                   }
-                } else if (this.hovered[id] && this.hovered[id][field]) {
-                  //It is no longer a hover, re-style
-                  const geoms = this.entities[id][field];
-                  _.each(geoms, (shape, idx) => {
-                    if (shape) {
-                      const selected =
-                        this.collection.selected &&
-                        this.collection.selected[id];
-                      style(shape, selected);
-                      try {
-                        shape.draw();
-                      } catch (e) {}
-                    }
-                  });
-                }
-                return hits;
-              },
-              hits
-            );
-          },
-          hits
-        );
-      },
-      {}
-    );
-    if (didHover && !this._hoverCursor) {
-      this._container.style.cursor = "pointer";
-      this._hoverCursor = true;
-    } else if (!didHover && this._hoverCursor) {
-      this._container.style.cursor = "";
-      this._hoverCursor = false;
+                  return hits;
+                },
+                hits
+              );
+            },
+            hits
+          );
+        },
+        {}
+      );
+      if (didHover && !this._hoverCursor) {
+        this._container.style.cursor = "pointer";
+        this._hoverCursor = true;
+      } else if (!didHover && this._hoverCursor) {
+        this._container.style.cursor = "";
+        this._hoverCursor = false;
+      }
+    } catch (e) {
+      console.error(e);
     }
     //console.timeEnd("hover");
   },

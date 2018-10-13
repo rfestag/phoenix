@@ -1,22 +1,53 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import styled from "styled-components";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import {
-  setBaselayer,
-  addBaselayer,
-  removeBaselayer,
-  showOverlay,
-  hideOverlay,
-  addOverlay,
-  removeOverlay
-} from "./MapActions";
+import { setBaselayer, showOverlay, hideOverlay } from "./MapActions";
 import { AutoSizer, List } from "react-virtualized";
-import { Collapse, ListGroup, ListGroupItem } from "reactstrap";
+import { Collapse, ListGroup, ListGroupItem, Media } from "reactstrap";
 import {
   CollapseHeader,
   SwitchableCollapse
 } from "../../components/SwitchableCollapse";
+import {
+  RevealVisibility,
+  RevealContainer,
+  Reveal,
+  RevealButtonGroup,
+  RevealButton
+} from "../../components/Reveal";
+import { Map, TileLayer } from "react-leaflet";
+
+const LayerItemWrapper = styled.div`
+  height: 58px;
+  position: relative;
+  &:hover {
+    border: 1px solid ${props => props.theme.accentColor};
+  }
+`;
+
+const LayerItem = ({ layer, crs }) => (
+  <LayerItemWrapper>
+    <RevealContainer>
+      <ListGroupItem
+        style={{ padding: 6, height: "100%", position: "relative" }}
+        action
+      >
+        <RevealVisibility visible={layer.active} />
+        <h4 style={{ display: "inline", marginLeft: 6 }}>{layer.name}</h4>
+        <RevealButtonGroup style={{ float: "right" }}>
+          <RevealButton>A</RevealButton>
+          <RevealButton>B</RevealButton>
+        </RevealButtonGroup>
+      </ListGroupItem>
+    </RevealContainer>
+  </LayerItemWrapper>
+);
+LayerItem.propTypes = {
+  layer: PropTypes.object,
+  crs: PropTypes.object
+};
 
 export class LayerList extends Component {
   constructor(props) {
@@ -34,12 +65,28 @@ export class LayerList extends Component {
     layers: PropTypes.array,
     open: PropTypes.bool,
     onHeaderClick: PropTypes.func,
+    onLayerClick: PropTypes.func,
     name: PropTypes.string
   };
+  componentDidUpdate(prevProps) {
+    if (this.props.layers !== prevProps.layers) {
+      let layers = this.props.layers.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        else return 0;
+      });
+      console.log("Setting state", layers);
+      this.setState({ layers });
+    }
+  }
   renderRow = ({ key, index, style }) => (
-    <ListGroupItem key={key} style={style}>
-      {this.state.layers[index].name}
-    </ListGroupItem>
+    <div
+      key={key}
+      style={style}
+      onClick={() => this.props.onLayerClick(this.state.layers[index])}
+    >
+      <LayerItem layer={this.state.layers[index]} />
+    </div>
   );
   render() {
     return (
@@ -67,9 +114,10 @@ export class LayerList extends Component {
             <AutoSizer tyle={{ height: "100%" }}>
               {({ height, width }) => (
                 <List
-                  height={true}
+                  height={height}
+                  data={this.state.layers}
                   rowCount={this.props.layers.length || 0}
-                  rowHeight={50}
+                  rowHeight={58}
                   rowRenderer={this.renderRow}
                   width={width}
                 />
@@ -86,9 +134,16 @@ export class LayerManager extends Component {
   render() {
     return (
       <SwitchableCollapse defaultPane="Base Layers">
-        <LayerList name="User Layers" layers={this.props.baseLayers} />
-        <LayerList name="Overlays" layers={this.props.baseLayers} />
-        <LayerList name="Base Layers" layers={this.props.baseLayers} />
+        <LayerList
+          name="Overlays"
+          layers={this.props.overlays}
+          onLayerClick={this.props.toggleOverlay}
+        />
+        <LayerList
+          name="Base Layers"
+          layers={this.props.baseLayers}
+          onLayerClick={this.props.setBaselayer}
+        />
       </SwitchableCollapse>
     );
   }
@@ -97,7 +152,10 @@ export class LayerManager extends Component {
 LayerManager.propTypes = {
   baseLayers: PropTypes.array,
   overlays: PropTypes.array,
-  layer: PropTypes.object
+  layer: PropTypes.object,
+  setBaselayer: PropTypes.func,
+  toggleOverlay: PropTypes.func,
+  onLayerClick: PropTypes.func
 };
 
 function mapStateToProps(state) {
@@ -111,12 +169,7 @@ const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       setBaselayer,
-      addBaselayer,
-      removeBaselayer,
-      showOverlay,
-      hideOverlay,
-      addOverlay,
-      removeOverlay
+      toggleOverlay: l => (l.active ? hideOverlay(l) : showOverlay(l))
     },
     dispatch
   );

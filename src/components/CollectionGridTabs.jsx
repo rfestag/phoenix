@@ -90,6 +90,9 @@ export class CollectionGridTabs extends React.Component {
       this.setState({ position: position - 1 });
     }
   };
+  onMenuAction = action => {
+    console.log("TODO: Handle", action);
+  };
   render() {
     return (
       <OuterPanel>
@@ -106,7 +109,11 @@ export class CollectionGridTabs extends React.Component {
                   })}
                   style={{ padding: ".5rem 0 .5rem 1rem" }}
                 >
-                  <TabMenu active={this.props.activeTab === id}>
+                  <TabMenu
+                    item={collection}
+                    active={this.props.activeTab === id}
+                    onMenuAction={this.onMenuAction}
+                  >
                     <span
                       onClick={() => {
                         this.props.onTabChange(id);

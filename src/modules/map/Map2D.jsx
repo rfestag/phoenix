@@ -77,20 +77,28 @@ export class Map2D extends Component {
   componentDidMount() {
     const map = this.map.current && this.map.current.leafletElement;
     const self = this;
-    map.invalidateSize();
-    map.on("zoomend", function() {
-      console.log(map.getBounds());
-      self.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
-    });
-    map.on("moveend", function() {
-      console.log(map.getBounds());
-      self.setState({ center: map.getCenter(), bounds: map.getBounds() });
-    });
-    self.setState({
-      center: map.getCenter(),
-      zoom: map.getZoom() - 4,
-      bounds: map.getBounds()
-    });
+    if (map) {
+      map.invalidateSize();
+      map.on("zoomend", function() {
+        try {
+          self.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
+        } catch (e) {
+          //Do nothing. This can happen in polar projections when you pan too far out
+        }
+      });
+      map.on("moveend", function() {
+        try {
+          self.setState({ center: map.getCenter(), bounds: map.getBounds() });
+        } catch (e) {
+          //Do nothing. This can happen in polar projections when you pan too far out
+        }
+      });
+      self.setState({
+        center: map.getCenter(),
+        zoom: map.getZoom() - 4,
+        bounds: map.getBounds()
+      });
+    }
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.props !== prevProps) {
@@ -117,15 +125,13 @@ export class Map2D extends Component {
     return (
       <Map
         ref={this.map}
+        key={this.props.crs.name} //This is necessary. It forces the map to re-mount when crs changes
         crs={this.props.crs.crs}
         center={this.props.center}
         {...this.props.crs.settings}
         zoom={this.props.zoom}
-        preferCanvas={true}
         zoomControl={false}
         attributionControl={false}
-        worldCopyJump={true}
-        minZoom={3}
         style={{ width: "100%", height: "100%" }}
       >
         <MapToolbar />
@@ -139,7 +145,10 @@ export class Map2D extends Component {
           latitudeExtractor={m => m.location[1]}
           intensityExtractor={m => m.value}
         />*/}
-        <TileLayer {...this.props.layer.settings} tileSize={512} />
+        <TileLayer {...this.props.layer.settings} />
+        {_.map(this.props.overlays, overlay => {
+          return overlay.active && <TileLayer {...overlay.settings} />;
+        })}
         {_.map(this.props.collections, (collection, cid) => {
           return (
             <CollectionLayer
@@ -174,6 +183,7 @@ function mapStateToProps(state, props) {
     collections: state.collection.collections,
     //collections: getVisibleCollections(state, props),
     heatmapPoints: getHeatmapPoints(state),
+    overlays: state.map.overlays,
     layer: state.map.layer,
     panels: state.panel,
     zoom: state.map.zoom

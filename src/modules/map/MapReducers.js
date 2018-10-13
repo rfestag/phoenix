@@ -40,13 +40,18 @@ const projections = [
     name: "Web Mercator",
     projection: "EPSG:3857",
     crs: L.CRS.EPSG3857,
-    settings: { center: [0, 0], minZoom: 0, maxZoom: 16 }
+    settings: { worldCopyJump: true, center: [0, 0], minZoom: 1, maxZoom: 16 }
   },
   {
     name: "Arctic LAEA on 10°E",
     projection: "ESPG:3575",
     crs: polar,
-    settings: { center: [87, 87], minZoom: 2, maxZoom: 16 }
+    settings: {
+      worldCopyJump: false,
+      center: [87, 87],
+      minZoom: 1,
+      maxZoom: 16
+    }
   }
 ];
 let baseLayers = [
@@ -54,6 +59,7 @@ let baseLayers = [
     name: "Night",
     projection: "EPSG:3857",
     type: "tile",
+    active: true,
     settings: {
       zoomOffset: -1,
       tileSize: 512,
@@ -65,6 +71,7 @@ let baseLayers = [
     name: "World Imagery",
     projection: "EPSG:3857",
     type: "tile",
+    active: false,
     settings: {
       tileSize: 512,
       url:
@@ -75,6 +82,7 @@ let baseLayers = [
     name: "Gray Canvas",
     projection: "EPSG:3857",
     type: "tile",
+    active: false,
     settings: {
       tileSize: 512,
       url:
@@ -82,19 +90,10 @@ let baseLayers = [
     }
   },
   {
-    name: "Earth at Night",
-    projection: "EPSG:3857",
-    type: "tile",
-    settings: {
-      tileSize: 512,
-      url:
-        "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}"
-    }
-  },
-  {
     name: "Open Street Map",
     projection: "EPSG:3857",
     type: "tile",
+    active: false,
     settings: {
       maxZoom: 19,
       tileSize: 512,
@@ -105,8 +104,10 @@ let baseLayers = [
     name: "Polar",
     projection: "ESPG:3575",
     type: "tile",
+    active: false,
     settings: {
       tileSize: 512,
+      maxZoom: 16,
       url: "https://tile.gbif.org/3575/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic".replace(
         "{r}",
         pixel_ratio
@@ -114,7 +115,69 @@ let baseLayers = [
     }
   }
 ];
-let overlays = [];
+
+let overlays = [
+  {
+    name: "Open Weather Map - Clouds",
+    projection: "EPSG:3857",
+    type: "tile",
+    active: false,
+    settings: {
+      apiKey: "586a2c891fc0b7bed36e2b2425199e21",
+      opacity: 0.5,
+      url:
+        "https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid={apiKey}"
+    }
+  },
+  {
+    name: "Open Weather Map - Precipitation",
+    projection: "EPSG:3857",
+    type: "tile",
+    active: false,
+    settings: {
+      apiKey: "586a2c891fc0b7bed36e2b2425199e21",
+      opacity: 0.5,
+      url:
+        "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid={apiKey}"
+    }
+  },
+  {
+    name: "Open Weather Map - Pressure",
+    projection: "EPSG:3857",
+    type: "tile",
+    active: false,
+    settings: {
+      apiKey: "586a2c891fc0b7bed36e2b2425199e21",
+      opacity: 0.5,
+      url:
+        "https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid={apiKey}"
+    }
+  },
+  {
+    name: "Open Weather Map - Temperature",
+    projection: "EPSG:3857",
+    type: "tile",
+    active: false,
+    settings: {
+      apiKey: "586a2c891fc0b7bed36e2b2425199e21",
+      opacity: 0.5,
+      url:
+        "https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid={apiKey}"
+    }
+  },
+  {
+    name: "Open Weather Map - Wind",
+    projection: "EPSG:3857",
+    type: "tile",
+    active: false,
+    settings: {
+      apiKey: "586a2c891fc0b7bed36e2b2425199e21",
+      opacity: 0.5,
+      url:
+        "https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid={apiKey}"
+    }
+  }
+];
 
 const initialState = {
   baseLayers,
@@ -123,21 +186,57 @@ const initialState = {
   layer: baseLayers[0],
   overlays,
   projections,
-  zoom: 5
+  zoom: 3
 };
+function updateLayer(layers, layer, update) {
+  let idx = layers.indexOf(layer);
+  if (idx) {
+    layers[idx] = { ...layer, ...update };
+  }
+  return layers;
+}
+function setActiveBaselayer(layers, layer) {
+  let oldIndex = layers.findIndex(l => l.active);
+  let newIndex = layers.findIndex(l => l === layer);
+  console.log(oldIndex, newIndex);
+  if (oldIndex < 0 || newIndex < 0) return layers;
+  layers = [...layers];
+  layers[oldIndex] = { ...layers[oldIndex], active: false };
+  layers[newIndex] = { ...layers[newIndex], active: true };
+  return layers;
+}
+function setActiveOverlays(layers, layer, active) {
+  let idx = layers.findIndex(l => l === layer);
+  if (idx < 0) return layers;
+  layer = { ...layer, active };
+  layers[idx] = layer;
+  return layers;
+}
 export default function(state = initialState, action) {
   /* TODO: Implement above actions */
   let idx = -1;
+  let baseLayers;
+  let overlays;
   switch (action.type) {
     case SET_PROJECTION:
       return { ...state, crs: action.projection };
     case SET_BASELAYER:
+      if (action.layer === state.layer) return state; //No change
       if (state.crs.projection === action.layer.projection) {
-        return { ...state, layer: action.layer };
+        baseLayers = setActiveBaselayer(state.baseLayers, action.layer);
+        if (baseLayers === state.baseLayers) return state; //No change
+        console.log("New base layers", baseLayers);
+        return { ...state, baseLayers, layer: action.layer };
       } else {
-        let projection = state.projections.find(p => p === action.projection);
+        let projection = state.projections.find(
+          p => p.projection === action.layer.projection
+        );
+        baseLayers = setActiveBaselayer(state.baseLayers, action.layer);
+        if (baseLayers === state.baseLayers) return state; //No change
+        console.log("New base layers", baseLayers, projection);
         return {
           ...state,
+          baseLayers,
           center: projection.settings.center,
           layer: action.layer,
           crs: projection
@@ -169,9 +268,11 @@ export default function(state = initialState, action) {
         };
       return state;
     case SHOW_OVERLAY:
-      return state;
+      overlays = [...setActiveOverlays(state.overlays, action.layer, true)];
+      return { ...state, overlays };
     case HIDE_OVERLAY:
-      return state;
+      overlays = [...setActiveOverlays(state.overlays, action.layer, false)];
+      return { ...state, overlays };
     default:
       return state;
   }

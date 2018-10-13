@@ -7,7 +7,18 @@ import {
   DropdownItem
 } from "reactstrap";
 
-const TabMenu = ({ children, active }) => (
+const defaultHandler = (action, item) => () => {
+  console.log(action, item);
+};
+const TabMenu = ({
+  children,
+  active,
+  item,
+  onManage = defaultHandler,
+  onPause = defaultHandler,
+  onCancel = defaultHandler,
+  onDelete = defaultHandler
+}) => (
   <Dropdown>
     {children}
     <DropdownToggle
@@ -16,18 +27,29 @@ const TabMenu = ({ children, active }) => (
       caret
     />
     <DropdownMenu right>
-      <DropdownItem>Manage...</DropdownItem>
+      <DropdownItem onClick={defaultHandler("manage", item)}>
+        Manage...
+      </DropdownItem>
       <DropdownItem divider />
-      <DropdownItem>Pause</DropdownItem>
-      <DropdownItem>Cancel</DropdownItem>
-      <DropdownItem>Delete</DropdownItem>
+      <DropdownItem onClick={defaultHandler("pause", item)}>Pause</DropdownItem>
+      <DropdownItem onClick={defaultHandler("cancel", item)}>
+        Cancel
+      </DropdownItem>
+      <DropdownItem onClick={defaultHandler("delete", item)}>
+        Delete
+      </DropdownItem>
     </DropdownMenu>
   </Dropdown>
 );
 
 TabMenu.propTypes = {
   active: PropTypes.bool,
-  children: PropTypes.any
+  item: PropTypes.any,
+  children: PropTypes.any,
+  onManage: PropTypes.func,
+  onPause: PropTypes.func,
+  onCancel: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export default TabMenu;

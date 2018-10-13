@@ -2,6 +2,7 @@
 $button-inactive-color: #545d62;
 $button-hover-color: #b6c0c3;
 $accent-color: orange;
+$accent-faded: rgba(orange, 0.5);
 $menu-bar-bg: #13191c;
 $banner-bg: #29353b;
 $split-bg:#13191c;
@@ -22,6 +23,8 @@ $input-bg: #29353b;
 $input-color: #bcc6c9;
 $close-color: #bcc6c9;
 $list-group-bg: #0f1416;
+$list-group-hover-bg: rgba(#29353b, 0.25); 
+$list-group-action-color: #bcc6c9;
 $yiq-text-light: #bcc6c9;
 $enable-rounded: false;
 $enable-shadows: false;
