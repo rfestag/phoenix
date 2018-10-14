@@ -55,21 +55,34 @@ function polarBounds(bounds, map) {
   let maxlat = Math.max(tr.lat, br.lat, tl.lat, bl.lat);
   let minlng = Math.min(tr.lng, br.lng, tl.lng, bl.lng);
   let maxlng = Math.max(tr.lng, br.lng, tl.lng, bl.lng);
-  if ((minlng < 0 && maxlng < 0) || (minlng > 0 && maxlng > 0)) {
+  //All left, all right, or all south
+  if ((minlng < 0 && maxlng < 0) || (minlng > 0 && maxlng > 0) || tr.lng < 90) {
     bounds = {
       _northEast: { lat: maxlat, lng: maxlng },
       _southWest: { lat: minlat, lng: minlng }
     };
     return [[bounds, 0]];
   } else {
-    left = {
-      _northEast: { lat: 90, lng: 0 },
-      _southWest: { lat: minlat, lng: -180 }
-    };
-    right = {
-      _northEast: { lat: 90, lng: 180 },
-      _southWest: { lat: minlat, lng: 0 }
-    };
+    //Todo: Handle all-north differently
+    if (br.lng < -90) {
+      left = {
+        _northEast: { lat: 90, lng: bl.lng },
+        _southWest: { lat: minlat, lng: tr.lng }
+      };
+      right = {
+        _northEast: { lat: 90, lng: tr.lng },
+        _southWest: { lat: minlat, lng: bl.lng }
+      };
+    } else {
+      left = {
+        _northEast: { lat: 90, lng: 0 },
+        _southWest: { lat: minlat, lng: -180 }
+      };
+      right = {
+        _northEast: { lat: 90, lng: 180 },
+        _southWest: { lat: minlat, lng: 0 }
+      };
+    }
     return [[left, 0], [right, 0]];
   }
 }
