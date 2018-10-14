@@ -25,7 +25,60 @@ function touchBounds(geom, bounds) {
   if (bbox[3] < bounds._southWest.lat) return false; // box is south of tile
   return true; // boxes overlap
 }
-function getBoundsAndTransforms(bounds) {
+function polarBounds(bounds, map) {
+  let tr = bounds._northEast;
+  let bl = bounds._southWest;
+  let left, right, tl, br;
+  //When we have a map, use actual pixel locations of corners to get unknown parts of bounds
+  if (map) {
+    let pbounds = map.getPixelBounds();
+    //Errors should only occur when point is way out the projection. So
+    //We can set the lat to the minimum, and average the longitudes of the known
+    //corners
+    try {
+      tl = map.unproject([pbounds.min.x, pbounds.min.y]);
+    } catch (e) {
+      tl = { lat: 45, lng: (tr.lng + bl.lng) / 2 };
+    }
+    try {
+      br = map.unproject([pbounds.max.x, pbounds.max.y]);
+    } catch (e) {
+      br = { lat: 45, lng: (tr.lng + bl.lng) / 2 };
+    }
+  }
+  //When we don't, just transform the box given to us. Not ideal, but no way around it.
+  else {
+    tl = { lat: tr.lat, lng: bl.lng };
+    br = { lat: bl.lat, lng: tr.lng };
+  }
+  let minlat = Math.min(tr.lat, br.lat, tl.lat, bl.lat);
+  let maxlat = Math.max(tr.lat, br.lat, tl.lat, bl.lat);
+  let minlng = Math.min(tr.lng, br.lng, tl.lng, bl.lng);
+  let maxlng = Math.max(tr.lng, br.lng, tl.lng, bl.lng);
+  if ((minlng < 0 && maxlng < 0) || (minlng > 0 && maxlng > 0)) {
+    bounds = {
+      _northEast: { lat: maxlat, lng: maxlng },
+      _southWest: { lat: minlat, lng: minlng }
+    };
+    return [[bounds, 0]];
+  } else {
+    left = {
+      _northEast: { lat: 90, lng: 0 },
+      _southWest: { lat: minlat, lng: -180 }
+    };
+    right = {
+      _northEast: { lat: 90, lng: 180 },
+      _southWest: { lat: minlat, lng: 0 }
+    };
+    return [[left, 0], [right, 0]];
+  }
+}
+function getBoundsAndTransforms(bounds, map, boundsFromMap = true) {
+  if (map.options.crs.code === "EPSG:3575") {
+    const test = polarBounds(bounds, boundsFromMap ? map : undefined);
+    return test;
+  }
+
   let west, east;
   if (bounds._northEast.lng > 180) {
     if (bounds._southWest.lng > 180) {
@@ -187,7 +240,7 @@ export const CollectionLayer = Layer.extend({
           _southWest: { lng: -180, lat: 45 }
         };
       }
-      this._allBounds = getBoundsAndTransforms(mapBounds);
+      this._allBounds = getBoundsAndTransforms(mapBounds, map);
       var p = this.options.padding,
         msize = this._map.getSize(),
         min = this._map
@@ -476,7 +529,7 @@ export const CollectionLayer = Layer.extend({
       };
       */
       const clickBounds = { _northEast: ne, _southWest: sw };
-      const allBounds = getBoundsAndTransforms(clickBounds);
+      const allBounds = getBoundsAndTransforms(clickBounds, map, false);
       const allBoxes = allBounds.map(bt => {
         const [bounds, transform] = bt;
         return [

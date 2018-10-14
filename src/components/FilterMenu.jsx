@@ -10,7 +10,7 @@ import {
 const FilterMenu = () => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>Filter</DropdownToggle>
-    <DropdownMenu left={true}>
+    <DropdownMenu>
       <DropdownItem>Something</DropdownItem>
       <DropdownItem>Another</DropdownItem>
       <DropdownItem divider />

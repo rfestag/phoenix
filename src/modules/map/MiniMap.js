@@ -24,11 +24,11 @@ class MiniMap extends Component {
 
   static propTypes = {
     active: PropTypes.bool,
-    crs: PropTypes.object,
-    center: PropTypes.array,
-    zoom: PropTypes.zoom,
+    projection: PropTypes.object,
+    center: PropTypes.any,
+    zoom: PropTypes.number,
     bounds: PropTypes.object,
-    children: PropTypes.array,
+    children: PropTypes.any,
     minZoom: PropTypes.number
   };
 
@@ -55,7 +55,7 @@ class MiniMap extends Component {
   render() {
     const {
       active,
-      crs,
+      projection,
       center,
       zoom,
       bounds,
@@ -66,7 +66,7 @@ class MiniMap extends Component {
       <Wrapper active={active}>
         <Map
           ref={this.map}
-          crs={crs}
+          crs={projection.crs}
           zoomControl={false}
           attributionControl={false}
           center={center}

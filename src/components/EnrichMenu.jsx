@@ -10,7 +10,7 @@ import {
 const EnrichMenu = () => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>Enrich</DropdownToggle>
-    <DropdownMenu left={true}>
+    <DropdownMenu>
       <DropdownItem>Something</DropdownItem>
       <DropdownItem>Another</DropdownItem>
       <DropdownItem divider />

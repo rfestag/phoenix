@@ -10,7 +10,7 @@ import {
 const LayoutMenu = () => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>Layout</DropdownToggle>
-    <DropdownMenu left={true}>
+    <DropdownMenu>
       <DropdownItem>Something</DropdownItem>
       <DropdownItem>Another</DropdownItem>
       <DropdownItem divider />

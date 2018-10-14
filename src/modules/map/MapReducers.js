@@ -40,7 +40,7 @@ const projections = [
     name: "Web Mercator",
     projection: "EPSG:3857",
     crs: L.CRS.EPSG3857,
-    settings: { worldCopyJump: true, center: [0, 0], minZoom: 1, maxZoom: 16 }
+    settings: { worldCopyJump: true, center: [0, 0], minZoom: 2, maxZoom: 16 }
   },
   {
     name: "Arctic LAEA on 10°E",
@@ -49,7 +49,7 @@ const projections = [
     settings: {
       worldCopyJump: false,
       center: [87, 87],
-      minZoom: 1,
+      minZoom: 2,
       maxZoom: 16
     }
   }
@@ -73,6 +73,7 @@ let baseLayers = [
     type: "tile",
     active: false,
     settings: {
+      zoomOffset: -1,
       tileSize: 512,
       url:
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -84,6 +85,7 @@ let baseLayers = [
     type: "tile",
     active: false,
     settings: {
+      zoomOffset: -1,
       tileSize: 512,
       url:
         "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
@@ -95,7 +97,7 @@ let baseLayers = [
     type: "tile",
     active: false,
     settings: {
-      maxZoom: 19,
+      zoomOffset: -1,
       tileSize: 512,
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     }
@@ -106,8 +108,8 @@ let baseLayers = [
     type: "tile",
     active: false,
     settings: {
+      zoomOffset: 0,
       tileSize: 512,
-      maxZoom: 16,
       url: "https://tile.gbif.org/3575/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic".replace(
         "{r}",
         pixel_ratio

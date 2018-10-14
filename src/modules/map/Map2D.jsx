@@ -77,12 +77,14 @@ export class Map2D extends Component {
   componentDidMount() {
     const map = this.map.current && this.map.current.leafletElement;
     const self = this;
+    console.log("MOUNTING MAP");
     if (map) {
       map.invalidateSize();
       map.on("zoomend", function() {
         try {
           self.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
         } catch (e) {
+          console.log("Sad panda zoom");
           //Do nothing. This can happen in polar projections when you pan too far out
         }
       });
@@ -90,6 +92,7 @@ export class Map2D extends Component {
         try {
           self.setState({ center: map.getCenter(), bounds: map.getBounds() });
         } catch (e) {
+          console.log("Sad panda move");
           //Do nothing. This can happen in polar projections when you pan too far out
         }
       });
@@ -104,6 +107,10 @@ export class Map2D extends Component {
     if (this.props !== prevProps) {
       this.resize();
     }
+    if (this.props.crs !== prevProps.crs) {
+      console.log("Should bind map events");
+      this.componentDidMount();
+    }
   }
   resize() {
     const map = this.map.current.leafletElement;
@@ -117,6 +124,9 @@ export class Map2D extends Component {
   toggleMiniMap = () => {
     this.setState({ miniMapActive: !this.state.miniMapActive });
   };
+  mapMounted = () => {
+    console.log("Map mounted");
+  };
   featureChanged = feature => {
     console.log("Feature changed!", feature);
   };
@@ -129,6 +139,7 @@ export class Map2D extends Component {
         crs={this.props.crs.crs}
         center={this.props.center}
         {...this.props.crs.settings}
+        onLoad={this.mapMounted}
         zoom={this.props.zoom}
         zoomControl={false}
         attributionControl={false}
@@ -160,7 +171,8 @@ export class Map2D extends Component {
           );
         })}
         <MiniMap
-          crs={this.props.crs.crs}
+          key={this.props.crs.name}
+          projection={this.props.crs}
           worldCopyJump={true}
           center={this.state.center}
           zoom={this.state.zoom}
