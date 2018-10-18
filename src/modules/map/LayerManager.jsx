@@ -35,7 +35,28 @@ const LayerItem = ({ layer, crs }) => (
         action
       >
         <RevealVisibility visible={layer.active} />
-        <h4 style={{ display: "inline", marginLeft: 6 }}>{layer.name}</h4>
+        <div
+          style={{
+            width: 42,
+            height: 42,
+            display: "inline-block",
+            border: "1px solid gray"
+          }}
+        >
+          <img style={{ width: "100%", height: "100%" }} />
+        </div>
+        <h4
+          style={{
+            display: "inline-block",
+            marginLeft: 6,
+            position: "absolute",
+            top: 12,
+            overflow: "hidden",
+            whiteSpace: "nowrap"
+          }}
+        >
+          {layer.name}
+        </h4>
         <RevealButtonGroup style={{ float: "right" }}>
           <RevealButton>A</RevealButton>
           <RevealButton>B</RevealButton>
