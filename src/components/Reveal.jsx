@@ -1,33 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ButtonGroup } from "reactstrap";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-library.add(faEye, faEyeSlash);
-
-const UnstyledVisibility = ({ visible }) => (
-  <FontAwesomeIcon icon={visible ? "eye" : "eye-slash"} />
-);
+const UnstyledVisibility = ({ visible }) =>
+  visible ? <FaEye /> : <FaEyeSlash />;
 UnstyledVisibility.propTypes = {
   visible: PropTypes.bool
 };
 
+export const RevealContainer = styled.div`
+  height: 100%;
+`;
 const RevealVisibilityElement = styled(UnstyledVisibility)`
   visibility: ${props => (props.visible ? "visible" : "hidden")};
   ${RevealContainer}:hover & {
     visibility: visible;
   }
-`;
-const RevealButtonElement = styled(Button)`
-  ${RevealContainer}:hover & {
-    visibility: visible;
-  }
-`;
-export const RevealContainer = styled.div`
-  height: 100%;
 `;
 
 const Reveal = styled.div`

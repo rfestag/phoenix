@@ -1,24 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import styled from "styled-components";
 import { Button, ButtonGroup } from "reactstrap";
 import { connect } from "react-redux";
-import styled from "styled-components";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faGlobeAmericas,
-  faLayerGroup,
-  faMap,
-  faPlus,
-  faMinus
-} from "@fortawesome/free-solid-svg-icons";
+import { MdLayers, MdPictureInPictureAlt } from "react-icons/md";
+import { FaGlobeAmericas, FaPlus, FaMinus } from "react-icons/fa";
 import {
   RIGHT_PANEL,
   LAYER_PANE,
   toggleLayerPane
 } from "../panel/PanelActions";
-
-library.add(faGlobeAmericas, faLayerGroup, faMap, faPlus, faMinus);
 
 const Wrapper = styled.div`
   display: flex;
@@ -71,18 +62,18 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleLayerManager}
       >
-        <FontAwesomeIcon icon="layer-group" />
+        <MdLayers />
       </RightArrowActiveButton>
     </ToolGroup>
     <ToolGroup vertical>
       <Button color="map-control" size="sm">
-        <FontAwesomeIcon icon="globe-americas" />
+        <FaGlobeAmericas />
       </Button>
       <Button color="map-control" size="sm">
-        <FontAwesomeIcon icon="plus" />
+        <FaPlus />
       </Button>
       <Button color="map-control" size="sm">
-        <FontAwesomeIcon icon="minus" />
+        <FaMinus />
       </Button>
     </ToolGroup>
     <ToolGroup vertical>
@@ -92,7 +83,7 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleMiniMap}
       >
-        <FontAwesomeIcon icon="map" />
+        <MdPictureInPictureAlt />
       </LeftArrowActiveButton>
     </ToolGroup>
   </Wrapper>

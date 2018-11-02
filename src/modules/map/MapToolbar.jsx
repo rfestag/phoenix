@@ -1,32 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faDrawPolygon,
-  faVectorSquare,
-  faObjectGroup,
-  faObjectUngroup,
-  faCircle,
-  faSquare,
-  faRuler,
-  faCrosshairs,
-  faFont
-} from "@fortawesome/free-solid-svg-icons";
+  FaDrawPolygon,
+  FaObjectGroup,
+  FaObjectUngroup,
+  FaCircle,
+  FaSquare,
+  FaRuler,
+  FaCrosshairs,
+  FaFont
+} from "react-icons/fa";
 import { Input, Button, ButtonGroup } from "reactstrap";
-
-library.add(
-  faDrawPolygon,
-  faVectorSquare,
-  faObjectGroup,
-  faObjectUngroup,
-  faCircle,
-  faSquare,
-  faRuler,
-  faCrosshairs,
-  faFont
-);
 
 const Wrapper = styled.div`
   width: 100%;
@@ -54,28 +39,28 @@ const MapToolbar = ({ children }) => (
     <Filler />
     <ButtonGroup>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="square" />
+        <FaSquare />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="circle" />
+        <FaCircle />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="draw-polygon" />
+        <FaDrawPolygon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="font" />
+        <FaFont />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="object-group" />
+        <FaObjectGroup />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="object-ungroup" />
+        <FaObjectUngroup />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="ruler" />
+        <FaRuler />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FontAwesomeIcon icon="crosshairs" />
+        <FaCrosshairs />
       </ToolbarButton>
     </ButtonGroup>
     <AOISearch placeholder="Search areas of interest" />

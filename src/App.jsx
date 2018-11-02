@@ -1,18 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faSearch,
-  faColumns,
-  faFilter,
-  faTable,
-  faUser,
-  faTimes,
-  faPause,
-  faPlay,
-  faChevronLeft,
-  faChevronRight
-} from "@fortawesome/free-solid-svg-icons";
+import { FaSearch, FaFilter, FaTable, FaUser } from "react-icons/fa";
 import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
@@ -34,19 +22,6 @@ import LeftMenu from "./components/LeftMenu";
 import LeftMenuBarButton from "./components/LeftMenuBarButton";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
-
-library.add(
-  faSearch,
-  faColumns,
-  faFilter,
-  faTable,
-  faUser,
-  faTimes,
-  faPause,
-  faPlay,
-  faChevronLeft,
-  faChevronRight
-);
 
 const Outer = styled.div`
   display: flex;
@@ -112,28 +87,34 @@ class App extends Component {
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "QUERY"}
                   onClick={() => this.props.toggleQueryPane()}
-                  icon="search"
-                />
+                >
+                  <FaSearch />
+                </LeftMenuBarButton>
               </NavItem>
               <NavItem style={{ width: "100%" }}>
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "ENTITY"}
                   onClick={() => this.props.toggleEntityPane()}
                   icon="user"
-                />
+                >
+                  <FaUser />
+                </LeftMenuBarButton>
               </NavItem>
               <NavItem>
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "FILTER"}
                   onClick={() => this.props.toggleFilterPane()}
-                  icon="filter"
-                />
+                >
+                  <FaFilter />
+                </LeftMenuBarButton>
               </NavItem>
               <NavItem>
                 <LeftMenuBarButton
+                  active={this.props.panel.BOTTOM === "GRID"}
                   onClick={() => this.props.toggleGridPane()}
-                  icon="table"
-                />
+                >
+                  <FaTable />
+                </LeftMenuBarButton>
               </NavItem>
             </Nav>
           </LeftMenu>

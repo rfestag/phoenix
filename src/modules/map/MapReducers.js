@@ -190,13 +190,6 @@ const initialState = {
   projections,
   zoom: 3
 };
-function updateLayer(layers, layer, update) {
-  let idx = layers.indexOf(layer);
-  if (idx) {
-    layers[idx] = { ...layer, ...update };
-  }
-  return layers;
-}
 function setActiveBaselayer(layers, layer) {
   let oldIndex = layers.findIndex(l => l.active);
   let newIndex = layers.findIndex(l => l === layer);

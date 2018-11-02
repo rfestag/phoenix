@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { setBaselayer, showOverlay, hideOverlay } from "./MapActions";
 import { AutoSizer, List } from "react-virtualized";
-import { Collapse, ListGroup, ListGroupItem, Media } from "reactstrap";
+import { Collapse, ListGroup, ListGroupItem } from "reactstrap";
 import {
   CollapseHeader,
   SwitchableCollapse
@@ -13,11 +13,9 @@ import {
 import {
   RevealVisibility,
   RevealContainer,
-  Reveal,
   RevealButtonGroup,
   RevealButton
 } from "../../components/Reveal";
-import { Map, TileLayer } from "react-leaflet";
 
 const LayerItemWrapper = styled.div`
   height: 58px;

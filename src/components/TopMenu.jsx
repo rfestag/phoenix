@@ -8,11 +8,7 @@ import SettingsMenu from "./SettingsMenu";
 import AdminMenu from "./AdminMenu";
 import HelpMenu from "./HelpMenu";
 import { ButtonGroup } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhoenixSquadron } from "@fortawesome/free-brands-svg-icons";
-import { library } from "@fortawesome/fontawesome-svg-core";
-
-library.add(faPhoenixSquadron);
+import { FaPhoenixSquadron } from "react-icons/fa";
 
 const Wrapper = styled.div`
   background-color: ${props => props.theme.menuBarBg};
@@ -23,17 +19,13 @@ const Wrapper = styled.div`
 const Spacer = styled.div`
   flex: 1;
 `;
-const Brand = styled(FontAwesomeIcon)`
+const Brand = styled(FaPhoenixSquadron)`
   color: ${props => props.theme.accentColor};
 `;
 
 const TopMenu = () => (
   <Wrapper>
-    <Brand
-      icon={["fab", "phoenix-squadron"]}
-      size="2x"
-      className="icon-brand"
-    />
+    <Brand size={28} className="icon-brand" />
     <ButtonGroup>
       <EnrichMenu />
       <FilterMenu />
