@@ -113,6 +113,7 @@ export class LayerList extends Component {
         style={{
           //flex: 0
           display: "flex",
+          overflow: "hidden",
           //flex: '0 1',
           flex: this.props.open ? 1 : 0,
           minHeight: 43,
@@ -127,7 +128,7 @@ export class LayerList extends Component {
         </CollapseHeader>
         <Collapse
           isOpen={this.props.open}
-          style={{ flex: this.props.open ? 1 : 0 }}
+          style={{ overflow: "hidden", flex: this.props.open ? 1 : 0 }}
         >
           <ListGroup style={{ height: "100%" }}>
             <AutoSizer tyle={{ height: "100%" }}>

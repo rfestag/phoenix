@@ -4,12 +4,13 @@ import styled from "styled-components";
 import { Button, ButtonGroup } from "reactstrap";
 import { connect } from "react-redux";
 import { MdLayers, MdPictureInPictureAlt } from "react-icons/md";
-import { FaGlobeAmericas, FaPlus, FaMinus } from "react-icons/fa";
+import { FaPlus, FaMinus } from "react-icons/fa";
 import {
   RIGHT_PANEL,
   LAYER_PANE,
   toggleLayerPane
 } from "../panel/PanelActions";
+import { ZoomToMenu } from "../../components/ZoomToMenu";
 
 const Wrapper = styled.div`
   display: flex;
@@ -66,9 +67,7 @@ export const ViewControl = ({
       </RightArrowActiveButton>
     </ToolGroup>
     <ToolGroup vertical>
-      <Button color="map-control" size="sm">
-        <FaGlobeAmericas />
-      </Button>
+      <ZoomToMenu />
       <Button color="map-control" size="sm">
         <FaPlus />
       </Button>
