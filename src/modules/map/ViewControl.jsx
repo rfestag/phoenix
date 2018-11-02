@@ -63,7 +63,7 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleLayerManager}
       >
-        <MdLayers />
+        <MdLayers size="1.25em" />
       </RightArrowActiveButton>
     </ToolGroup>
     <ToolGroup vertical>
@@ -82,7 +82,7 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleMiniMap}
       >
-        <MdPictureInPictureAlt />
+        <MdPictureInPictureAlt size="1.25em" />
       </LeftArrowActiveButton>
     </ToolGroup>
   </Wrapper>

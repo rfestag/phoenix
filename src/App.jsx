@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { FaSearch, FaFilter, FaTable, FaUser } from "react-icons/fa";
+import { FaSearch, FaFilter, FaTh } from "react-icons/fa";
+import { MdHourglassEmpty, MdList } from "react-icons/md";
 import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
@@ -82,8 +83,8 @@ class App extends Component {
         <TopMenu />
         <Main>
           <LeftMenu>
-            <Nav tabs>
-              <NavItem style={{ width: "100%" }}>
+            <Nav tabs style={{ position: "absolute", top: 0 }}>
+              <NavItem>
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "QUERY"}
                   onClick={() => this.props.toggleQueryPane()}
@@ -91,13 +92,13 @@ class App extends Component {
                   <FaSearch />
                 </LeftMenuBarButton>
               </NavItem>
-              <NavItem style={{ width: "100%" }}>
+              <NavItem>
                 <LeftMenuBarButton
                   active={this.props.panel.LEFT === "ENTITY"}
                   onClick={() => this.props.toggleEntityPane()}
                   icon="user"
                 >
-                  <FaUser />
+                  <MdList size="1.5em" />
                 </LeftMenuBarButton>
               </NavItem>
               <NavItem>
@@ -108,12 +109,22 @@ class App extends Component {
                   <FaFilter />
                 </LeftMenuBarButton>
               </NavItem>
+            </Nav>
+            <Nav tabs style={{ position: "absolute", bottom: 0 }}>
               <NavItem>
                 <LeftMenuBarButton
                   active={this.props.panel.BOTTOM === "GRID"}
                   onClick={() => this.props.toggleGridPane()}
                 >
-                  <FaTable />
+                  <MdHourglassEmpty size="1.5em" />
+                </LeftMenuBarButton>
+              </NavItem>
+              <NavItem>
+                <LeftMenuBarButton
+                  active={this.props.panel.BOTTOM === "GRID"}
+                  onClick={() => this.props.toggleGridPane()}
+                >
+                  <FaTh />
                 </LeftMenuBarButton>
               </NavItem>
             </Nav>
