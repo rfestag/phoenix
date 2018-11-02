@@ -6,6 +6,7 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from "react-reflex";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Map2D from "./modules/map/Map2D";
 import CollectionGridTabs from "./components/CollectionGridTabs";
+import SettingsModal from "./modules/settings/SettingsModal";
 import {
   toggleQueryPane,
   toggleEntityPane,
@@ -79,6 +80,7 @@ class App extends Component {
   render() {
     return (
       <Outer>
+        <SettingsModal />
         <Banner>Phoenix GIS</Banner>
         <TopMenu />
         <Main>

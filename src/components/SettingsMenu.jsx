@@ -1,4 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { toggleSettingsModal } from "../modules/modal/ModalActions";
 import {
   UncontrolledButtonDropdown as Dropdown,
   DropdownToggle,
@@ -6,16 +9,33 @@ import {
   DropdownItem
 } from "reactstrap";
 
-const SettingsMenu = () => (
+function mapDispatchToProps(dispatch) {
+  return {
+    toggleMapSettingsModal: () => dispatch(toggleSettingsModal("map")),
+    toggleGeneralSettingsModal: () => dispatch(toggleSettingsModal("general"))
+  };
+}
+
+const SettingsMenu = ({
+  toggleMapSettingsModal,
+  toggleGeneralSettingsModal
+}) => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret style={{ boxShadow: "none !important" }}>
       Settings
     </DropdownToggle>
     <DropdownMenu right={true} style={{ top: -5 }}>
-      <DropdownItem>Map Settings</DropdownItem>
-      <DropdownItem>General Settings</DropdownItem>
+      <DropdownItem onClick={toggleMapSettingsModal}>Map Settings</DropdownItem>
+      <DropdownItem onClick={toggleGeneralSettingsModal}>
+        General Settings
+      </DropdownItem>
     </DropdownMenu>
   </Dropdown>
 );
 
-export default SettingsMenu;
+SettingsMenu.propTypes = {
+  toggleMapSettingsModal: PropTypes.func.isRequired,
+  toggleGeneralSettingsModal: PropTypes.func.isRequired
+};
+
+export default connect(null, mapDispatchToProps)(SettingsMenu);

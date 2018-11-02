@@ -7,6 +7,8 @@ import { ageOffEpic } from "../modules/collection/CollectionEpics";
 import map from "../modules/map/MapReducers";
 import panel from "../modules/panel/PanelReducers";
 import metrics from "../modules/metrics/MetricsReducers";
+import modal from "../modules/modal/ModalReducers";
+import settings from "../modules/settings/SettingsReducers";
 import query, { sharedWorkerProxyEpic } from "../modules/query/QueryReducers";
 import { timeActionsMiddleware } from "../modules/metrics/MetricsMiddleware";
 //import query, { queryEpic, sharedWorkerProxyEpic } from "../modules/query/QueryReducers";
@@ -17,8 +19,10 @@ const rootReducer = combineReducers({
   collection,
   map,
   metrics,
+  modal,
   panel,
-  query
+  query,
+  settings
 });
 
 const epicMiddleware = createEpicMiddleware();
