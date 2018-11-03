@@ -115,6 +115,7 @@ export class LayerList extends Component {
           display: "flex",
           overflow: "hidden",
           //flex: '0 1',
+          transition: "flex 0.5s ease-out",
           flex: this.props.open ? 1 : 0,
           minHeight: 43,
           flexDirection: "column"
