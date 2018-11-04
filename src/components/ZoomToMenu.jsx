@@ -26,7 +26,7 @@ const DropLeftIconButton = styled(DropdownToggle)`
 `;
 export const ZoomToMenu = () => (
   <Dropdown setActiveFromChild direction="left">
-    <DropLeftIconButton size="sm">
+    <DropLeftIconButton color="map-control" size="sm">
       <FaGlobeAmericas />
     </DropLeftIconButton>
     <DropdownMenu>

@@ -15,12 +15,19 @@ export default class LeftPanel extends Component {
 
   render() {
     return (
-      <TabContent activeTab={this.props.activePane} style={{ flex: "1" }}>
-        <TabPane tabId={QUERY_PANE}>
+      <TabContent
+        activeTab={this.props.activePane}
+        style={{ flex: "1", height: "100%" }}
+      >
+        <TabPane tabId={QUERY_PANE} style={{ height: "100%" }}>
           <QueryPanel />
         </TabPane>
-        <TabPane tabId={ENTITY_PANE}>TODO: Entity Panel</TabPane>
-        <TabPane tabId={FILTER_PANE}>TODO: Filter Panel</TabPane>
+        <TabPane tabId={ENTITY_PANE} style={{ height: "100%" }}>
+          TODO: Entity Panel
+        </TabPane>
+        <TabPane tabId={FILTER_PANE} style={{ height: "100%" }}>
+          TODO: Filter Panel
+        </TabPane>
       </TabContent>
     );
   }

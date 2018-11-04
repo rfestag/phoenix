@@ -1,6 +1,6 @@
 /* Dark theme main SASS/CSS. Loads all general styling not handled directly by components
 */
 @import "utils/all";       //Utils are functions, mixins, and helpers that can be used when defintning variables
-@import "themes/dark/all"; //Define theme specific-values and pull in theme-specific CSS from 3rd party libraries
+@import "themes/light/all"; //Define theme specific-values and pull in theme-specific CSS from 3rd party libraries
 @import "vendors/all";     //Pull in all generic 3rd-party SASS/CSS (not related to the theme
 @import "base/all";        //Pull in base CSS (this use should be limited)

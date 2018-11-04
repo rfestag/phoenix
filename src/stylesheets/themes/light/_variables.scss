@@ -1,18 +1,56 @@
 //My variables
-$body-bg: #0f1416;
-$body-color: #bcc6c9;
-//$text-color: #bcc6c9 !default;
-//$background-color: #0f1416 !default;
-$button-inactive-color: #545d62 !default;
-$button-hover-color: #b6c0c3 !default;
-$accent-color: orange !default;
+$button-inactive-color: #545d62;
+$button-hover-color: #b6c0c3;
+$accent-color: #3A70A6;
+$accent-faded: rgba(#3A70A6, 0.5);
+$menu-bar-bg: #E3E3E3;
+$banner-bg: #C3C3C3;
+$split-bg:#E3E3E3;
+$split-size: 8px;
+$split-border: #6c757d;
+$collapse-header-bg: #E3E3E3;
+$collapse-header-hover-bg: lighten(#E3E3E3, .5);
+$map-control-bg: rgba(#E3E3E3, .9);
+
+//AG-Grid variables
+$icons-path: "~ag-grid/src/styles/balham-icons/";
+$border-color: #424242; //This shouldn't be necessary, but somehow is. Beware of the generic name 
 
 //Bootstrap overrides
+$secondary: #E3E3E3;
+$body-bg: white;
+//$body-color: gray;
+//$input-bg: #29353b;
+//$input-color: #bcc6c9;
+//$close-color: #bcc6c9;
+//$list-group-bg: #0f1416;
+//$list-group-hover-bg: rgba(#29353b, 0.25); 
+//$list-group-action-color: #bcc6c9;
+//$yiq-text-light: #bcc6c9;
 $enable-rounded: false;
-//$component-active-color: orange;
+$enable-shadows: false;
+$component-active-bg: $accent-color;
+//$component-active-color: #13191c;
 //$secondary: #13191c;
-//$active: orange;
-//$nav-tabs-link-active-bg: orange;
+$active: $accent-color;
+$nav-tabs-link-active-color:  white;
+$nav-tabs-link-active-bg: $accent-color;
+$nav-tabs-link-hover-border-color: $accent-color;
+$nav-tabs-link-active-border-color: $accent-color;
+$nav-tabs-link-hover-color: $body-bg;
+//$dropdown-bg: $body-bg;
+//$dropdown-link-color: $body-color;
+//$dropdown-link-hover-bg: $accent-color;
+//$dropdown-link-hover-color: $body-bg;
+//$dropdown-link-active-bg: $body-bg;
+//$dropdown-link-active-color: $body-color;
+//$modal-content-bg: $body-bg;
+$dialog-title-bar-height: 48px;
+
+$theme-colors: (
+  "accent": $accent-color,
+  "map-control": $map-control-bg,
+);
 
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

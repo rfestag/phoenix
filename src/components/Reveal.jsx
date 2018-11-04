@@ -13,14 +13,14 @@ UnstyledVisibility.propTypes = {
 export const RevealContainer = styled.div`
   height: 100%;
 `;
-const RevealVisibilityElement = styled(UnstyledVisibility)`
+export const RevealVisibilityElement = styled(UnstyledVisibility)`
   visibility: ${props => (props.visible ? "visible" : "hidden")};
   ${RevealContainer}:hover & {
     visibility: visible;
   }
 `;
 
-const Reveal = styled.div`
+export const Reveal = styled.div`
   position: absolute;
   top: -3px;
   left: 0;

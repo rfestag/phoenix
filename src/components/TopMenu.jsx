@@ -21,6 +21,9 @@ const Spacer = styled.div`
 `;
 const Brand = styled(FaPhoenixSquadron)`
   color: ${props => props.theme.accentColor};
+  width: 36px;
+  height: 36px;
+  padding: 4px;
 `;
 
 const TopMenu = () => (
