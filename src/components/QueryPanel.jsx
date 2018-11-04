@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Button, InputGroup, Input } from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
-import Tree from "./Tree";
+import FilterableDropdownTree from "./FilterableDropdownTree";
 
 var RANDOM_WORDS = [
   "abstrusity",
@@ -137,12 +137,7 @@ export class QueryPanel extends React.Component {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <Button onClick={this.props.query}>Test</Button>
-        <InputGroup>
-          <Input placeholder="Filter" onChange={this.updateFilter} />
-        </InputGroup>
-        <div style={{ flex: 1 }}>
-          <Tree data={data} filter={this.state.filter} />
-        </div>
+        <FilterableDropdownTree data={data} />
       </div>
     );
   }
