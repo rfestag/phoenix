@@ -135,9 +135,11 @@ export class QueryPanel extends React.Component {
   };
   render() {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ width: "100%", height: "100%" }}>
         <Button onClick={this.props.query}>Test</Button>
-        <FilterableDropdownTree data={data} />
+        <div style={{ float: "right" }}>
+          <FilterableDropdownTree data={data} />
+        </div>
       </div>
     );
   }

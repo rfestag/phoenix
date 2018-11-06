@@ -57,6 +57,8 @@ class Tree extends React.Component {
 
     var onClick = event => {
       event.stopPropagation();
+      console.log("Clicked", event.target);
+      event.target.focus();
       if (hasChildren) {
         item.expanded = !item.expanded;
         if (item.expanded && this.props.onExpand) this.props.onExpand(item);
@@ -64,6 +66,19 @@ class Tree extends React.Component {
           this.props.onCollapse(item);
         this.refList.current.recomputeRowHeights();
         this.refList.current.forceUpdate();
+      }
+    };
+    var onKeyDown = event => {
+      //Note - we don't implement any special key navigation
+      //Browser should inherently do the following:
+      //1) Tab - Move to next element
+      //2) Shift+Tab - Move to prev element
+      //3) Space - Act like click (causes expand/contract)
+      //4) Enter - This is the only one we implement. Causes selection
+      const key = event.keyCode;
+      if (key === 13) {
+        setSubtreeSelection(item, !item.selected);
+        this.recompute();
       }
     };
     var handleSelectChange = event => {
@@ -86,9 +101,13 @@ class Tree extends React.Component {
     var shouldShow = hasChildren || this.filterItem(item);
 
     if (shouldShow) {
+      //Note - tabIndex is used here to ensure we can use keyboard naviagion.
+      //Without it, the div cannot be focused
       children.unshift(
         <div
+          tabIndex="0"
           onClick={onClick}
+          onKeyDown={onKeyDown}
           key="label"
           style={{
             paddingLeft: hasChildren ? 0 : 16,
@@ -122,17 +141,16 @@ class Tree extends React.Component {
     var renderedCell = this.renderItem(this.state.data[index], index);
 
     return (
-      <ul
+      <div
         key={key}
         style={{
           transitionProperty: "top",
           transitionDuration: "0.2s",
-          paddingLeft: 10,
           ...style
         }}
       >
         {renderedCell}
-      </ul>
+      </div>
     );
   };
   getExpandedItemCount = item => {

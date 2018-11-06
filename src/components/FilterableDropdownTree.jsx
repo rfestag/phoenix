@@ -9,9 +9,13 @@ import {
 } from "reactstrap";
 
 const FilterableDropdownTree = ({ data }) => (
-  <Dropdown setActiveFromChild>
+  <Dropdown setActiveFromChild style={{ width: "100%" }}>
     <DropdownToggle caret>Chose</DropdownToggle>
-    <DropdownMenu>
+    <DropdownMenu
+      left
+      modifiers={{ positionFixed: true, preventOverflow: { enabled: "false" } }}
+      style={{ width: 200 }}
+    >
       <div style={{ height: 200 }}>
         <FilterableTree data={data} />
       </div>

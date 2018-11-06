@@ -11,7 +11,6 @@ export default class FilterableTree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.inputRef = React.createRef();
   }
   componentDidMount() {}
   static propTypes = {
