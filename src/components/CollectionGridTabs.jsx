@@ -48,7 +48,7 @@ export class CollectionGridTabs extends React.Component {
   static propTypes = {
     collections: PropTypes.object.isRequired,
     activeTab: PropTypes.string,
-    columnPaneActive: PropTypes.string,
+    columnPaneActive: PropTypes.bool,
     onTabChange: PropTypes.func,
     onColumManagerClicked: PropTypes.func
   };

@@ -7,7 +7,7 @@ import { COLUMN_PANE, LAYER_PANE } from "../modules/panel/PanelActions";
 
 export default class RightPanel extends Component {
   static propTypes = {
-    activePane: PropTypes.object
+    activePane: PropTypes.string
   };
 
   render() {

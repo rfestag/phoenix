@@ -24,7 +24,7 @@ const StyledButton = styled.div`
   }
 `;
 
-const LeftMenuBarButton = ({ icon, active, onClick, children }) => (
+const LeftMenuBarButton = ({ active, onClick, children }) => (
   <StyledButton className={classnames({ active })} onClick={onClick}>
     <Button
       style={{
@@ -42,7 +42,6 @@ const LeftMenuBarButton = ({ icon, active, onClick, children }) => (
   </StyledButton>
 );
 LeftMenuBarButton.propTypes = {
-  icon: PropTypes.string.isRequired,
   active: PropTypes.bool,
   children: PropTypes.any,
   onClick: PropTypes.any

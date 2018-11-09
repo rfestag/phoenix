@@ -24,7 +24,7 @@ const SettingsMenu = ({
     <DropdownToggle caret style={{ boxShadow: "none !important" }}>
       Settings
     </DropdownToggle>
-    <DropdownMenu right={true} style={{ top: -5 }}>
+    <DropdownMenu right style={{ top: -5 }}>
       <DropdownItem onClick={toggleMapSettingsModal}>Map Settings</DropdownItem>
       <DropdownItem onClick={toggleGeneralSettingsModal}>
         General Settings

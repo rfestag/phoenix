@@ -4,7 +4,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
-import { Map, TileLayer, FeatureGroup } from "react-leaflet";
+import { Map, TileLayer } from "react-leaflet";
 //import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";

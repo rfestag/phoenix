@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Button, InputGroup, Input } from "reactstrap";
+import { Button } from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
 import FilterableDropdownTree from "./FilterableDropdownTree";
 

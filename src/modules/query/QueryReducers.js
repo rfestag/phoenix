@@ -61,6 +61,7 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
   port.start();
   return observable;
 };
+
 export const handleCreateQuery = (state, action) => {
   console.log("CREATE QUERY", action);
   return {
@@ -68,6 +69,8 @@ export const handleCreateQuery = (state, action) => {
     [action.id]: {
       paused: false,
       done: false,
+      id: action.id,
+      name: action.name,
       source: action.source,
       query: action.query
     }

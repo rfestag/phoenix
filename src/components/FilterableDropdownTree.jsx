@@ -4,15 +4,13 @@ import FilterableTree from "./FilterableTree";
 import {
   UncontrolledButtonDropdown as Dropdown,
   DropdownToggle,
-  DropdownMenu,
-  DropdownItem
+  DropdownMenu
 } from "reactstrap";
 
 const FilterableDropdownTree = ({ data }) => (
   <Dropdown setActiveFromChild style={{ width: "100%" }}>
     <DropdownToggle caret>Chose</DropdownToggle>
     <DropdownMenu
-      left
       modifiers={{ positionFixed: true, preventOverflow: { enabled: "false" } }}
       style={{ width: 200 }}
     >

@@ -22,7 +22,7 @@ const Checkbox = ({ selected, onClick }) => {
   );
 };
 Checkbox.propTypes = {
-  selected: PropTypes.bool.isRequired,
+  selected: PropTypes.bool,
   onClick: PropTypes.func.isRequired
 };
 const setSubtreeSelection = (item, selection) => {

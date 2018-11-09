@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import QueryMenu from "./QueryMenu";
 import EnrichMenu from "./EnrichMenu";
 import FilterMenu from "./FilterMenu";
 import LayoutMenu from "./LayoutMenu";
@@ -30,6 +31,7 @@ const TopMenu = () => (
   <Wrapper>
     <Brand size={28} className="icon-brand" />
     <ButtonGroup>
+      <QueryMenu />
       <EnrichMenu />
       <FilterMenu />
       <LayoutMenu />

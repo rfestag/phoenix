@@ -41,7 +41,7 @@ const LayerItem = ({ layer, crs }) => (
             border: "1px solid gray"
           }}
         >
-          <img style={{ width: "100%", height: "100%" }} />
+          <img alt="" style={{ width: "100%", height: "100%" }} />
         </div>
         <h4
           style={{

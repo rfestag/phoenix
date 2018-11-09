@@ -1,11 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
-import {
-  InputGroup,
-  Input,
-  UncontrolledButtonDropdown as Dropdown
-} from "reactstrap";
+import { InputGroup, Input } from "reactstrap";
 
 export default class FilterableTree extends React.Component {
   constructor(props) {
