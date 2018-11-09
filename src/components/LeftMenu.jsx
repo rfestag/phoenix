@@ -5,8 +5,13 @@ import classnames from "classnames";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { Button, Nav, NavItem } from "reactstrap";
-import { FaSearch, FaFilter, FaTh } from "react-icons/fa";
-import { MdHourglassEmpty, MdList } from "react-icons/md";
+import {
+  QueryPanelIcon,
+  FilterIcon,
+  GridPanelIcon,
+  TimeIcon,
+  EntityPanelIcon
+} from "./Icons";
 import {
   toggleQueryPane,
   toggleEntityPane,
@@ -80,7 +85,7 @@ const LeftMenu = ({
           active={leftPane === "QUERY"}
           onClick={() => toggleQueryPane()}
         >
-          <FaSearch />
+          <QueryPanelIcon />
         </LeftMenuBarButton>
       </NavItem>
       <NavItem>
@@ -89,7 +94,7 @@ const LeftMenu = ({
           onClick={() => toggleEntityPane()}
           icon="user"
         >
-          <MdList size="1.5em" />
+          <EntityPanelIcon size="1.5em" />
         </LeftMenuBarButton>
       </NavItem>
       <NavItem>
@@ -97,7 +102,7 @@ const LeftMenu = ({
           active={leftPane === "FILTER"}
           onClick={() => toggleFilterPane()}
         >
-          <FaFilter />
+          <FilterIcon />
         </LeftMenuBarButton>
       </NavItem>
     </Nav>
@@ -107,7 +112,7 @@ const LeftMenu = ({
           active={bottomPane === "GRID"}
           onClick={() => toggleGridPane()}
         >
-          <MdHourglassEmpty size="1.5em" />
+          <TimeIcon size="1.5em" />
         </LeftMenuBarButton>
       </NavItem>
       <NavItem>
@@ -115,7 +120,7 @@ const LeftMenu = ({
           active={bottomPane === "GRID"}
           onClick={() => toggleGridPane()}
         >
-          <FaTh />
+          <GridPanelIcon />
         </LeftMenuBarButton>
       </NavItem>
     </Nav>

@@ -6,7 +6,7 @@ import {
   DropdownItem,
   UncontrolledButtonDropdown as Dropdown
 } from "reactstrap";
-import { FaGlobeAmericas } from "react-icons/fa";
+import { GlobeIcon } from "./Icons";
 
 const DropLeftIconButton = styled(DropdownToggle)`
   padding: 0;
@@ -26,7 +26,7 @@ const DropLeftIconButton = styled(DropdownToggle)`
 export const ZoomToMenu = () => (
   <Dropdown setActiveFromChild direction="left">
     <DropLeftIconButton color="map-control" size="sm">
-      <FaGlobeAmericas />
+      <GlobeIcon />
     </DropLeftIconButton>
     <DropdownMenu>
       <DropdownItem>Zoom to World</DropdownItem>

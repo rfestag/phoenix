@@ -8,7 +8,7 @@ import { connect } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import styled from "styled-components";
 import { setCurrentCollection } from "../modules/collection/CollectionActions";
-import { FaChevronLeft, FaChevronRight, FaColumns } from "react-icons/fa";
+import { ChevronLeftIcon, ChevronRightIcon, ColumnsIcon } from "./Icons";
 import { Button } from "reactstrap";
 import {
   RIGHT_PANEL,
@@ -98,7 +98,7 @@ export class CollectionGridTabs extends React.Component {
       <OuterPanel>
         <TabCarousel>
           <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
-            <FaChevronLeft />
+            <ChevronLeftIcon />
           </Button>
           <Tabs tabs>
             {_.map(this.props.collections, (collection, id) => (
@@ -127,13 +127,13 @@ export class CollectionGridTabs extends React.Component {
             ))}
           </Tabs>
           <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
-            <FaChevronRight />
+            <ChevronRightIcon />
           </Button>
           <Button
             active={this.props.columnPaneActive}
             onClick={this.props.onColumManagerClicked}
           >
-            <FaColumns />
+            <ColumnsIcon />
           </Button>
         </TabCarousel>
         <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>

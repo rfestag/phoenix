@@ -1,17 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import {
-  FaDrawPolygon,
-  FaObjectGroup,
-  FaObjectUngroup,
-  FaCircle,
-  FaSquare,
-  FaRuler,
-  FaCrosshairs,
-  FaFont
-} from "react-icons/fa";
 import { Input, Button, ButtonGroup } from "reactstrap";
+import {
+  PolygonToolIcon,
+  GroupToolIcon,
+  UngroupToolIcon,
+  CircleToolIcon,
+  BoxToolIcon,
+  MeasureToolIcon,
+  WhatsHereToolIcon,
+  LabelToolIcon
+} from "../../components/Icons";
 
 const Wrapper = styled.div`
   width: 100%;
@@ -39,28 +39,28 @@ const MapToolbar = ({ children }) => (
     <Filler />
     <ButtonGroup>
       <ToolbarButton color="map-control">
-        <FaSquare />
+        <BoxToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaCircle />
+        <CircleToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaDrawPolygon />
+        <PolygonToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaFont />
+        <LabelToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaObjectGroup />
+        <GroupToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaObjectUngroup />
+        <UngroupToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaRuler />
+        <MeasureToolIcon />
       </ToolbarButton>
       <ToolbarButton color="map-control">
-        <FaCrosshairs />
+        <WhatsHereToolIcon />
       </ToolbarButton>
     </ButtonGroup>
     <AOISearch placeholder="Search areas of interest" />

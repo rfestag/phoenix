@@ -2,10 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { Button, ButtonGroup } from "reactstrap";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { VisibleIcon, HiddenIcon } from "./Icons";
 
 const UnstyledVisibility = ({ visible }) =>
-  visible ? <FaEye /> : <FaEyeSlash />;
+  visible ? <VisibleIcon /> : <HiddenIcon />;
 UnstyledVisibility.propTypes = {
   visible: PropTypes.bool
 };

@@ -3,8 +3,12 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { Button, ButtonGroup } from "reactstrap";
 import { connect } from "react-redux";
-import { MdLayers, MdPictureInPictureAlt } from "react-icons/md";
-import { FaPlus, FaMinus } from "react-icons/fa";
+import {
+  LayersIcon,
+  MiniMapIcon,
+  ZoomInIcon,
+  ZoomOutIcon
+} from "../../components/Icons";
 import {
   RIGHT_PANEL,
   LAYER_PANE,
@@ -63,16 +67,16 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleLayerManager}
       >
-        <MdLayers size="1.25em" />
+        <LayersIcon size="1.25em" />
       </RightArrowActiveButton>
     </ToolGroup>
     <ToolGroup vertical>
       <ZoomToMenu />
       <Button color="map-control" size="sm">
-        <FaPlus />
+        <ZoomInIcon />
       </Button>
       <Button color="map-control" size="sm">
-        <FaMinus />
+        <ZoomOutIcon />
       </Button>
     </ToolGroup>
     <ToolGroup vertical>
@@ -82,7 +86,7 @@ export const ViewControl = ({
         size="sm"
         onClick={toggleMiniMap}
       >
-        <MdPictureInPictureAlt size="1.25em" />
+        <MiniMapIcon size="1.25em" />
       </LeftArrowActiveButton>
     </ToolGroup>
   </Wrapper>

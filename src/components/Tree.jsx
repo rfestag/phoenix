@@ -1,14 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { AutoSizer, List } from "react-virtualized";
-import { MdExpandMore, MdChevronRight } from "react-icons/md";
-import { FaRegSquare, FaCheckSquare, FaRegStar, FaStar } from "react-icons/fa";
+import {
+  CollapsedIcon,
+  ExpandedIcon,
+  CheckedIcon,
+  UncheckedIcon
+} from "./Icons";
 import _ from "lodash";
 
 var ROW_HEIGHT = 24;
 
 const ExpandIndicator = ({ expanded, expandable }) => {
-  return expanded ? <MdExpandMore /> : expandable ? <MdChevronRight /> : null;
+  return expanded ? <ExpandedIcon /> : expandable ? <CollapsedIcon /> : null;
 };
 ExpandIndicator.propTypes = {
   expanded: PropTypes.bool.isRequired,
@@ -16,9 +20,9 @@ ExpandIndicator.propTypes = {
 };
 const Checkbox = ({ selected, onClick }) => {
   return selected ? (
-    <FaCheckSquare onClick={onClick} />
+    <CheckedIcon onClick={onClick} />
   ) : (
-    <FaRegSquare onClick={onClick} />
+    <UncheckedIcon onClick={onClick} />
   );
 };
 Checkbox.propTypes = {
