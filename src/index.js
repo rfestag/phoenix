@@ -1,5 +1,6 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
+import "react-reflex/styles.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App.jsx";
