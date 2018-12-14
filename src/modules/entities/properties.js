@@ -93,3 +93,8 @@ export const updateProperty = (prop, value, time) => {
   updateAggregations(prop, value);
   return prop;
 };
+export const ageoffProperty = (prop, time) => {
+  const index = prop.data.find(t => t >= time);
+  prop.data = prop.data.slice(index);
+  return prop;
+};

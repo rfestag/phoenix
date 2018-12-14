@@ -69,6 +69,14 @@ export default function(state = initialState, action) {
         console.error("Cannot delete collection (does not exist)", id);
         return state;
       }
+    case DELETE_FROM_COLLECTION:
+      collection = state.collections[id];
+      let data = _.omit(collection.data, action.ids);
+      console.log("Deleting", action.ids.length);
+      return {
+        ...state,
+        collections: { ...state.collections, [id]: { ...collection, data } }
+      };
     case BATCH_UPDATE_COLLECTIONS:
       const updatedCollections = _.reduce(
         action.allUpdates,

@@ -9,7 +9,6 @@ import registerServiceWorker from "./registerServiceWorker";
 import { Provider } from "react-redux";
 import store from "./js/store";
 import "babel-polyfill";
-import fs from "fs";
 
 ReactDOM.render(
   <Provider store={store}>
