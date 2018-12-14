@@ -8,6 +8,15 @@ import { setSelectedEntities } from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
 import _ from "lodash";
 
+const getTheme = (state, props) => state.settings.general.theme;
+const getGridThemeName = createSelector([getTheme], theme => {
+  return theme === "light" ? "ag-theme-balham" : "ag-theme-balham-dark";
+});
+const getGridThemeCss = createSelector([getTheme], theme => {
+  return require(`../../node_modules/ag-grid/dist/styles/ag-theme-balham${
+    theme === "light" ? "" : "-dark"
+  }.css`);
+});
 const getData = (state, props) => props.collection.data;
 const getCollectionData = createSelector([getData], collection => {
   return collection === undefined ? [] : Object.values(collection);
@@ -22,14 +31,14 @@ export class Grid extends Component {
     /** Column definitions for this grid */
     columns: PropTypes.array,
     /** The theme to use */
-    theme: PropTypes.string,
+    themeName: PropTypes.string,
+    themeCss: PropTypes.string,
     selected: PropTypes.object,
     onSelectionChanged: PropTypes.func
   };
   static defaultProps = {
     data: [],
-    columns: [],
-    theme: "ag-theme-balham-dark"
+    columns: []
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -71,7 +80,7 @@ export class Grid extends Component {
     return (
       <div
         style={{ height: "100%", width: "100%" }}
-        className={this.props.theme}
+        className={this.props.themeName}
       >
         <AgGridReact
           // binding to array properties
@@ -94,8 +103,9 @@ function mapStateToProps(state, props) {
   return {
     data: getCollectionData(state, props),
     selected: getSelected(state, props),
-    columns: getColumnDefs(state, props)
-    //TODO: theme
+    columns: getColumnDefs(state, props),
+    themeName: getGridThemeName(state, props),
+    themeCss: getGridThemeCss(state, props)
   };
 }
 

@@ -10,8 +10,38 @@ describe("collection reducer", () => {
       reducer(undefined, actions.createCollection("cid", "name", ["qid"]))
     ).toEqual({
       collections: {
-        cid: { id: "cid", data: {}, name: "name", queries: ["qid"] }
-      }
+        cid: {
+          ageoff: { unit: "seconds", value: 30 },
+          data: {},
+          fields: {
+            geometries: {},
+            properties: {
+              whenEnd: {
+                _formatterName: "timeFormatter",
+                _getterName: "timeGetter",
+                _type: "time",
+                field: "end",
+                headerName: "Last seen",
+                hide: false
+              },
+              whenStart: {
+                _formatterName: "timeFormatter",
+                _getterName: "timeGetter",
+                _type: "time",
+                field: "start",
+                headerName: "First seen",
+                hide: false
+              }
+            }
+          },
+          id: "cid",
+          name: "name",
+          queries: ["qid"],
+          selected: {},
+          visible: true
+        }
+      },
+      current: "cid"
     });
   });
 });

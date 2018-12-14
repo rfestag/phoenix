@@ -9,7 +9,7 @@ import {
   DomEvent
 } from "leaflet";
 import { Stage, Line, Circle, FastLayer } from "konva";
-import * as Util from "leaflet/src/core/Util";
+import { Util } from "leaflet";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 

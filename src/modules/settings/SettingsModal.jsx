@@ -16,22 +16,11 @@ import {
   TabContent,
   TabPane,
   Row,
-  Col
+  Col,
+  FormGroup,
+  Label,
+  Input
 } from "reactstrap";
-
-function mapStateToProps(state, props) {
-  return {
-    open: state.modal[SETTINGS_MODAL] ? true : false,
-    activeTab: state.modal[SETTINGS_MODAL],
-    settings: state.settings
-  };
-}
-function mapDispatchToProps(dispatch) {
-  return {
-    toggle: () => dispatch(toggleSettingsModal()),
-    apply: () => dispatch(updateSettings())
-  };
-}
 
 export class SettingsModal extends React.Component {
   constructor(props) {
@@ -42,7 +31,7 @@ export class SettingsModal extends React.Component {
     };
   }
   static propTypes = {
-    activeTab: PropTypes.string,
+    activeTab: PropTypes.bool,
     open: PropTypes.bool.isRequired,
     settings: PropTypes.object.isRequired,
     toggle: PropTypes.func.isRequired,
@@ -52,8 +41,15 @@ export class SettingsModal extends React.Component {
   setTab = activeTab => this.setState({ activeTab });
   toggle = () => this.props.toggle();
   apply = () => {
+    console.log("Settings should now be", this.state.settings);
     this.props.apply(this.state.settings);
     this.toggle();
+  };
+  themeChanged = e => {
+    console.log("Theme changed", e.target.value);
+    const general = { ...this.state.settings.general, theme: e.target.value };
+    const settings = { ...this.state.settings, general };
+    this.setState({ settings });
   };
   render() {
     return (
@@ -94,6 +90,39 @@ export class SettingsModal extends React.Component {
                   <Row>
                     <Col sm="12">
                       <h4>General Settings</h4>
+                      <FormGroup tag="fieldset" row>
+                        <legend className="col-form-label col-sm-2">
+                          Theme
+                        </legend>
+                        <Col sm={10} onChange={this.themeChanged}>
+                          <FormGroup check>
+                            <Label check>
+                              <Input
+                                type="radio"
+                                name="theme"
+                                value="light"
+                                defaultChecked={
+                                  this.state.settings.general.theme === "light"
+                                }
+                              />{" "}
+                              Light
+                            </Label>
+                          </FormGroup>
+                          <FormGroup check>
+                            <Label check>
+                              <Input
+                                type="radio"
+                                name="theme"
+                                value="dark"
+                                defaultChecked={
+                                  this.state.settings.general.theme === "dark"
+                                }
+                              />{" "}
+                              Dark
+                            </Label>
+                          </FormGroup>
+                        </Col>
+                      </FormGroup>
                     </Col>
                   </Row>
                 </TabPane>
@@ -109,7 +138,7 @@ export class SettingsModal extends React.Component {
           </Row>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={this.toggle}>
+          <Button color="primary" onClick={this.apply}>
             Apply
           </Button>{" "}
           <Button color="secondary" onClick={this.toggle}>
@@ -119,5 +148,19 @@ export class SettingsModal extends React.Component {
       </Modal>
     );
   }
+}
+
+function mapStateToProps(state, props) {
+  return {
+    open: state.modal[SETTINGS_MODAL] ? true : false,
+    activeTab: state.modal[SETTINGS_MODAL],
+    settings: state.settings
+  };
+}
+function mapDispatchToProps(dispatch) {
+  return {
+    toggle: () => dispatch(toggleSettingsModal()),
+    apply: settings => dispatch(updateSettings(settings))
+  };
 }
 export default connect(mapStateToProps, mapDispatchToProps)(SettingsModal);

@@ -8,13 +8,13 @@
   }
 }
 .dropdown-toggle:focus {
-  box-shadow: none !important;
+  box-shadow: inset 1px 1px $accent-color, inset -1px -1px $accent-color !important;
 }
 .btn:focus {
-  box-shadow: none !important;
+  box-shadow: inset 1px 1px $accent-color, inset -1px -1px $accent-color !important;
 }
 input:focus {
-  box-shadow: none !important;
+  box-shadow: inset 1px 1px $accent-color, inset -1px -1px $accent-color !important;
 }
 .dropdown-menu {
   top: -5px !important;
@@ -23,6 +23,9 @@ input:focus {
   &:focus, 
   &:hover {
     background-color: inherit !important;
+  }
+  &:focus {
+    box-shadow: inset 1px 1px $accent-color, inset -1px -1px $accent-color !important;
   }
 }
 .btn.active {
