@@ -32,7 +32,7 @@ export class Grid extends Component {
     columns: PropTypes.array,
     /** The theme to use */
     themeName: PropTypes.string,
-    themeCss: PropTypes.string,
+    themeCss: PropTypes.any,
     selected: PropTypes.object,
     onSelectionChanged: PropTypes.func
   };

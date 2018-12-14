@@ -127,16 +127,19 @@ export class QueryPanel extends React.Component {
     this.state = {};
   }
   static propTypes = {
-    query: PropTypes.func.isRequired
+    createQuery: PropTypes.func.isRequired
   };
   updateFilter = event => {
     const filter = event.target.value;
     this.setState({ filter });
   };
+  query = event => {
+    this.props.createQuery("ADSBApollo", {}, "ADSB Exchange");
+  };
   render() {
     return (
       <div style={{ width: "100%", height: "100%" }}>
-        <Button onClick={this.props.query}>Test</Button>
+        <Button onClick={this.query}>Test</Button>
         <div style={{ float: "right" }}>
           <FilterableDropdownTree data={data} />
         </div>
@@ -147,7 +150,7 @@ export class QueryPanel extends React.Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    query: () => dispatch(createQuery("Test", {}, "My Test"))
+    createQuery: (src, opts, name) => dispatch(createQuery(src, opts, name))
   };
 }
 
