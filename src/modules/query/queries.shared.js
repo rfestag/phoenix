@@ -61,7 +61,7 @@ export function mapToCollection(action$) {
     return src.pipe(
       mergeMap(action => {
         const adapter = sources[action.source].query(action.query);
-        const dictionary = sources[action.source].dictionary();
+        const dictionary = sources[action.source].dictionary(action.query);
         const id = action.id;
         const name = action.name || id;
         const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value

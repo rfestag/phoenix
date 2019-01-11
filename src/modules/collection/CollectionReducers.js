@@ -26,7 +26,8 @@ function updateCollection(collection, action) {
       const [updatedEntity, updatedFields] = updateEntity(
         data[id],
         updates,
-        fields
+        fields,
+        collection.ageoff
       );
       data[id] = updatedEntity;
       fields = updatedFields;
@@ -104,7 +105,6 @@ export default function(state = initialState, action) {
     case UPDATE_COLLECTION_FIELDS:
       collection = state.collections[id];
       if (collection) {
-        console.log("UPDATED FIELDS", collection.fields, action.fields);
         collection = { ...collection, fields: action.fields };
         return {
           ...state,

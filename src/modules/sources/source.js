@@ -6,7 +6,8 @@ export class Source {
   constructor(name) {
     this.name = name;
   }
-  dictionary() {
+  dictionary(def) {
+    //Ignore def
     return {};
   }
   query() {

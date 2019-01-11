@@ -27,7 +27,8 @@ export class ADSBApolloSource extends ApolloWsSource {
    * data, use this method.
    * TODO: Provide more details on the supported types and additional options
    */
-  dictionary() {
+  dictionary(def) {
+    //Ignore def, use static dictionary
     return {
       geometries: {},
       properties: {

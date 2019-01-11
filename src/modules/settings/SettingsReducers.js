@@ -1,4 +1,5 @@
 import { UPDATE_SETTINGS } from "./SettingsActions";
+import { KILOMETERS, SECONDS, KILOMETERS_PER_HOUR } from "../sources/Constants";
 
 const initialState = {
   general: {
@@ -6,6 +7,11 @@ const initialState = {
   },
   map: {
     coordinateFormat: "DD"
+  },
+  units: {
+    distance: KILOMETERS,
+    duration: SECONDS,
+    speed: KILOMETERS_PER_HOUR
   }
 };
 
