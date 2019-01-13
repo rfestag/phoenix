@@ -3,6 +3,18 @@ import { map, interval } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { createTrackPoint } from "../entities/geometries";
 import { createPropertyColumn, getDefaultColumns } from "../columns/Constants";
+import {
+  DISTANCE,
+  FEET,
+  SPEED,
+  KNOTS,
+  FEET_PER_SECOND,
+  LATITUDE,
+  LONGITUDE,
+  DD,
+  ROTATION,
+  DEGREES
+} from "./Constants";
 import gql from "graphql-tag";
 import _ from "lodash";
 
@@ -44,15 +56,15 @@ export class ADSBApolloSource extends ApolloWsSource {
         }),
         Alt: createPropertyColumn("Alt", 0, {
           hide: false,
-          _unitType: "distance",
-          _unit: "feet",
+          _unitType: DISTANCE,
+          _unit: FEET,
           _description:
             " The altitude in feet at standard pressure. (broadcast by the aircraft)"
         }),
         GAlt: createPropertyColumn("GAlt", 0, {
           hide: false,
-          _unitType: "distance",
-          _unit: "feet",
+          _unitType: DISTANCE,
+          _unit: FEET,
           _description:
             " The altitude adjusted for local air pressure, should be roughly the height above mean sea level."
         }),
@@ -62,27 +74,27 @@ export class ADSBApolloSource extends ApolloWsSource {
         }),
         Lat: createPropertyColumn("Lat", 0, {
           hide: false,
-          _unitType: "latitude",
-          _unit: "degrees"
+          _unitType: LATITUDE,
+          _unit: DD
         }),
         Long: createPropertyColumn("Long", 0, {
           hide: false,
-          _unitType: "longitude",
-          _unit: "degrees"
+          _unitType: LONGITUDE,
+          _unit: DD
         }),
         Mlat: createPropertyColumn("Mlat", true),
         Spd: createPropertyColumn("Spd", 0, {
           hide: false,
-          _unitType: "speed",
-          _unit: "knots"
+          _unitType: SPEED,
+          _unit: KNOTS
         }),
         Trak: createPropertyColumn("Trak", 0, {
-          _unitType: "orientation",
-          _unit: "degrees"
+          _unitType: ROTATION,
+          _unit: DEGREES
         }),
         Vsi: createPropertyColumn("Vsi", 0, {
-          _unitType: "speed",
-          _unit: "fps"
+          _unitType: SPEED,
+          _unit: FEET_PER_SECOND
         }),
         CallSus: createPropertyColumn("CallSus", true),
         Sqk: createPropertyColumn("Sqk", 0),

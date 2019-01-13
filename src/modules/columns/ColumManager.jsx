@@ -10,6 +10,12 @@ import { connect } from "react-redux";
 import { Button, ButtonGroup } from "reactstrap";
 import _ from "lodash";
 import PerfectScrollbar from "react-perfect-scrollbar";
+import {
+  ListGroup,
+  ListGroupItem,
+  ListGroupItemHeading,
+  ListGroupItemText
+} from "reactstrap";
 
 import { CheckedIcon, UncheckedIcon } from "../../components/Icons";
 
@@ -37,6 +43,16 @@ export class ColumnManager extends Component {
     const columns = { ...props.columns };
     const geometries = { ...props.geometries };
     this.state = { columns, geometries };
+  }
+  componentDidUpdate(oldProps) {
+    if (
+      oldProps.columns !== this.props.columns ||
+      oldProps.geometries !== this.props.geometries
+    ) {
+      let columns = { ...this.props.columns, ...this.state.columns };
+      let geometries = { ...this.props.geometries, ...this.state.geometries };
+      this.setState({ columns, geometries });
+    }
   }
   toggleColumn = column => {
     const { columns } = this.state;
@@ -67,17 +83,20 @@ export class ColumnManager extends Component {
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <div style={{ flex: 1, overflowY: "hidden" }}>
           <PerfectScrollbar>
-            {_.map(this.state.columns, (column, name) => {
-              return (
-                <div key={name}>
-                  <Checkbox
-                    selected={!column.hide}
-                    onClick={() => this.toggleColumn(column)}
-                  />{" "}
-                  {column.headerName}
-                </div>
-              );
-            })}
+            {_.chain(this.state.columns)
+              .sortBy("headerName")
+              .map((column, name) => {
+                return (
+                  <div key={name}>
+                    <Checkbox
+                      selected={!column.hide}
+                      onClick={() => this.toggleColumn(column)}
+                    />{" "}
+                    {column.headerName}
+                  </div>
+                );
+              })
+              .value()}
             {/*_.map(this.state.geometries, (geom, name) => {
               return <div key={name}><Checkbox selected={!geom.hide} onClick={() => this.toggleGeometry(geom)}/> {name}</div>;
             })*/}

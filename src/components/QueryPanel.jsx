@@ -1,8 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Button } from "reactstrap";
+import {
+  Col,
+  Button,
+  ButtonGroup,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormText
+} from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import FilterableDropdownTree from "./FilterableDropdownTree";
 
 var RANDOM_WORDS = [
@@ -124,25 +134,69 @@ function createRandomizedItem(depth) {
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { name: "", query: {} };
   }
   static propTypes = {
     createQuery: PropTypes.func.isRequired
+  };
+  clear = () => {
+    this.setState({
+      name: "",
+      query: {}
+    });
+  };
+  setName = e => {
+    let name = e.target.value;
+    this.setState({ name });
   };
   updateFilter = event => {
     const filter = event.target.value;
     this.setState({ filter });
   };
-  query = event => {
-    this.props.createQuery("ADSBApollo", {}, "ADSB Exchange");
+  execute = event => {
+    console.log(this.state);
+    this.props.createQuery("ADSBApollo", this.state.query, this.state.name);
   };
   render() {
+    const { name, query } = this.state;
+    const { setName, clear, execute } = this;
     return (
-      <div style={{ width: "100%", height: "100%" }}>
-        <Button onClick={this.query}>Test</Button>
-        <div style={{ float: "right" }}>
-          <FilterableDropdownTree data={data} />
-        </div>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
+        <Form
+          style={{ width: "100%", flex: 1, padding: 10, overflow: "hidden" }}
+        >
+          <PerfectScrollbar>
+            <FormGroup>
+              <Label for="name">Name</Label>
+              <Input
+                value={name}
+                type="text"
+                name="name"
+                id="name"
+                placeholder="Query Name"
+                onChange={setName}
+              />
+            </FormGroup>
+            <div style={{ float: "right" }}>
+              <FilterableDropdownTree data={data} />
+            </div>
+          </PerfectScrollbar>
+        </Form>
+        <ButtonGroup style={{ marginTop: "auto", display: "flex" }}>
+          <Button style={{ flex: 1 }} onClick={clear}>
+            Clear
+          </Button>
+          <Button style={{ flex: 1 }} onClick={execute}>
+            Query
+          </Button>
+        </ButtonGroup>
       </div>
     );
   }
