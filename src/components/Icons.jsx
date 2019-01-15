@@ -4,7 +4,10 @@ import {
   MdHourglassEmpty,
   MdLayers,
   MdList,
-  MdPictureInPictureAlt
+  MdPictureInPictureAlt,
+  MdAdd,
+  MdPlaylistAdd,
+  MdDelete
 } from "react-icons/md";
 import {
   FaCheckSquare,
@@ -31,10 +34,13 @@ import {
 } from "react-icons/fa";
 import { FaRegSquare, FaRegStar } from "react-icons/fa";
 
+export const AddGroupIcon = MdPlaylistAdd;
+export const AddRuleIcon = MdAdd;
 export const ChevronLeftIcon = FaChevronLeft;
 export const ChevronRightIcon = FaChevronRight;
 export const ColumnsIcon = FaColumns;
 export const CollapsedIcon = MdChevronRight;
+export const DeleteIcon = MdDelete;
 export const ExpandedIcon = MdExpandMore;
 export const TimeIcon = MdHourglassEmpty;
 export const LayersIcon = MdLayers;

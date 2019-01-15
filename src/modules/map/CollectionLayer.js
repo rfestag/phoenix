@@ -216,7 +216,8 @@ export const CollectionLayer = Layer.extend({
     this._map.on("mousemove", Util.throttle(this._onMouseMove, 32, this), this);
     DomEvent.on(
       container,
-      "click dblclick mousedown mouseup contextmenu",
+      //"click dblclick mousedown mouseup contextmenu",
+      "click",
       this._onClick,
       this
     );
@@ -514,7 +515,7 @@ export const CollectionLayer = Layer.extend({
     if (this.dragging) return;
     try {
       const map = this._map;
-      const t = 8; //Threshold
+      const t = 4; //Threshold
       const nw = map.layerPointToLatLng(
         new Point(e.layerPoint.x - t, e.layerPoint.y - t)
       );
@@ -638,7 +639,14 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw();
   },
   _onClick: function(e) {
-    console.log(e);
+    console.log(e, this.collection);
+    let clicked = Object.keys(this.hovered).map(id => this.collection.data[id]);
+    if (clicked.length === 1) {
+      console.log("Clicked", clicked[0]);
+    } else if (clicked.length > 1) {
+      console.log("Find closest", clicked);
+    }
+
     //This is to stop the context menu popup. May want to move to its own handler?
     e.preventDefault();
   }

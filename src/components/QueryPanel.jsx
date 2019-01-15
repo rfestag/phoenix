@@ -14,6 +14,9 @@ import {
 import { createQuery } from "../modules/query/QueryActions";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import FilterableDropdownTree from "./FilterableDropdownTree";
+import * as sources from "../modules/sources/SourceMap";
+
+let source = sources["ADSBApollo"];
 
 var RANDOM_WORDS = [
   "abstrusity",
@@ -131,10 +134,11 @@ function createRandomizedItem(depth) {
   return item;
 }
 
+const defaultQuery = { type: "and", rules: [], groups: [] };
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { name: "", query: {} };
+    this.state = { name: "", query: defaultQuery };
   }
   static propTypes = {
     createQuery: PropTypes.func.isRequired
@@ -142,7 +146,7 @@ export class QueryPanel extends React.Component {
   clear = () => {
     this.setState({
       name: "",
-      query: {}
+      query: defaultQuery
     });
   };
   setName = e => {
@@ -157,9 +161,17 @@ export class QueryPanel extends React.Component {
     console.log(this.state);
     this.props.createQuery("ADSBApollo", this.state.query, this.state.name);
   };
+  handleFormUpdate = (event, value, selectedKey) => {
+    console.log(event, query, selectedKey);
+    let query = { ...this.state.query, ...value };
+    console.log(value, query);
+
+    this.setState({ query });
+  };
   render() {
     const { name, query } = this.state;
-    const { setName, clear, execute } = this;
+    const { setName, clear, execute, handleFormUpdate } = this;
+    console.log("Query", query);
     return (
       <div
         style={{
@@ -184,9 +196,10 @@ export class QueryPanel extends React.Component {
                 onChange={setName}
               />
             </FormGroup>
-            <div style={{ float: "right" }}>
+            {/*<div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
-            </div>
+            </div>*/}
+            <source.Form group={query} onChange={handleFormUpdate} />
           </PerfectScrollbar>
         </Form>
         <ButtonGroup style={{ marginTop: "auto", display: "flex" }}>

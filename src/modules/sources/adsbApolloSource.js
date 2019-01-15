@@ -11,12 +11,12 @@ import {
   FEET_PER_SECOND,
   LATITUDE,
   LONGITUDE,
-  DD,
   ROTATION,
   DEGREES
 } from "./Constants";
 import gql from "graphql-tag";
 import _ from "lodash";
+import form from "./AdsbApolloForm";
 
 /**
  * Connects to a websocket providing JSON data from ADSBExchange
@@ -32,8 +32,8 @@ export class ADSBApolloSource extends ApolloWsSource {
       wsUri: "ws://localhost:4000/subscriptions",
       ...def
     });
+    this.Form = form;
   }
-
   /**
    * Returns default column definitions for fields. If you want to provide descriptions and units for
    * data, use this method.
@@ -74,13 +74,11 @@ export class ADSBApolloSource extends ApolloWsSource {
         }),
         Lat: createPropertyColumn("Lat", 0, {
           hide: false,
-          _unitType: LATITUDE,
-          _unit: DD
+          _unitType: LATITUDE
         }),
         Long: createPropertyColumn("Long", 0, {
           hide: false,
-          _unitType: LONGITUDE,
-          _unit: DD
+          _unitType: LONGITUDE
         }),
         Mlat: createPropertyColumn("Mlat", true),
         Spd: createPropertyColumn("Spd", 0, {

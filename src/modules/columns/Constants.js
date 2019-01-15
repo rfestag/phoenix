@@ -40,7 +40,7 @@ export const createPropertyColumn = (field, sample, opts = {}) => {
     _getterName: "latestValueGetter"
   };
   if (sample) {
-    if (_.isArray(sample)) createPropertyColumn(field, sample[0]);
+    if (_.isArray(sample)) return createPropertyColumn(field, sample[0], opts);
     if (_.isBoolean(sample)) {
       columnDef._type = "boolean";
     } else if (_.isNumber(sample)) {
