@@ -7,6 +7,7 @@ import Select from "./Select";
 
 class RuleList extends React.Component {
   static propTypes = {
+    fields: PropTypes.array,
     onChange: PropTypes.func.isRequired,
     rules: PropTypes.array.isRequired
   };
@@ -21,13 +22,14 @@ class RuleList extends React.Component {
     this.props.onChange(null, data);
   };
   render() {
-    let { rules } = this.props;
+    let { rules, fields } = this.props;
     return (
       <div style={{ paddingLeft: 8, paddingTop: 4, paddingBottom: 4 }}>
         {rules.map((rule, index) => (
           <Rule
             key={rule.id}
             rule={rule}
+            fields={fields}
             onChange={this.handleFieldChange(index)}
             onRemove={this.handleFieldRemove(index)}
             canRemove={rules.length > 1}
@@ -56,7 +58,7 @@ class GroupList extends React.Component {
     let { groups } = this.props;
     return (
       <div style={{ paddingLeft: 8, paddingTop: 4, paddingBottom: 4 }}>
-        {groups.map((group, index) => (
+        {groups.map((group, fields, up, index) => (
           <QueryGroup
             key={group.id}
             group={group}
@@ -71,9 +73,11 @@ class GroupList extends React.Component {
 }
 const operations = [
   { label: "IN", value: "in" },
+  { label: "EXISTS", value: "exists" },
   { label: "CONTAINS", value: "contains" },
-  { label: "STARTSWITH", value: "startswith" },
-  { label: "ENDSWITH", value: "endswith" },
+  { label: "STARTSWITH", value: "startsWith" },
+  { label: "ENDSWITH", value: "endsWith" },
+  { label: "=", value: "eq" },
   { label: "<", value: "gt" },
   { label: "<=", value: "gte" },
   { label: ">", value: "lt" },
@@ -84,7 +88,8 @@ class Rule extends React.Component {
     rule: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
-    canRemove: PropTypes.bool.isRequired
+    canRemove: PropTypes.bool.isRequired,
+    fields: PropTypes.array
   };
   setField = value => {
     let rule = { ...this.props.rule };
@@ -117,10 +122,13 @@ class Rule extends React.Component {
     this.props.onChange(null, rule);
   };
   render() {
-    const { canRemove, onRemove, rule } = this.props;
+    const { canRemove, onRemove, rule, fields } = this.props;
     const { field, op, value } = rule;
     const { setField, createField, setOp, setValue, createValue } = this;
 
+    let fieldsList = fields
+      ? fields.map(f => ({ label: f.headerName, value: f }))
+      : [];
     let fieldOption = field ? { label: field.headerName, value: field } : null;
     let opOption = op ? operations.find(o => o.value === op) : null;
     let valueOption = value ? value.map(v => ({ label: v, value: v })) : null;
@@ -133,6 +141,7 @@ class Rule extends React.Component {
           <div style={{ flex: 1 }}>
             <Select
               placeholder="Field..."
+              options={fieldsList}
               value={fieldOption}
               onCreateOption={createField}
               onChange={setField}
@@ -166,6 +175,7 @@ class QueryGroup extends React.Component {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     group: PropTypes.object.isRequired,
+    fields: PropTypes.array,
     onRemove: PropTypes.func,
     canRemove: PropTypes.bool
   };
@@ -186,7 +196,7 @@ class QueryGroup extends React.Component {
   changeGroups = this.handleFieldChange("groups");
   addRule = () => {
     let rules = [...this.props.group.rules];
-    let rule = { id: uuid() };
+    let rule = { id: uuid(), op: "in" };
     rules.push(rule);
     this.changeRules(null, rules);
   };
@@ -202,7 +212,7 @@ class QueryGroup extends React.Component {
     this.changeGroups(null, groups);
   };
   render() {
-    let { group, onRemove, canRemove } = this.props;
+    let { group, fields, onRemove, canRemove } = this.props;
     let { id, type, rules, groups } = group;
     let { setAnd, setOr, addRule, addGroup, handleFieldChange } = this;
     return (
@@ -251,7 +261,11 @@ class QueryGroup extends React.Component {
             </Button>
           </ButtonGroup>
         </div>
-        <RuleList rules={rules} onChange={handleFieldChange("rules")} />
+        <RuleList
+          rules={rules}
+          fields={fields}
+          onChange={handleFieldChange("rules")}
+        />
         <GroupList groups={groups} onChange={handleFieldChange("groups")} />
       </FormGroup>
     );

@@ -129,7 +129,10 @@ const defaultQuery = { type: "and", rules: [], groups: [] };
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { name: "", query: defaultQuery };
+    this.state = {
+      name: "",
+      query: { data: defaultQuery, acft: defaultQuery, acftType: defaultQuery }
+    };
   }
   static propTypes = {
     createQuery: PropTypes.func.isRequired
@@ -137,7 +140,7 @@ export class QueryPanel extends React.Component {
   clear = () => {
     this.setState({
       name: "",
-      query: defaultQuery
+      query: { data: defaultQuery, acft: defaultQuery, acftType: defaultQuery }
     });
   };
   setName = e => {
@@ -187,7 +190,7 @@ export class QueryPanel extends React.Component {
             {/*<div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
             </div>*/}
-            <source.Form group={query} onChange={handleFormUpdate} />
+            <source.Form data={query} onChange={handleFormUpdate} />
           </PerfectScrollbar>
         </Form>
         <ButtonGroup style={{ marginTop: "auto", display: "flex" }}>
