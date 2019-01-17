@@ -10,12 +10,6 @@ import { connect } from "react-redux";
 import { Button, ButtonGroup } from "reactstrap";
 import _ from "lodash";
 import PerfectScrollbar from "react-perfect-scrollbar";
-import {
-  ListGroup,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText
-} from "reactstrap";
 
 import { CheckedIcon, UncheckedIcon } from "../../components/Icons";
 

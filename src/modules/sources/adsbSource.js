@@ -1,6 +1,5 @@
 import { WebsocketSource } from "./websocketSource";
-import { map, interval } from "rxjs/operators";
-import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import _ from "lodash";
 
 /**

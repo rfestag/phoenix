@@ -1,5 +1,4 @@
 import { ApolloWsSource } from "./apolloWsSource";
-import { map, interval } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { createTrackPoint } from "../entities/geometries";
 import { createPropertyColumn, getDefaultColumns } from "../columns/Constants";

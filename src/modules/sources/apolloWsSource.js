@@ -49,6 +49,6 @@ export class ApolloWsSource extends Source {
    * @return {Observable} An Observable indicating whether this source is "available"
    */
   health() {
-    true;
+    return true;
   }
 }

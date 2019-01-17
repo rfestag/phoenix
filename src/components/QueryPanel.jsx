@@ -1,16 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import {
-  Col,
-  Button,
-  ButtonGroup,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  FormText
-} from "reactstrap";
+import { Button, ButtonGroup, Form, FormGroup, Label, Input } from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import FilterableDropdownTree from "./FilterableDropdownTree";
@@ -162,16 +153,13 @@ export class QueryPanel extends React.Component {
     this.props.createQuery("ADSBApollo", this.state.query, this.state.name);
   };
   handleFormUpdate = (event, value, selectedKey) => {
-    console.log(event, query, selectedKey);
     let query = { ...this.state.query, ...value };
-    console.log(value, query);
 
     this.setState({ query });
   };
   render() {
     const { name, query } = this.state;
     const { setName, clear, execute, handleFormUpdate } = this;
-    console.log("Query", query);
     return (
       <div
         style={{
