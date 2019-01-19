@@ -331,9 +331,11 @@ export const CollectionLayer = Layer.extend({
     }
     return this;
   },
-  initialize: function(collection, timeRange, props) {
+  initialize: function(collection, props, timeRange) {
     this.entities = {};
     this.hovered = {};
+    this.onSelect = props.onSelect;
+    this.onToggle = props.onToggle;
     this.setTimeRange(timeRange);
     this.setCollection(collection);
   },
@@ -528,20 +530,6 @@ export const CollectionLayer = Layer.extend({
       const sw = map.layerPointToLatLng(
         new Point(e.layerPoint.x - t, e.layerPoint.y + t)
       );
-      /*
-      const clickBox = {
-        type: "Polygon",
-        coordinates: [
-          [
-            [nw.lng, nw.lat],
-            [ne.lng, ne.lat],
-            [se.lng, se.lat],
-            [sw.lng, sw.lat],
-            [nw.lng, nw.lat]
-          ]
-        ]
-      };
-      */
       const clickBounds = { _northEast: ne, _southWest: sw };
       const allBounds = getBoundsAndTransforms(clickBounds, map, false);
       const allBoxes = allBounds.map(bt => {
@@ -639,12 +627,17 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw();
   },
   _onClick: function(e) {
-    console.log(e, this.collection);
+    let { shiftKey, ctrlKey } = e;
+    let clear = !shiftKey && !ctrlKey;
     let clicked = Object.keys(this.hovered).map(id => this.collection.data[id]);
     if (clicked.length === 1) {
-      console.log("Clicked", clicked[0]);
+      console.log("Clicked", clicked[0], this.onToggle);
+      if (this.onToggle)
+        this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
     } else if (clicked.length > 1) {
       console.log("Find closest", clicked);
+      if (this.onToggle)
+        this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
     }
 
     //This is to stop the context menu popup. May want to move to its own handler?

@@ -3,6 +3,10 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
+import {
+  setSelectedEntities,
+  toggleSelectedEntities
+} from "../collection/CollectionActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
 import { Map, TileLayer } from "react-leaflet";
 //import HeatmapLayer from "react-leaflet-heatmap-layer";
@@ -71,7 +75,12 @@ export class Map2D extends Component {
     center: PropTypes.array.isRequired,
     collections: PropTypes.object.isRequired,
     zoom: PropTypes.number.isRequired,
-    layer: PropTypes.object.isRequired
+    layer: PropTypes.object.isRequired,
+    overlays: PropTypes.array.isRequired,
+    panels: PropTypes.object,
+    setSelectedEntities: PropTypes.func,
+    toggleSelectedEntities: PropTypes.func,
+    emitTimingMetric: PropTypes.func
   };
 
   componentDidMount() {
@@ -165,6 +174,8 @@ export class Map2D extends Component {
             <CollectionLayer
               key={cid}
               collection={collection}
+              onSelect={this.props.setSelectedEntities}
+              onToggle={this.props.toggleSelectedEntities}
               onRender={this.props.emitTimingMetric}
               minZoom={5}
             />
@@ -206,8 +217,9 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       ...MapActions,
-      emitTimingMetric: (metric, duration) =>
-        dispatch(emitTimingMetric(metric, duration))
+      setSelectedEntities,
+      toggleSelectedEntities,
+      emitTimingMetric
     },
     dispatch
   );

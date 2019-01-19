@@ -63,7 +63,7 @@ export class Grid extends Component {
     ) {
       this.skipSelectChange = true;
       const ids = this.api.getSelectedRows().map(row => row.id);
-      this.props.onSelectionChanged(this.props.collection.id, ids);
+      this.props.onSelectionChanged(this.props.collection.id, ids, true);
     }
   });
   onGridReady = params => {

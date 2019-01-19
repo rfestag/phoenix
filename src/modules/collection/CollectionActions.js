@@ -7,6 +7,7 @@ export const DELETE_COLLECTION = "DELETE_COLLECTION";
 export const DELETE_FROM_COLLECTION = "DELETE_FROM_COLLECTION";
 export const SELECT_ENTITIES = "SELECT_ENTITIES";
 export const SET_SELECTED_ENTITIES = "SET_SELECTED_ENTITIES";
+export const TOGGLE_SELECTED_ENTITIES = "TOGGLE_SELECTED_ENTITIES";
 export const UPDATE_COLLECTION = "UPDATE_COLLECTION";
 export const BATCH_UPDATE_COLLECTIONS = "BATCH_UPDATE_COLLECTIONS";
 export const UPDATE_COLLECTION_FIELDS = "UPDATE_COLLECTION_FIELDS";
@@ -50,15 +51,17 @@ export const setEntityAgeoff = (id, ageoff) => ({
   id,
   ageoff
 });
-export const selectEntities = (id, ids) => ({
-  type: SELECT_ENTITIES,
+export const toggleSelectedEntities = (id, ids, clear) => ({
+  type: TOGGLE_SELECTED_ENTITIES,
   id,
-  ids
+  ids,
+  clear
 });
-export const setSelectedEntities = (id, ids) => ({
+export const setSelectedEntities = (id, ids, clear) => ({
   type: SET_SELECTED_ENTITIES,
   id,
-  ids
+  ids,
+  clear
 });
 export const setObservationAgeoff = (id, ageoff) => ({
   type: SET_OBSERVATION_AGEOFF,
@@ -74,8 +77,12 @@ export const ageoffCollection = id => ({
   type: AGEOFF_COLLECTION,
   id
 });
-export const setCurrentCollection = (id, eid) => ({
+export const setCurrentCollection = id => ({
   type: SET_CURRENT_COLLECTION,
+  id
+});
+export const setFocusedEntity = (id, eid) => ({
+  type: SET_FOCUSED_ENTITY,
   id,
   eid
 });

@@ -6,8 +6,8 @@ import {
   BATCH_UPDATE_COLLECTIONS,
   UPDATE_COLLECTION_FIELDS,
   DELETE_FROM_COLLECTION,
-  SELECT_ENTITIES,
   SET_SELECTED_ENTITIES,
+  TOGGLE_SELECTED_ENTITIES,
   SET_CURRENT_COLLECTION,
   SET_FOCUSED_ENTITY
 } from "./CollectionActions";
@@ -113,23 +113,6 @@ export default function(state = initialState, action) {
       } else {
         return state;
       }
-    case SELECT_ENTITIES:
-      collection = state.collections[id];
-      if (collection) {
-        collection.selected = action.ids.reduce(
-          (selected, id) => {
-            selected[id] = true;
-            return selected;
-          },
-          { ...collection.selected }
-        );
-        return {
-          ...state,
-          collections: { ...state.collections, [id]: { ...collection } }
-        };
-      } else {
-        return state;
-      }
     case SET_SELECTED_ENTITIES:
       console.log("Setting selected entities");
       collection = state.collections[id];
@@ -137,7 +120,22 @@ export default function(state = initialState, action) {
         collection.selected = action.ids.reduce((selected, id) => {
           selected[id] = true;
           return selected;
-        }, {});
+        }, action.clear ? {} : { ...collection.selected });
+        return {
+          ...state,
+          collections: { ...state.collections, [id]: { ...collection } }
+        };
+      } else {
+        return state;
+      }
+    case TOGGLE_SELECTED_ENTITIES:
+      console.log("Toggling selected entities");
+      collection = state.collections[id];
+      if (collection) {
+        collection.selected = action.ids.reduce((selected, id) => {
+          selected[id] = !collection.selected[id];
+          return selected;
+        }, action.clear ? {} : { ...collection.selected });
         return {
           ...state,
           collections: { ...state.collections, [id]: { ...collection } }
