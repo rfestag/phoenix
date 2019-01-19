@@ -121,10 +121,23 @@ class Rule extends React.Component {
     rule.value.push(value);
     this.props.onChange(null, rule);
   };
+  isValid = input => {
+    //Yea, this seems dumb. For whatever reason, without it, the bowels
+    //of react-select try to convert the value to a lowercase string.
+    //Adding this so that "falsey" values are treated as invalid
+    return input;
+  };
   render() {
     const { canRemove, onRemove, rule, fields } = this.props;
     const { field, op, value } = rule;
-    const { setField, createField, setOp, setValue, createValue } = this;
+    const {
+      setField,
+      createField,
+      setOp,
+      setValue,
+      createValue,
+      isValid
+    } = this;
 
     let fieldsList = fields
       ? fields.map(f => ({ label: f.headerName, value: f }))
@@ -143,6 +156,7 @@ class Rule extends React.Component {
               placeholder="Field..."
               options={fieldsList}
               value={fieldOption}
+              isValidNewOption={isValid}
               onCreateOption={createField}
               onChange={setField}
               isClearable

@@ -59,7 +59,7 @@ function toGql(query) {
   }
   return "";
 }
-let fieldNames = [
+let aircraftFields = [
   "ModeS",
   "FirstCreated",
   "LastModified",
@@ -70,13 +70,25 @@ let fieldNames = [
   "ICAOTypeCode",
   "Type",
   "SerialNo",
-  "PopularName",
-  "GenericName",
   "RegisteredOwners",
   "Interested",
   "UserTag"
 ];
-let fields = fieldNames.map(f => ({ headerName: f, field: f }));
+let aircraftTypeFields = [
+  "Icao",
+  "WakeTurbulence",
+  "Species",
+  "EngineType",
+  "EnginePlacement",
+  "Engines",
+  "Model",
+  "Manufacturer"
+];
+let aircraftOptions = aircraftFields.map(f => ({ headerName: f, field: f }));
+let aircraftTypeOptions = aircraftTypeFields.map(f => ({
+  headerName: f,
+  field: f
+}));
 class AdsbQueryForm extends React.Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
@@ -113,21 +125,21 @@ class AdsbQueryForm extends React.Component {
       <div>
         <h4>Mode-S Data</h4>
         <BooleanQueryBuilder
-          fields={fields}
+          fields={aircraftOptions}
           group={data.data}
           onChange={handleFormChange("data")}
           {...props}
         />
         <h4>Aircraft Information</h4>
         <BooleanQueryBuilder
-          fields={fields}
+          fields={aircraftOptions}
           group={data.acft}
           onChange={handleFormChange("acft")}
           {...props}
         />
         <h4>Aircraft Type Information</h4>
         <BooleanQueryBuilder
-          fields={fields}
+          fields={aircraftTypeOptions}
           group={data.acftType}
           onChange={handleFormChange("acftType")}
           {...props}

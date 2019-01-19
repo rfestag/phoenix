@@ -35,7 +35,7 @@ const getStyles = createSelector([getTheme], name => {
     menu: (provided, state) => {
       return state.options.length === 0
         ? { width: 0, height: 0 }
-        : { ...provided, background: appTheme.bodyBg };
+        : { ...provided, background: appTheme.bodyBg, zIndex: 2 };
     }
   };
 });
