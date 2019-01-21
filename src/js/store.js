@@ -4,6 +4,7 @@ import { combineReducers } from "redux";
 import { combineEpics } from "redux-observable";
 import collection from "../modules/collection/CollectionReducers";
 import { ageOffEpic } from "../modules/collection/CollectionEpics";
+import { enrichNewEntitiesEpic } from "../modules/enrich/EnrichEpics";
 import map from "../modules/map/MapReducers";
 import panel from "../modules/panel/PanelReducers";
 import metrics from "../modules/metrics/MetricsReducers";
@@ -13,7 +14,12 @@ import query, { sharedWorkerProxyEpic } from "../modules/query/QueryReducers";
 import { timeActionsMiddleware } from "../modules/metrics/MetricsMiddleware";
 //import query, { queryEpic, sharedWorkerProxyEpic } from "../modules/query/QueryReducers";
 
-export const rootEpic = combineEpics(sharedWorkerProxyEpic, ageOffEpic);
+export const rootEpic = combineEpics(
+  sharedWorkerProxyEpic,
+  ageOffEpic,
+  enrichNewEntitiesEpic
+);
+//export const rootEpic = combineEpics(sharedWorkerProxyEpic, ageOffEpic);
 
 const rootReducer = combineReducers({
   collection,
