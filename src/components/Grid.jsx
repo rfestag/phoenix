@@ -7,6 +7,7 @@ import { getColumnDefs } from "../modules/columns/Constants";
 import { setSelectedEntities } from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
 import _ from "lodash";
+import copyToClipboard from "../utils/copyToClipboard";
 
 const getTheme = (state, props) => state.settings.general.theme;
 const getGridThemeName = createSelector([getTheme], theme => {
@@ -75,12 +76,26 @@ export class Grid extends Component {
     });
     this.batchUpdatingSelect = false;
   };
+  onKeyPress = e => {
+    if (e.ctrlKey && e.key === "c") {
+      let focused = this.api.getFocusedCell();
+      if (focused) {
+        console.log("Focused", focused);
+        let row = this.api.getDisplayedRowAtIndex(focused.rowIndex);
+        console.log("Row", row);
+        let column = focused.column.colId;
+        let value = this.api.getValue(column, row);
+        copyToClipboard(value);
+      }
+    }
+  };
 
   render() {
     return (
       <div
         style={{ height: "100%", width: "100%" }}
         className={this.props.themeName}
+        onKeyPress={this.onKeyPress}
       >
         <AgGridReact
           // binding to array properties
