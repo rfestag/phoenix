@@ -4,6 +4,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import * as MapActions from "./MapActions";
 import {
+  setFocusedEntity,
   setSelectedEntities,
   toggleSelectedEntities
 } from "../collection/CollectionActions";
@@ -78,6 +79,7 @@ export class Map2D extends Component {
     layer: PropTypes.object.isRequired,
     overlays: PropTypes.array.isRequired,
     panels: PropTypes.object,
+    setFocusedEntity: PropTypes.func,
     setSelectedEntities: PropTypes.func,
     toggleSelectedEntities: PropTypes.func,
     emitTimingMetric: PropTypes.func
@@ -174,6 +176,7 @@ export class Map2D extends Component {
             <CollectionLayer
               key={cid}
               collection={collection}
+              onFocus={this.props.setFocusedEntity}
               onSelect={this.props.setSelectedEntities}
               onToggle={this.props.toggleSelectedEntities}
               onRender={this.props.emitTimingMetric}
@@ -217,6 +220,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       ...MapActions,
+      setFocusedEntity,
       setSelectedEntities,
       toggleSelectedEntities,
       emitTimingMetric

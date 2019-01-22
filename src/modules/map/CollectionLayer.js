@@ -336,6 +336,7 @@ export const CollectionLayer = Layer.extend({
     this.hovered = {};
     this.onSelect = props.onSelect;
     this.onToggle = props.onToggle;
+    this.onFocus = props.onFocus;
     this.setTimeRange(timeRange);
     this.setCollection(collection);
   },
@@ -634,6 +635,7 @@ export const CollectionLayer = Layer.extend({
       console.log("Clicked", clicked[0], this.onToggle);
       if (this.onToggle)
         this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
+      if (this.onFocus) this.onFocus(clicked[0].id);
     } else if (clicked.length > 1) {
       console.log("Find closest", clicked);
       if (this.onToggle)

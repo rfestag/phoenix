@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import QueryPanel from "./QueryPanel";
+import EntityPanel from "./EntityPanel";
 import { TabContent, TabPane } from "reactstrap";
 import {
   QUERY_PANE,
@@ -23,7 +24,7 @@ export default class LeftPanel extends Component {
           <QueryPanel />
         </TabPane>
         <TabPane tabId={ENTITY_PANE} style={{ height: "100%" }}>
-          TODO: Entity Panel
+          <EntityPanel />
         </TabPane>
         <TabPane tabId={FILTER_PANE} style={{ height: "100%" }}>
           TODO: Filter Panel

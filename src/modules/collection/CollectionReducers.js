@@ -13,7 +13,7 @@ import {
 } from "./CollectionActions";
 import { updateEntity } from "../entities/entities";
 import { getDefaultColumns } from "../columns/Constants";
-const initialState = { collections: {} };
+const initialState = { focused: null, collections: {} };
 
 function updateCollection(collection, action) {
   let fields = {
@@ -151,12 +151,16 @@ export default function(state = initialState, action) {
         current: id
       };
     case SET_FOCUSED_ENTITY:
+      console.log("FOCUSING", action);
       return {
         ...state,
+        focused: action.id
+        /*
         collections: {
           ...state.collections,
           [id]: { ...collection, focused: action.eid }
         }
+        */
       };
     default:
   }

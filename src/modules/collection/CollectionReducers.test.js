@@ -3,7 +3,7 @@ import * as actions from "./CollectionActions";
 
 describe("collection reducer", () => {
   it("should return the initial state", () => {
-    expect(reducer(undefined, {})).toEqual({ collections: {} });
+    expect(reducer(undefined, {})).toEqual({ collections: {}, focused: null });
   });
   it("should handle CREATE_COLLECTION", () => {
     expect(
@@ -41,7 +41,8 @@ describe("collection reducer", () => {
           visible: true
         }
       },
-      current: "cid"
+      current: "cid",
+      focused: null
     });
   });
 });
