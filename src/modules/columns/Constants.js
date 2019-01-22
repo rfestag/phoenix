@@ -98,7 +98,7 @@ export const getColumnDefs = createSelector(
       _.map(columns, c => {
         return {
           ...c,
-          cellRendererFramework: ValueRenderer,
+          //cellRendererFramework: ValueRenderer,
           valueGetter: GETTERS[c._getterName],
           valueFormatter: FORMATTERS[c._formatterName]
         };

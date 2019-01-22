@@ -23,12 +23,14 @@ function updateCollection(collection, action) {
   let data = _.reduce(
     action.data,
     (data, updates, id) => {
+      let isNew = data[id] === undefined;
       const [updatedEntity, updatedFields] = updateEntity(
         data[id],
         updates,
         fields,
         collection.ageoff
       );
+      updateEntity.isNew = isNew;
       data[id] = updatedEntity;
       fields = updatedFields;
       return data;

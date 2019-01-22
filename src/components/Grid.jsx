@@ -71,6 +71,7 @@ export class Grid extends Component {
     this.api = params.api;
     this.columnApi = params.columnApi;
     this.batchUpdatingSelect = true;
+    this.api.setRowData(this.props.data);
     this.api.forEachNode(node => {
       if (this.props.selected[node.id]) node.setSelected(true);
     });
@@ -91,6 +92,37 @@ export class Grid extends Component {
   };
 
   render() {
+    if (this.api) {
+      let start = Date.now();
+      let transaction = { update: [], add: [], remove: [] };
+      let keys = {};
+      let count = 0;
+      this.batchUpdatingSelect = true;
+      this.api.forEachNode((node, index) => {
+        count += 1;
+        keys[node.id] = true;
+        node.setSelected(Boolean(this.props.selected[node.id]));
+      });
+      this.batchUpdatingSelect = false;
+      if (count === 0) {
+        transaction = { add: this.props.data };
+      } else {
+        transaction = this.props.data.reduce((transaction, entity) => {
+          delete keys[entity.id];
+          try {
+            if (!this.api.getRowNode(entity.id)) transaction.add.push(entity);
+            else transaction.update.push(entity);
+          } catch (e) {
+            transaction.update.push(entity);
+          }
+          return transaction;
+        }, transaction);
+        transaction.remove = Object.keys(keys).map(id => ({ id }));
+      }
+      console.log("Transactions Calculated", Date.now() - start);
+      this.api.updateRowData(transaction);
+      console.log("Completed update", Date.now() - start);
+    }
     return (
       <div
         style={{ height: "100%", width: "100%" }}
@@ -100,9 +132,8 @@ export class Grid extends Component {
         <AgGridReact
           // binding to array properties
           onGridReady={this.onGridReady}
-          rowData={this.props.data}
+          //rowData={this.props.data}
           columnDefs={this.props.columns}
-          deltaRowDataMode={true}
           enableSorting={true}
           rowSelection="multiple"
           suppressRowClickSelection={true}

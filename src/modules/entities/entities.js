@@ -20,10 +20,24 @@ const defaultEntity = {
   }
 };
 
+/*
 export const createEntity = (def = defaultEntity) => ({
   ...def,
+  geometries: {...def.geometries},
+  properties: {...def.properties},
   when: { ...def.when }
 });
+*/
+export const createEntity = def => {
+  return def
+    ? def
+    : {
+        ...defaultEntity,
+        geometries: {},
+        properties: {},
+        when: { ...defaultEntity.when }
+      };
+};
 export const updateEntity = (e, updates, fields) => {
   const entity = updates.reduce((entity, update) => {
     if (!entity.id) entity.id = update.id;
@@ -36,6 +50,8 @@ export const updateEntity = (e, updates, fields) => {
       //entity.history.push(update.properties)
       //entity.properties = { ...entity.properties, ...update.properties }
 
+      //Immutable version
+      /*
       let updatedProperties = _.reduce(
         update.properties,
         (updatedProperties, update, field) => {
@@ -52,8 +68,27 @@ export const updateEntity = (e, updates, fields) => {
         {}
       );
       entity.properties = { ...entity.properties, ...updatedProperties };
+      */
+      //Mutable version
+      let updatedProperties = _.reduce(
+        update.properties,
+        (updatedProperties, update, field) => {
+          const { value, time } = update;
+          const prop = updatedProperties[field]
+            ? updatedProperties[field]
+            : createProperty(entity.properties[field]);
+          updatedProperties[field] = updateProperty(prop, value, time);
+          updateWhen(entity, time);
+          if (!fields.properties[field])
+            fields.properties[field] = createPropertyColumn(field, value);
+          return updatedProperties;
+        },
+        entity.properties
+      );
     }
     if (update.geometries) {
+      //Immutable verion
+      /*
       let updatedGeometries = _.reduce(
         update.geometries,
         (updatedGeometries, update, field) => {
@@ -69,6 +104,22 @@ export const updateEntity = (e, updates, fields) => {
         {}
       );
       entity.geometries = { ...entity.geometries, ...updatedGeometries };
+      */
+      //Mutable version
+      let updatedGeometries = _.reduce(
+        update.geometries,
+        (updatedGeometries, update, field) => {
+          const prop = updatedGeometries[field]
+            ? updatedGeometries[field]
+            : createGeometry(entity.geometries[field]);
+          updatedGeometries[field] = updateGeometry(prop, update);
+          updateWhen(entity, update.when.end || update.when.start);
+          if (!fields.geometries[field])
+            fields.geometries[field] = createGeometryColumn(field, update);
+          return updatedGeometries;
+        },
+        entity.geometries
+      );
     }
 
     return entity;

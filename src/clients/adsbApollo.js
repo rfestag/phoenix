@@ -6,6 +6,7 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { split } from "apollo-link";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
+import _ from "lodash";
 
 const uri = "http://localhost:4000/graphql";
 const wsUri = "ws://localhost:4000/subscriptions";
@@ -27,7 +28,7 @@ const link = split(
   httpLink
 );
 
-const client = new ApolloClient({
+export const client = new ApolloClient({
   link,
   cache: new InMemoryCache()
 });
@@ -55,6 +56,20 @@ function toGql(query) {
   return "";
 }
 
+export const toParams = args => {
+  let params = _.reduce(
+    args,
+    (params, v, k) => {
+      console.log("Parsing", k, v);
+      let gqlStr = toGql(v);
+      console.log("GQL", gqlStr);
+      if (gqlStr !== "") params.push(`${k}: ${gqlStr}`);
+      return params;
+    },
+    []
+  );
+  return params.length > 0 ? `(${params.join(",")})` : "";
+};
 const Api = {
   aircraft: (q = {}, opts = {}) => {
     q = `query: ${toGql(q)}`;
@@ -64,18 +79,6 @@ const Api = {
     if (opts !== "options: ") params.push(opts);
     params = params.join(",");
     if (params !== "") params = `(${params})`;
-    let blah = `
-      query {
-        aircraft${params} {
-          ModeS,
-          ModeSCountry,
-          Registration, 
-          Manufacturer,
-          ICAOTypeCode,
-          Type,
-          SerialNo,
-        }
-      }`;
     const query = gql`
       query {
         aircraft${params} {

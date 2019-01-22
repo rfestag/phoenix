@@ -16,6 +16,7 @@ import {
 import gql from "graphql-tag";
 import _ from "lodash";
 import form from "./AdsbApolloForm";
+import { toParams } from "../../clients/adsbApollo";
 
 /**
  * Connects to a websocket providing JSON data from ADSBExchange
@@ -119,10 +120,12 @@ export class ADSBApolloSource extends ApolloWsSource {
    * @return {Object} An RXJS Observable stream of *batches* of results.
    */
   query(def) {
+    console.log("Should subscribe with filter", def);
+    console.log("To params", toParams(def));
     return new Observable(observer => {
       const query = gql`
         subscription {
-          update {
+          update${toParams(def)} {
             updates {
               id
               time
@@ -134,8 +137,7 @@ export class ADSBApolloSource extends ApolloWsSource {
       //TODO: need to know how to complete
       this.client
         .subscribe({
-          query,
-          variables: {}
+          query
         })
         .subscribe({
           next(data) {
