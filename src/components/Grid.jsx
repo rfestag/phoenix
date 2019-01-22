@@ -6,6 +6,7 @@ import { AgGridReact } from "ag-grid-react";
 import { getColumnDefs } from "../modules/columns/Constants";
 import { setSelectedEntities } from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
+import { emitTimingMetric } from "../modules/metrics/MetricsActions";
 import _ from "lodash";
 import copyToClipboard from "../utils/copyToClipboard";
 
@@ -35,6 +36,7 @@ export class Grid extends Component {
     themeName: PropTypes.string,
     themeCss: PropTypes.any,
     selected: PropTypes.object,
+    emitTimingMetric: PropTypes.func,
     onSelectionChanged: PropTypes.func
   };
   static defaultProps = {
@@ -92,21 +94,37 @@ export class Grid extends Component {
   };
 
   render() {
+    //I found that using delta mode was a little slow (often over 100ms), and
+    //it doesn't deal with the new mutable nature of the collection. This
+    //appears to perform better, and handles mutable entities
     if (this.api) {
       let start = Date.now();
       let transaction = { update: [], add: [], remove: [] };
       let keys = {};
       let count = 0;
       this.batchUpdatingSelect = true;
+
+      //Start by manually setting everything as selected.
+      //While it may technically be more correct select after
+      //the update (to ensure any new entities that somehow may
+      //have been selected are marked), that case should be
+      //rare or non-existent. This avoids multiple iterations
+      //over the data.
       this.api.forEachNode((node, index) => {
         count += 1;
         keys[node.id] = true;
         node.setSelected(Boolean(this.props.selected[node.id]));
       });
       this.batchUpdatingSelect = false;
+
+      //If the grid has no data, initialize it by adding the collection
+      //data directly.
       if (count === 0) {
         transaction = { add: this.props.data };
-      } else {
+      }
+      //Otherwise, check to see if we already have it. Determine
+      //add vs update based on that.
+      else {
         transaction = this.props.data.reduce((transaction, entity) => {
           delete keys[entity.id];
           try {
@@ -117,11 +135,16 @@ export class Grid extends Component {
           }
           return transaction;
         }, transaction);
+        //Finally, remove any keys we didn't either add or update.
+        //These will be associated with entities that have aged off
+        //or been deleted
         transaction.remove = Object.keys(keys).map(id => ({ id }));
       }
-      console.log("Transactions Calculated", Date.now() - start);
+      //We explicitly do the synchronous update vs. async. The async
+      //logic adds unnecessary overhead, taking 50-100ms longer.
       this.api.updateRowData(transaction);
-      console.log("Completed update", Date.now() - start);
+      if (this.props.emitTimingMetric)
+        this.props.emitTimingMetric("GRID_UPDATE", Date.now() - start);
     }
     return (
       <div
@@ -130,9 +153,7 @@ export class Grid extends Component {
         onKeyPress={this.onKeyPress}
       >
         <AgGridReact
-          // binding to array properties
           onGridReady={this.onGridReady}
-          //rowData={this.props.data}
           columnDefs={this.props.columns}
           enableSorting={true}
           rowSelection="multiple"
@@ -158,6 +179,7 @@ function mapStateToProps(state, props) {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      emitTimingMetric,
       onSelectionChanged: setSelectedEntities
     },
     dispatch
