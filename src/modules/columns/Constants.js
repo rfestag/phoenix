@@ -1,5 +1,4 @@
 import { createSelector } from "reselect";
-import ValueRenderer from "./ValueRenderer";
 import moment from "moment";
 import _ from "lodash";
 

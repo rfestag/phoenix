@@ -9,7 +9,6 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { split } from "apollo-link";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
-import { Source } from "./source";
 
 const uri = "http://localhost:4000/graphql";
 const wsUri = "ws://localhost:4000/subscriptions";

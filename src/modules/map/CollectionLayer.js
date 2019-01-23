@@ -1,13 +1,5 @@
 import { MapLayer, withLeaflet } from "react-leaflet";
-import {
-  Layer,
-  LatLng,
-  Point,
-  Bounds,
-  Browser,
-  DomUtil,
-  DomEvent
-} from "leaflet";
+import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
 import { Stage, Line, Circle, FastLayer } from "konva";
 import { Util } from "leaflet";
 import _ from "lodash";
@@ -214,15 +206,6 @@ export const CollectionLayer = Layer.extend({
     this.getPane().appendChild(this._container);
     //TODO: Properly register this so that we can remove the handler
     this._map.on("mousemove", Util.throttle(this._onMouseMove, 32, this), this);
-    /*
-    DomEvent.on(
-      container,
-      //"click dblclick mousedown mouseup contextmenu",
-      "click",
-      this._onClick,
-      this
-    );
-    */
     //We check for dragging outside of the actual throttle so we can still render after
     this.throttleRedraw = _.throttle(self.redraw, 200);
     this._map.on("movestart", this._onMoveStart, this);
@@ -235,7 +218,6 @@ export const CollectionLayer = Layer.extend({
   onRemove: function() {
     destroyNode(this.stage);
     DomUtil.remove(this._container);
-    //DomEvent.off(this._container);
     this._map.off("moveend", this.throttleRedraw);
     delete this._container;
   },

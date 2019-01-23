@@ -45,7 +45,6 @@ function toGql(query) {
     return rules.length ? `{or:[${parsed}]}` : "";
   }
   if (field && op) {
-    field = field;
     if (op === "exists") {
       return `{field: ${field}, op: ${op}}`;
     } else if (values) {
