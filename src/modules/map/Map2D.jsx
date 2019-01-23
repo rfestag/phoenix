@@ -65,6 +65,7 @@ export class Map2D extends Component {
     super(props);
     this.map = React.createRef();
     this.canvas = L.canvas();
+    this.collectionLayerRefs = [];
     this.state = {
       miniMapActive: false,
       center: props.center,
@@ -107,6 +108,13 @@ export class Map2D extends Component {
           //Do nothing. This can happen in polar projections when you pan too far out
         }
       });
+      map.on("click", function(e) {
+        for (let ref of self.collectionLayerRefs) {
+          if (ref && ref.leafletElement) {
+            ref.leafletElement._onClick(e);
+          }
+        }
+      });
       self.setState({
         center: map.getCenter(),
         zoom: map.getZoom() - 4,
@@ -143,6 +151,7 @@ export class Map2D extends Component {
   };
 
   render() {
+    let cids = Object.keys(this.props.collections);
     return (
       <Map
         ref={this.map}
@@ -175,6 +184,7 @@ export class Map2D extends Component {
           return (
             <CollectionLayer
               key={cid}
+              ref={ref => (this.collectionLayerRefs[cids.indexOf(cid)] = ref)}
               collection={collection}
               onFocus={this.props.setFocusedEntity}
               onSelect={this.props.setSelectedEntities}

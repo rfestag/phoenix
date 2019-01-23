@@ -214,6 +214,7 @@ export const CollectionLayer = Layer.extend({
     this.getPane().appendChild(this._container);
     //TODO: Properly register this so that we can remove the handler
     this._map.on("mousemove", Util.throttle(this._onMouseMove, 32, this), this);
+    /*
     DomEvent.on(
       container,
       //"click dblclick mousedown mouseup contextmenu",
@@ -221,6 +222,7 @@ export const CollectionLayer = Layer.extend({
       this._onClick,
       this
     );
+    */
     //We check for dragging outside of the actual throttle so we can still render after
     this.throttleRedraw = _.throttle(self.redraw, 200);
     this._map.on("movestart", this._onMoveStart, this);
@@ -233,8 +235,7 @@ export const CollectionLayer = Layer.extend({
   onRemove: function() {
     destroyNode(this.stage);
     DomUtil.remove(this._container);
-    DomEvent.off(this._container);
-    this._map.off("zoomend", this.throttleRedraw);
+    //DomEvent.off(this._container);
     this._map.off("moveend", this.throttleRedraw);
     delete this._container;
   },
@@ -282,11 +283,13 @@ export const CollectionLayer = Layer.extend({
         y = -b.min.y;
       const position = stage.position();
       if (width !== container.width) {
+        container.style.position = "absolute";
         container.width = width;
         container.style.width = x + "px";
         stage.width(width);
       }
       if (height !== container.height) {
+        container.style.position = "absolute";
         container.height = height;
         container.style.height = y + "px";
         stage.height(height);
@@ -628,6 +631,7 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw();
   },
   _onClick: function(e) {
+    console.log("Checking click on", this.collection.id);
     let { shiftKey, ctrlKey } = e;
     let clear = !shiftKey && !ctrlKey;
     let clicked = Object.keys(this.hovered).map(id => this.collection.data[id]);
@@ -643,7 +647,7 @@ export const CollectionLayer = Layer.extend({
     }
 
     //This is to stop the context menu popup. May want to move to its own handler?
-    e.preventDefault();
+    //e.preventDefault();
   }
 });
 

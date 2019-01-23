@@ -143,8 +143,8 @@ export class Grid extends Component {
       //We explicitly do the synchronous update vs. async. The async
       //logic adds unnecessary overhead, taking 50-100ms longer.
       this.api.updateRowData(transaction);
-      if (this.props.emitTimingMetric)
-        this.props.emitTimingMetric("GRID_UPDATE", Date.now() - start);
+      //if (this.props.emitTimingMetric)
+      //this.props.emitTimingMetric("GRID_UPDATE", Date.now() - start);
     }
     return (
       <div

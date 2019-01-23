@@ -17,6 +17,12 @@ import {
 } from "../modules/panel/PanelActions";
 import TabMenu from "./TabMenu";
 
+/*
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+*/
+
 const OuterPanel = styled.div`
   display: flex;
   flex-direction: column;
@@ -56,6 +62,7 @@ export class CollectionGridTabs extends React.Component {
     super(props);
 
     this.state = {
+      activeTab: 0,
       position: 0,
       sliding: false
     };
@@ -92,6 +99,11 @@ export class CollectionGridTabs extends React.Component {
   };
   onMenuAction = action => {
     console.log("TODO: Handle", action);
+  };
+  handleChange = (event, activeTab) => {
+    const collections = Object.keys(this.props.collections);
+    this.props.onTabChange(collections[activeTab]);
+    this.setState({ activeTab });
   };
   render() {
     return (
@@ -136,6 +148,29 @@ export class CollectionGridTabs extends React.Component {
             <ColumnsIcon />
           </Button>
         </TabCarousel>
+        {/*
+        <AppBar position="static" color="default" style={{zIndex: 0, flexDirection: 'row', display: 'flex'}}>
+          <Tabs
+            value={this.state.activeTab}
+            onChange={this.handleChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="scrollable"
+            scrollButtons="auto"
+            style={{flex: 1}}
+          >
+            {_.map(this.props.collections, (collection, id) => (
+              <Tab key={id} label={collection.name} />
+            ))}
+          </Tabs>
+          <Button
+            active={this.props.columnPaneActive}
+            onClick={this.props.onColumManagerClicked}
+          >
+            <ColumnsIcon />
+          </Button>
+        </AppBar>
+        */}
         <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>
           <TabPane tabId={this.props.activeTab} style={{ height: "100%" }}>
             <Grid

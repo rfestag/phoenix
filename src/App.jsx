@@ -10,6 +10,7 @@ import { ThemeProvider } from "styled-components";
 import { createSelector } from "reselect";
 import { connect } from "react-redux";
 import { light, dark } from "./themes";
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 const themeProps = {
   light,
@@ -19,6 +20,22 @@ const themeProps = {
 const getTheme = (state, props) => state.settings.general.theme;
 const getThemeProps = createSelector([getTheme], theme => {
   return themeProps[theme];
+});
+const getMuiThemeProps = createSelector([getTheme], themeName => {
+  let theme = themeProps[themeName];
+  console.log("Theme", themeName, theme);
+  return createMuiTheme({
+    palette: {
+      type: themeName,
+      primary: {
+        main: theme.active
+      },
+      grey: {
+        900: theme.secondary
+      }
+    },
+    typography: { useNextVariants: true }
+  });
 });
 
 const Outer = styled.div`
@@ -43,7 +60,7 @@ const Main = styled.div`
   }
   */
 
-const App = ({ themeName, themeProps }) => (
+const App = ({ themeName, themeProps, muiThemeProps }) => (
   <div>
     <link
       rel={themeName === "light" ? "stylesheet" : "stylesheet alternate"}
@@ -56,31 +73,35 @@ const App = ({ themeName, themeProps }) => (
       href={process.env.PUBLIC_URL + "/dark.css"}
     />
     <ThemeProvider theme={themeProps}>
-      <Outer>
-        <SettingsModal />
-        <Banner>Phoenix GIS</Banner>
-        <TopMenu />
-        <Main>
-          <LeftMenu />
-          <MainPanels />
-        </Main>
-        <Banner>
-          Copyright &copy; 2018 Phoenix Project Team. All rights reserved
-        </Banner>
-      </Outer>
+      <MuiThemeProvider theme={muiThemeProps}>
+        <Outer>
+          <SettingsModal />
+          <Banner>Phoenix GIS</Banner>
+          <TopMenu />
+          <Main>
+            <LeftMenu />
+            <MainPanels />
+          </Main>
+          <Banner>
+            Copyright &copy; 2018 Phoenix Project Team. All rights reserved
+          </Banner>
+        </Outer>
+      </MuiThemeProvider>
     </ThemeProvider>
   </div>
 );
 
 App.propTypes = {
   themeName: PropTypes.string.isRequired,
-  themeProps: PropTypes.object.isRequired
+  themeProps: PropTypes.object.isRequired,
+  muiThemeProps: PropTypes.object.isRequired
 };
 
 function mapStateToProps(state, props) {
   return {
     themeName: getTheme(state, props),
-    themeProps: getThemeProps(state, props)
+    themeProps: getThemeProps(state, props),
+    muiThemeProps: getMuiThemeProps(state, props)
   };
 }
 export default connect(mapStateToProps, null)(App);
