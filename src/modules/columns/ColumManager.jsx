@@ -39,7 +39,17 @@ export class ColumnManager extends Component {
     this.state = { columns, geometries };
   }
   componentDidUpdate(oldProps) {
-    if (
+    //If the collection changes, drop old state
+    if (oldProps.collection !== this.props.collection) {
+      let columns = { ...this.props.columns };
+      let geometries = { ...this.props.geometries };
+      this.setState({ columns, geometries });
+    }
+    //If the collection is the same, but the props/geoms changed,
+    //merge the current state over the props. This should only happen
+    //when new things are added, so we want to keep the current state and
+    //just show the new fields
+    else if (
       oldProps.columns !== this.props.columns ||
       oldProps.geometries !== this.props.geometries
     ) {
