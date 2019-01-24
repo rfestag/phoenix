@@ -5,6 +5,7 @@ import { Button, ButtonGroup, Form, FormGroup, Label, Input } from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import FilterableDropdownTree from "./FilterableDropdownTree";
+import Ageoff from "./Ageoff";
 import * as sources from "../modules/sources/SourceMap";
 import Select from "./Select";
 import _ from "lodash";
@@ -134,7 +135,12 @@ export class QueryPanel extends React.Component {
     this.state = {
       name: "",
       source: sources["ADSBApollo"],
-      query: { data: defaultQuery, acft: defaultQuery, acftType: defaultQuery }
+      query: {
+        data: { ...defaultQuery },
+        acft: { ...defaultQuery },
+        acftType: { ...defaultQuery }
+      },
+      ageoff: { ageoff: 90, unit: "seconds" }
     };
   }
   static propTypes = {
@@ -143,12 +149,21 @@ export class QueryPanel extends React.Component {
   clear = () => {
     this.setState({
       name: "",
-      query: { data: defaultQuery, acft: defaultQuery, acftType: defaultQuery }
+      source: sources["ADSBApollo"],
+      query: {
+        data: { ...defaultQuery },
+        acft: { ...defaultQuery },
+        acftType: { ...defaultQuery }
+      },
+      ageoff: { ageoff: 90, unit: "seconds" }
     });
   };
   setName = e => {
     let name = e.target.value;
     this.setState({ name });
+  };
+  setAgeoff = ageoff => {
+    this.setState({ ageoff });
   };
   setSource = option => {
     console.log("Setting source", option.value);
@@ -172,8 +187,15 @@ export class QueryPanel extends React.Component {
     this.setState({ query });
   };
   render() {
-    const { name, query, source } = this.state;
-    const { setName, setSource, clear, execute, handleFormUpdate } = this;
+    const { name, query, source, ageoff } = this.state;
+    const {
+      setName,
+      setSource,
+      setAgeoff,
+      clear,
+      execute,
+      handleFormUpdate
+    } = this;
     const sourceOptions = _.map(sources, value => ({
       label: value.name,
       value
@@ -194,14 +216,6 @@ export class QueryPanel extends React.Component {
         >
           <PerfectScrollbar>
             <FormGroup>
-              <Label for="source">Source</Label>
-              <Select
-                options={sourceOptions}
-                value={currentSource}
-                onChange={setSource}
-              />
-            </FormGroup>
-            <FormGroup>
               <Label for="name">Name</Label>
               <Input
                 value={name}
@@ -211,6 +225,18 @@ export class QueryPanel extends React.Component {
                 placeholder="Query Name"
                 onChange={setName}
               />
+            </FormGroup>
+            <FormGroup>
+              <Label for="source">Source</Label>
+              <Select
+                options={sourceOptions}
+                value={currentSource}
+                onChange={setSource}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="ageoff">Age-Off</Label>
+              <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
             </FormGroup>
             {/*<div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
