@@ -35,6 +35,7 @@ import {
   pipe
 } from "rxjs/operators";
 import "babel-polyfill";
+import _ from "lodash";
 
 export function collectBy(field) {
   return source => {
@@ -60,8 +61,10 @@ export function mapToCollection(action$) {
   return function mapToCollectionImplementation(src) {
     return src.pipe(
       mergeMap(action => {
-        const adapter = sources[action.source].query(action.query);
-        const dictionary = sources[action.source].dictionary(action.query);
+        const sourceAdapter = _.find(sources, s => s.name === action.source);
+        console.log("Source adapter", sourceAdapter, action.source, sources);
+        const adapter = sourceAdapter.query(action.query);
+        const dictionary = sourceAdapter.dictionary(action.query);
         const id = action.id;
         const name = action.name || id;
         const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value

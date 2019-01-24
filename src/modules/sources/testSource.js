@@ -1,6 +1,6 @@
 import { Source } from "./source";
 import { interval } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, take } from "rxjs/operators";
 import { createTrackPoint } from "../entities/geometries";
 
 /**
@@ -26,7 +26,6 @@ export class TestSource extends Source {
     return interval(1000).pipe(
       map(v => {
         const data = [];
-        /*
         for (let i = 0; i < 100; i++) {
           let time = Date.now();
           let lat = { time, value: Math.random() * 180 - 90 };
@@ -44,9 +43,9 @@ export class TestSource extends Source {
             properties: { lat, lng, Alt: alt }
           };
         }
-        */
         return data;
-      })
+      }),
+      take(10)
     );
   }
 }
