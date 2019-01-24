@@ -1,7 +1,6 @@
 import { MapLayer, withLeaflet } from "react-leaflet";
 import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
 import { Stage, Line, Circle, FastLayer } from "konva";
-import { Util } from "leaflet";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 
@@ -202,12 +201,10 @@ export const CollectionLayer = Layer.extend({
   beforeAdd: function(map) {},
   onAdd: function() {
     const container = (this._container = document.createElement("div"));
-    const self = this;
     this.getPane().appendChild(this._container);
     //TODO: Properly register this so that we can remove the handler
-    this._map.on("mousemove", Util.throttle(this._onMouseMove, 32, this), this);
     //We check for dragging outside of the actual throttle so we can still render after
-    this.throttleRedraw = _.throttle(self.redraw, 200);
+    this.throttleRedraw = _.throttle(this.redraw, 200, this);
     this._map.on("movestart", this._onMoveStart, this);
     this._map.on("moveend", this._onMoveEnd, this);
     this._map.on("zoomend", this.throttleRedraw, this);

@@ -16,7 +16,7 @@ import MapToolbar from "./MapToolbar";
 import _ from "lodash";
 import { createSelector } from "reselect";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
-import L from "leaflet";
+import L, { Util } from "leaflet";
 //import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
 import MiniMap from "./MiniMap";
@@ -92,30 +92,58 @@ export class Map2D extends Component {
     console.log("MOUNTING MAP");
     if (map) {
       map.invalidateSize();
-      map.on("zoomend", function() {
-        try {
-          self.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
-        } catch (e) {
-          console.log("Sad panda zoom");
-          //Do nothing. This can happen in polar projections when you pan too far out
-        }
-      });
-      map.on("moveend", function() {
-        try {
-          self.setState({ center: map.getCenter(), bounds: map.getBounds() });
-        } catch (e) {
-          console.log("Sad panda move");
-          //Do nothing. This can happen in polar projections when you pan too far out
-        }
-      });
-      map.on("click", function(e) {
-        for (let ref of self.collectionLayerRefs) {
-          if (ref && ref.leafletElement) {
-            ref.leafletElement._onClick(e);
+      map.on(
+        "zoomend",
+        () => {
+          try {
+            this.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
+          } catch (e) {
+            console.log("Sad panda zoom");
+            //Do nothing. This can happen in polar projections when you pan too far out
           }
-        }
-      });
-      self.setState({
+        },
+        this
+      );
+      map.on(
+        "moveend",
+        () => {
+          try {
+            this.setState({ center: map.getCenter(), bounds: map.getBounds() });
+          } catch (e) {
+            console.log("Sad panda move");
+            //Do nothing. This can happen in polar projections when you pan too far out
+          }
+        },
+        this
+      );
+      map.on(
+        "click",
+        e => {
+          for (let ref of this.collectionLayerRefs) {
+            if (ref && ref.leafletElement) {
+              ref.leafletElement._onClick(e);
+            }
+          }
+        },
+        this
+      );
+      map.on(
+        "mousemove",
+        Util.throttle(
+          e => {
+            for (let ref of this.collectionLayerRefs) {
+              if (ref && ref.leafletElement) {
+                ref.leafletElement._onMouseMove(e);
+              }
+            }
+          },
+          32,
+          this
+        ),
+        this
+      );
+
+      this.setState({
         center: map.getCenter(),
         zoom: map.getZoom() - 4,
         bounds: map.getBounds()
