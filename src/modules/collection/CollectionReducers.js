@@ -52,7 +52,7 @@ export default function(state = initialState, action) {
       } else {
         collection = {
           id,
-          ageoff: { value: 30, unit: "seconds" },
+          ageoff: { value: 90, unit: "seconds" },
           name: action.name,
           queries: action.queries,
           visible: true,

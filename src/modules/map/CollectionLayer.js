@@ -3,6 +3,7 @@ import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
 import { Stage, Line, Circle, FastLayer } from "konva";
 import _ from "lodash";
 import * as turf from "@turf/turf";
+import moment from "moment";
 
 const MIN_SIMPLIFY_ZOOM = 6;
 //const MAX_SIMPLIFY_ZOOM = 8;
@@ -252,6 +253,10 @@ export const CollectionLayer = Layer.extend({
         container = this._container,
         size = b.getSize(),
         m = Browser.retina ? 2 : 1;
+      let ageoff = this.collection.ageoff;
+      let minTime = ageoff
+        ? moment().subtract(ageoff.value, ageoff.unit)
+        : undefined;
 
       DomUtil.setPosition(container, b.min);
 
@@ -280,7 +285,7 @@ export const CollectionLayer = Layer.extend({
       const newEntities = _.reduce(
         this.collection.data,
         (entities, entity, id) => {
-          entities[id] = this._updateEntity(entity, id);
+          entities[id] = this._updateEntity(entity, id, minTime);
           return entities;
         },
         {}
@@ -347,18 +352,18 @@ export const CollectionLayer = Layer.extend({
       false
     );
   },
-  _updateEntity: function(entity, id) {
+  _updateEntity: function(entity, id, minTime) {
     const e = (this.entities[id] = _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
-        geoms[field] = this._updateGeometry(geom, field, id, geoms);
+        geoms[field] = this._updateGeometry(geom, field, id, geoms, minTime);
         return geoms;
       },
       this.entities[id] || {}
     ));
     return e;
   },
-  _updateGeometry: function(geometryCollection, field, id, geoms) {
+  _updateGeometry: function(geometryCollection, field, id, geoms, minTime) {
     return (geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
@@ -367,16 +372,28 @@ export const CollectionLayer = Layer.extend({
           this.collection.selected && this.collection.selected[id];
         //Update the shape itself
         if (geometry.etype === "Track" || geometry.type === "LineString") {
-          geom[idx] = this._renderLine(geometry, geom[idx], hovered, selected);
+          geom[idx] = this._renderLine(
+            geometry,
+            geom[idx],
+            hovered,
+            selected,
+            minTime
+          );
         } else if (geometry.type === "Point") {
-          geom[idx] = this._renderPoint(geometry, geom[idx], hovered, selected);
+          geom[idx] = this._renderPoint(
+            geometry,
+            geom[idx],
+            hovered,
+            selected,
+            minTime
+          );
         }
         return geom;
       },
       geoms[field] || {}
     ));
   },
-  _renderPoint: function(geom, shape, hovered, selected) {
+  _renderPoint: function(geom, shape, hovered, selected, minTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
     const rendered = _.reduce(
       this._allBounds,
@@ -419,7 +436,7 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderLine: function(geom, shape, hovered, selected) {
+  _renderLine: function(geom, shape, hovered, selected, minTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
     const rendered = _.reduce(
@@ -436,6 +453,8 @@ export const CollectionLayer = Layer.extend({
               ? [geom.coordinates, geom.coordinates]
               : geom.coordinates;
           if (zoom < MIN_SIMPLIFY_ZOOM) {
+            //TODO: If this is a track, find last point before minTime (i.e., just outside the time window),
+            //then interpolate the position at minTime. Use that as p1
             const p1 = coordinates[0];
             const p2 = coordinates[coordinates.length - 1];
             const pt1 = this._map.latLngToLayerPoint(
@@ -452,7 +471,18 @@ export const CollectionLayer = Layer.extend({
             ];
           } else {
             //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
-            points = coordinates.reduce((pts, p) => {
+            let foundStart = false;
+            points = coordinates.reduce((pts, p, i) => {
+              if (geom.etype === "Track") {
+                if (geom.times[i] > minTime) {
+                  if (!foundStart) {
+                    //TODO: interpolate the position at minTime and prepend it
+                    foundStart = true;
+                  }
+                } else {
+                  return pts;
+                }
+              }
               const pt = this._map.latLngToLayerPoint(
                 new LatLng(p[1], p[0] + transform, p[2])
               );
@@ -461,32 +491,34 @@ export const CollectionLayer = Layer.extend({
               return pts;
             }, points);
           }
-          //Special case - if this is a track of one point so far,
-          //we tweak the points to make it visible
-          if (geom.type === "Point") {
-            points[2] += 1;
-            points[3] += 1;
+          if (points.length > 0) {
+            //Special case - if this is a track of one point so far,
+            //we tweak the points to make it visible
+            if (points.length === 1) {
+              points[2] = points[0] + 1;
+              points[3] = points[1] + 1;
+            }
+            if (shape && shape.constructor !== Line) {
+              shape.destroy();
+              shape = undefined;
+            }
+            if (!shape) {
+              shape = new Line({
+                shadowForStrokeEnabled: false,
+                fillEnabled: false,
+                strokeHitEnabled: false,
+                listening: false,
+                perfectDrawEnabled: true,
+                strokeWidth: 2
+              });
+              this.layer.add(shape);
+            }
+            shape.geom = geom;
+            shape.points(points);
+            shape.tension(0.5);
+            hovered ? hoverStyle(shape) : style(shape, selected);
+            shape.show();
           }
-          if (shape && shape.constructor !== Line) {
-            shape.destroy();
-            shape = undefined;
-          }
-          if (!shape) {
-            shape = new Line({
-              shadowForStrokeEnabled: false,
-              fillEnabled: false,
-              strokeHitEnabled: false,
-              listening: false,
-              perfectDrawEnabled: true,
-              strokeWidth: 2
-            });
-            this.layer.add(shape);
-          }
-          shape.geom = geom;
-          shape.points(points);
-          shape.tension(0.5);
-          hovered ? hoverStyle(shape) : style(shape, selected);
-          shape.show();
         }
         return rendered;
       },
