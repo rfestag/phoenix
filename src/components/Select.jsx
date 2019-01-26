@@ -13,7 +13,8 @@ const getStyles = createSelector([getTheme], name => {
     control: (provided, state) => ({
       ...provided,
       backgroundColor: appTheme.inputBg,
-      borderRadius: 0
+      borderRadius: 0,
+      borderColor: state.isFocused ? appTheme.active : provided.borderColor
     }),
     singleValue: provided => ({
       ...provided,
@@ -28,8 +29,14 @@ const getStyles = createSelector([getTheme], name => {
         ...provided,
         backgroundColor: state.isFocused
           ? appTheme.active
-          : provided.backgroundColor,
-        color: state.isFocused ? appTheme.activeColor : provided.color
+          : state.isSelected
+            ? appTheme.bodyCoclor
+            : provided.backgroundColor,
+        color: state.isFocused
+          ? appTheme.activeColor
+          : state.isSelected
+            ? appTheme.color
+            : provided.color
       };
     },
     menu: (provided, state) => {

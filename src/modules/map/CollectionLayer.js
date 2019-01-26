@@ -610,9 +610,10 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw();
   },
   _onClick: function(e) {
-    console.log("Checking click on", this.collection.id);
-    let { shiftKey, ctrlKey } = e;
+    console.log("Checking click on", this.collection.id, e);
+    let { shiftKey, ctrlKey } = e.originalEvent;
     let clear = !shiftKey && !ctrlKey;
+    console.log("Should clear", clear);
     let clicked = Object.keys(this.hovered).map(id => this.collection.data[id]);
     if (clicked.length === 1) {
       console.log("Clicked", clicked[0], this.onToggle);

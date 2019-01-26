@@ -215,6 +215,7 @@ export class QueryPanel extends React.Component {
           style={{ width: "100%", flex: 1, padding: 10, overflow: "hidden" }}
         >
           <PerfectScrollbar>
+            <h3>Query</h3>
             <FormGroup>
               <Label for="name">Name</Label>
               <Input
@@ -241,6 +242,7 @@ export class QueryPanel extends React.Component {
             {/*<div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
             </div>*/}
+            <h3>Criteria</h3>
             {source.Form && (
               <source.Form data={query} onChange={handleFormUpdate} />
             )}
