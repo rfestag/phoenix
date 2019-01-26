@@ -614,7 +614,10 @@ export const CollectionLayer = Layer.extend({
     let { shiftKey, ctrlKey } = e.originalEvent;
     let clear = !shiftKey && !ctrlKey;
     console.log("Should clear", clear);
-    let clicked = Object.keys(this.hovered).map(id => this.collection.data[id]);
+    let clicked = Object.keys(this.hovered).reduce((clicked, id) => {
+      if (this.collection.data[id]) clicked.push(this.collection.data[id]);
+      return clicked;
+    }, []);
     if (clicked.length === 1) {
       console.log("Clicked", clicked[0], this.onToggle);
       if (this.onToggle)

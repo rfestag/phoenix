@@ -19,10 +19,11 @@ const Title = styled.h4`
   pointer-events: none;
 `;
 const CloseButton = styled(Button)`
-  line-height: ${props => props.theme.lineHeightLg};
   position: absolute;
   right: 0;
   z-index: 1;
+  height: 100%;
+  width: 48px;
   &:hover {
     background-color: ${props => props.theme.danger} !important;
   }
@@ -35,7 +36,7 @@ const Dialog = ({ onClose, title, children, ...props }) => (
   <ReactModal {...props}>
     <Wrapper>
       <TitleBar>
-        <CloseButton onClick={onClose} size="lg" close="true">
+        <CloseButton onClick={onClose} size="lg" close>
           &times;
         </CloseButton>
         <Title>{title}</Title>

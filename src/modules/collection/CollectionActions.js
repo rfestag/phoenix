@@ -1,6 +1,6 @@
 /* Types */
 export const AGEOFF_COLLECTION = "AGEOFF_COLLECTION";
-export const SET_ENTITY_AGEOFF = "SET_AGEOFF";
+export const SET_AGEOFF = "SET_AGEOFF";
 export const SET_OBSERVATION_AGEOFF = "SET_AGEOFF";
 export const CREATE_COLLECTION = "CREATE_COLLECTION";
 export const DELETE_COLLECTION = "DELETE_COLLECTION";
@@ -101,8 +101,8 @@ export const deleteFromCollection = (id, ids) => ({
 /**
  * NOT IMPLEMENTED YET, DO NOT USE
  */
-export const setEntityAgeoff = (id, ageoff) => ({
-  type: SET_ENTITY_AGEOFF,
+export const setAgeoff = (id, ageoff) => ({
+  type: SET_AGEOFF,
   id,
   ageoff
 });

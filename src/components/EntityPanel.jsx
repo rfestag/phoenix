@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import EntityDetails from "./EntityDetails";
+import EntityList from "./EntityList";
 import { createSelector } from "reselect";
 import { connect } from "react-redux";
 import _ from "lodash";
@@ -26,7 +28,7 @@ export class EntityPanel extends Component {
 
   render() {
     let { entity } = this.props;
-    return <span>{entity ? entity.id : "No selected entity"}</span>;
+    return entity ? <EntityDetails entity={entity} /> : <EntityList />;
   }
 }
 
