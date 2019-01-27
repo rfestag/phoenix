@@ -188,6 +188,50 @@ function hoverStyle(shape) {
   shape.stroke("yellow");
   shape.moveToTop();
 }
+function geomInTime(geom, minTime, maxTime) {
+  //We do this just in case there is only a start or end for some
+  //reason.
+  let { start, end } = geom.when;
+
+  //If we have some sort of time bounds and a time to work with...
+  if (minTime && start) {
+    //Return undefined if the geom is completely before or after the region
+    if (end && end < minTime) {
+      return false;
+    }
+    if (maxTime && start > maxTime) return false;
+  }
+  return true;
+}
+function timeBoundedGeom(geom, minTime, maxTime) {
+  //We do this just in case there is only a start or end for some
+  //reason.
+  let start = geom.when.start || geom.when.end;
+  let end = geom.when.end || geom.when.start;
+
+  //If we have some sort of time bounds and a time to work with...
+  if (minTime && start) {
+    //Return undefined if the geom is completely before or after the region
+    if (end < minTime) return undefined;
+    if (maxTime && start > maxTime) return undefined;
+
+    //If it is a track, calculate partial segment.
+    if (geom.etype === "Track" && geom.type === "LineString") {
+      //TODO: Interpolate start/end
+      let coordinates = [],
+        times = [];
+      for (let i in geom.times) {
+        let t = geom.times[i];
+        if (t > minTime && (!maxTime || t < maxTime)) {
+          coordinates.push(geom.coordinates[i]);
+          times.push(t);
+        }
+      }
+      geom = { ...geom, times, coordinates };
+    }
+  }
+  return geom;
+}
 export const CollectionLayer = Layer.extend({
   options: {
     // @option padding: Number = 0.1
@@ -254,9 +298,8 @@ export const CollectionLayer = Layer.extend({
         size = b.getSize(),
         m = Browser.retina ? 2 : 1;
       let ageoff = this.collection.ageoff;
-      let minTime = ageoff
-        ? moment().subtract(ageoff.value, ageoff.unit)
-        : undefined;
+      let minTime = this.getMinTime();
+      let maxTime = undefined; //This is a placeholder until we have full time regions
 
       DomUtil.setPosition(container, b.min);
 
@@ -285,7 +328,7 @@ export const CollectionLayer = Layer.extend({
       const newEntities = _.reduce(
         this.collection.data,
         (entities, entity, id) => {
-          entities[id] = this._updateEntity(entity, id, minTime);
+          entities[id] = this._updateEntity(entity, id, minTime, maxTime);
           return entities;
         },
         {}
@@ -334,13 +377,28 @@ export const CollectionLayer = Layer.extend({
     this.collection = collection;
     this.redraw();
   },
+  getMinTime: function() {
+    let ageoff = this.collection.ageoff;
+    return ageoff
+      ? moment()
+          .subtract(ageoff.value, ageoff.unit)
+          .valueOf()
+      : undefined;
+  },
   _closeTo: function(geom, allBoxes) {
+    let minTime = this.getMinTime();
+    let maxTime = undefined; //Placeholder
     return _.reduce(
       allBoxes,
       (close, box) => {
         const [, clickBounds, clickBox] = box;
         if (close) return close;
         if (!touchBounds(geom, clickBounds)) return false;
+        //TODO: Find a more efficient way to do this. As tracks grow,
+        //we'll get more false positives, making this object creation
+        //much more expensive
+        geom = timeBoundedGeom(geom, minTime, maxTime);
+        if (geom === undefined) return false;
         if (geom.type === "Point") return true;
         else {
           return (
@@ -352,21 +410,37 @@ export const CollectionLayer = Layer.extend({
       false
     );
   },
-  _updateEntity: function(entity, id, minTime) {
+  _updateEntity: function(entity, id, minTime, maxTime) {
     const e = (this.entities[id] = _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
-        geoms[field] = this._updateGeometry(geom, field, id, geoms, minTime);
+        geoms[field] = this._updateGeometry(
+          geom,
+          field,
+          id,
+          geoms,
+          minTime,
+          maxTime
+        );
         return geoms;
       },
       this.entities[id] || {}
     ));
     return e;
   },
-  _updateGeometry: function(geometryCollection, field, id, geoms, minTime) {
+  _updateGeometry: function(
+    geometryCollection,
+    field,
+    id,
+    geoms,
+    minTime,
+    maxTime
+  ) {
     return (geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
+        //geometry = timeBoundedGeom(geometry, minTime, maxTime)
+        //if (geometry === undefined) return geom
         const hovered = this.hovered[id] && this.hovered[id][field];
         const selected =
           this.collection.selected && this.collection.selected[id];
@@ -377,7 +451,8 @@ export const CollectionLayer = Layer.extend({
             geom[idx],
             hovered,
             selected,
-            minTime
+            minTime,
+            maxTime
           );
         } else if (geometry.type === "Point") {
           geom[idx] = this._renderPoint(
@@ -385,7 +460,8 @@ export const CollectionLayer = Layer.extend({
             geom[idx],
             hovered,
             selected,
-            minTime
+            minTime,
+            maxTime
           );
         }
         return geom;
@@ -393,13 +469,13 @@ export const CollectionLayer = Layer.extend({
       geoms[field] || {}
     ));
   },
-  _renderPoint: function(geom, shape, hovered, selected, minTime) {
+  _renderPoint: function(geom, shape, hovered, selected, minTime, maxTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
         const [bounds, transform] = bt;
-        if (touchBounds(geom, bounds)) {
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
           rendered = true;
           const coords = geom.coordinates;
           const pt = this._map.latLngToLayerPoint(
@@ -436,7 +512,7 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderLine: function(geom, shape, hovered, selected, minTime) {
+  _renderLine: function(geom, shape, hovered, selected, minTime, maxTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
     const rendered = _.reduce(
@@ -444,19 +520,24 @@ export const CollectionLayer = Layer.extend({
       (rendered, bt) => {
         if (rendered) return rendered;
         const [bounds, transform] = bt;
-        if (touchBounds(geom, bounds)) {
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
           rendered = true;
           const zoom = this._map.getZoom();
           let points = [];
-          const coordinates =
-            geom.type === "Point"
-              ? [geom.coordinates, geom.coordinates]
-              : geom.coordinates;
+          let coordinates =
+            geom.type === "Point" ? [geom.coordinates] : geom.coordinates;
+          let start = 0;
+          let end = coordinates.length - 1;
+          if (minTime && geom.etype === "Track")
+            start = _.sortedIndex(geom.times, minTime);
+          if (maxTime && geom.etype === "Track")
+            end = _.sortedIndex(geom.times, maxTime);
+          if (start === coordinates.length) start = start - 1;
+          if (end === coordinates.length) end = end - 1;
           if (zoom < MIN_SIMPLIFY_ZOOM) {
-            //TODO: If this is a track, find last point before minTime (i.e., just outside the time window),
-            //then interpolate the position at minTime. Use that as p1
-            const p1 = coordinates[0];
-            const p2 = coordinates[coordinates.length - 1];
+            const p1 = coordinates[start];
+            const p2 = coordinates[end];
+            if (p1 === undefined) console.log(start, end, coordinates);
             const pt1 = this._map.latLngToLayerPoint(
               new LatLng(p1[1], p1[0] + transform, p1[2])
             );
@@ -473,28 +554,29 @@ export const CollectionLayer = Layer.extend({
             //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
             let foundStart = false;
             points = coordinates.reduce((pts, p, i) => {
-              if (geom.etype === "Track") {
-                if (geom.times[i] > minTime) {
-                  if (!foundStart) {
-                    //TODO: interpolate the position at minTime and prepend it
-                    foundStart = true;
-                  }
-                } else {
-                  return pts;
-                }
+              //TODO: Interpolate
+              if (start <= i && i <= end) {
+                const pt = this._map.latLngToLayerPoint(
+                  new LatLng(p[1], p[0] + transform, p[2])
+                );
+                pts.push(Math.floor(pt.x));
+                pts.push(Math.floor(pt.y));
               }
-              const pt = this._map.latLngToLayerPoint(
-                new LatLng(p[1], p[0] + transform, p[2])
-              );
-              pts.push(Math.floor(pt.x));
-              pts.push(Math.floor(pt.y));
+              if (pts.length === 0 && i === coordinates.length - 1)
+                console.log(
+                  "Didn't find any points in range",
+                  start,
+                  end,
+                  coordinates.length,
+                  geom.times.length
+                );
               return pts;
             }, points);
           }
           if (points.length > 0) {
             //Special case - if this is a track of one point so far,
             //we tweak the points to make it visible
-            if (points.length === 1) {
+            if (points.length === 2) {
               points[2] = points[0] + 1;
               points[3] = points[1] + 1;
             }
@@ -518,6 +600,8 @@ export const CollectionLayer = Layer.extend({
             shape.tension(0.5);
             hovered ? hoverStyle(shape) : style(shape, selected);
             shape.show();
+          } else {
+            console.log("Cannot render", start, end, minTime, geom);
           }
         }
         return rendered;
@@ -660,9 +744,6 @@ export const CollectionLayer = Layer.extend({
       if (this.onToggle)
         this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
     }
-
-    //This is to stop the context menu popup. May want to move to its own handler?
-    //e.preventDefault();
   }
 });
 

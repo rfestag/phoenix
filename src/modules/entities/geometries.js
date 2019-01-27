@@ -1,6 +1,14 @@
 import * as turf from "@turf/turf";
 import { updateWhen } from "./common";
 
+const findIndex = (data, fn) => {
+  //Search backwards through the data. This is because,
+  //in the most common cases, the item is close to the end
+  for (let i = data.length - 1; i >= 0; i--) {
+    if (fn(data[i], i)) return i;
+  }
+  return -1;
+};
 const defaultGeometryCollection = {
   type: "GeometryCollection",
   geometries: []
@@ -113,8 +121,7 @@ const updateTrack = (geometry, pt, print) => {
   }
   //Normal case - Append point to track, update times
   const time = pt.when.start;
-  if (segment.times === undefined) console.log("Bad juju:", segment, pt);
-  const index = segment.times.findIndex(t => t <= time);
+  const index = findIndex(segment.times, t => t <= time);
   if (index === segment.times.length - 1) {
     segment.times.push(time);
     segment.coordinates.push(pt.coordinates);
