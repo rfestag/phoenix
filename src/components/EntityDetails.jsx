@@ -6,7 +6,8 @@ import {
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
-  ListGroupItemText
+  ListGroupItemText,
+  Table
 } from "reactstrap";
 import { Media } from "reactstrap";
 import {
@@ -34,6 +35,9 @@ export default class EntityDetails extends Component {
 
   render() {
     let { entity } = this.props;
+    let { id, label, when, properties } = entity;
+    let fields = Object.keys(properties).sort();
+    console.log(entity);
     return (
       <div>
         <ListGroup>
@@ -60,7 +64,7 @@ export default class EntityDetails extends Component {
                     whiteSpace: "nowrap"
                   }}
                 >
-                  {entity.label}
+                  {label}
                 </h4>
                 <span
                   style={{
@@ -81,8 +85,24 @@ export default class EntityDetails extends Component {
           </EntityHeaderWrapper>
         </ListGroup>
         <EntityToolbar />
+        <Table size="sm" striped borderless hover>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Last Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fields.map(f => (
+              <tr key={f}>
+                <td>{f}</td>
+                <td>{properties[f].last}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </div>
     );
-    return <span>{entity.id}</span>;
+    return <span>{id}</span>;
   }
 }

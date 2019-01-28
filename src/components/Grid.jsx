@@ -84,7 +84,7 @@ export class Grid extends Component {
     });
     this.batchUpdatingSelect = false;
   };
-  onCellFocused = e => {
+  onCellFocused = _.throttle(e => {
     if (!this.api) return;
     let focused = this.api.getFocusedCell();
     if (focused) {
@@ -94,7 +94,7 @@ export class Grid extends Component {
         this.props.onRowFocusChanged(row.data.id);
       }
     }
-  };
+  }, 100);
   onKeyPress = e => {
     if (!this.api) return;
     if (e.ctrlKey && e.key === "c") {
