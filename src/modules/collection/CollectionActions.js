@@ -165,8 +165,7 @@ export const setCurrentCollection = id => ({
 /**
  * NOT IMPLEMENTED YET, DO NOT USE
  */
-export const setFocusedEntity = (id, eid) => ({
+export const setFocusedEntity = id => ({
   type: SET_FOCUSED_ENTITY,
   id
-  //  eid
 });

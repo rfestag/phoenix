@@ -4,7 +4,10 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
 import { getColumnDefs } from "../modules/columns/Constants";
-import { setSelectedEntities } from "../modules/collection/CollectionActions";
+import {
+  setSelectedEntities,
+  setFocusedEntity
+} from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
 import { emitTimingMetric } from "../modules/metrics/MetricsActions";
 import _ from "lodash";
@@ -37,7 +40,8 @@ export class Grid extends Component {
     themeCss: PropTypes.any,
     selected: PropTypes.object,
     emitTimingMetric: PropTypes.func,
-    onSelectionChanged: PropTypes.func
+    onSelectionChanged: PropTypes.func,
+    onRowFocusChanged: PropTypes.func
   };
   static defaultProps = {
     data: [],
@@ -70,6 +74,7 @@ export class Grid extends Component {
     }
   });
   onGridReady = params => {
+    this.focused = undefined;
     this.api = params.api;
     this.columnApi = params.columnApi;
     this.batchUpdatingSelect = true;
@@ -79,13 +84,23 @@ export class Grid extends Component {
     });
     this.batchUpdatingSelect = false;
   };
+  onCellFocused = e => {
+    if (!this.api) return;
+    let focused = this.api.getFocusedCell();
+    if (focused) {
+      let row = this.api.getDisplayedRowAtIndex(focused.rowIndex);
+      if (row !== this.focused) {
+        this.focused = row;
+        this.props.onRowFocusChanged(row.data.id);
+      }
+    }
+  };
   onKeyPress = e => {
+    if (!this.api) return;
     if (e.ctrlKey && e.key === "c") {
       let focused = this.api.getFocusedCell();
       if (focused) {
-        console.log("Focused", focused);
         let row = this.api.getDisplayedRowAtIndex(focused.rowIndex);
-        console.log("Row", row);
         let column = focused.column.colId;
         let value = this.api.getValue(column, row);
         copyToClipboard(value);
@@ -160,6 +175,7 @@ export class Grid extends Component {
           suppressRowClickSelection={true}
           getRowNodeId={data => data.id}
           onSelectionChanged={this.onSelectionChanged}
+          onCellFocused={this.onCellFocused}
           suppressPropertyNamesCheck={true}
         />
       </div>
@@ -180,7 +196,8 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       emitTimingMetric,
-      onSelectionChanged: setSelectedEntities
+      onSelectionChanged: setSelectedEntities,
+      onRowFocusChanged: setFocusedEntity
     },
     dispatch
   );

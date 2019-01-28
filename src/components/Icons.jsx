@@ -1,11 +1,13 @@
 import {
   MdChevronRight,
   MdExpandMore,
+  MdFilterCenterFocus,
   MdHourglassEmpty,
   MdLayers,
   MdList,
   MdPictureInPictureAlt,
   MdAdd,
+  MdTimeline,
   MdPlaylistAdd,
   MdDelete
 } from "react-icons/md";
@@ -17,6 +19,7 @@ import {
   FaColumns,
   FaCrosshairs,
   FaDrawPolygon,
+  FaEllipsisH,
   FaEye,
   FaEyeSlash,
   FaFilter,
@@ -40,6 +43,7 @@ export const ChevronLeftIcon = FaChevronLeft;
 export const ChevronRightIcon = FaChevronRight;
 export const ColumnsIcon = FaColumns;
 export const CollapsedIcon = MdChevronRight;
+export const CenterIcon = MdFilterCenterFocus;
 export const DeleteIcon = MdDelete;
 export const ExpandedIcon = MdExpandMore;
 export const TimeIcon = MdHourglassEmpty;
@@ -59,6 +63,7 @@ export const CircleToolIcon = FaCircle;
 export const GroupToolIcon = FaObjectGroup;
 export const UngroupToolIcon = FaObjectUngroup;
 export const MeasureToolIcon = FaRuler;
+export const MoreIcon = FaEllipsisH;
 export const WhatsHereToolIcon = FaCrosshairs;
 export const FavoritedIcon = FaStar;
 export const UnfavoritedIcon = FaRegStar;
@@ -67,3 +72,4 @@ export const ZoomInIcon = FaPlus;
 export const ZoomOutIcon = FaMinus;
 export const VisibleIcon = FaEye;
 export const HiddenIcon = FaEyeSlash;
+export const PullTrackIcon = MdTimeline;

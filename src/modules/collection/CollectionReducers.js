@@ -152,7 +152,6 @@ export default function(state = initialState, action) {
         current: id
       };
     case SET_FOCUSED_ENTITY:
-      console.log("FOCUSING", action);
       return {
         ...state,
         focused: action.id

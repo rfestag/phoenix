@@ -29,7 +29,12 @@ export class EntityPanel extends Component {
 
   render() {
     let { entities } = this.props;
-    return <span>{entities.length}</span>;
+    return (
+      <div>
+        <h3>Entities</h3>
+        <span>{entities.length}</span>
+      </div>
+    );
   }
 }
 
