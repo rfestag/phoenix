@@ -108,17 +108,17 @@ class Rule extends React.Component {
       this.props.onChange(null, rule);
     }
   };
-  setValue = value => {
-    if (value) {
+  setValue = values => {
+    if (values) {
       let rule = { ...this.props.rule };
-      rule.value = value.map(v => v.value);
+      rule.values = values.map(v => v.value);
       this.props.onChange(null, rule);
     }
   };
   createValue = value => {
     let rule = { ...this.props.rule };
-    rule.value = rule.value ? [...rule.value] : [];
-    rule.value.push(value);
+    rule.values = rule.values ? [...rule.values] : [];
+    rule.values.push(value);
     this.props.onChange(null, rule);
   };
   isValid = input => {
@@ -129,7 +129,7 @@ class Rule extends React.Component {
   };
   render() {
     const { canRemove, onRemove, rule, fields } = this.props;
-    const { field, op, value } = rule;
+    const { field, op, values } = rule;
     const {
       setField,
       createField,
@@ -144,7 +144,7 @@ class Rule extends React.Component {
       : [];
     let fieldOption = field ? { label: field.headerName, value: field } : null;
     let opOption = op ? operations.find(o => o.value === op) : null;
-    let valueOption = value ? value.map(v => ({ label: v, value: v })) : null;
+    let valueOption = values ? values.map(v => ({ label: v, value: v })) : null;
 
     return (
       <div

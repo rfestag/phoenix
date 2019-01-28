@@ -35,6 +35,7 @@ export const client = new ApolloClient({
 
 function toGql(query) {
   let { type, rules, field, op, values } = query;
+  field = field ? field.field || field : field;
   let parsed;
   if (type === "and") {
     parsed = rules.map(toGql).join(",");
@@ -59,9 +60,7 @@ export const toParams = args => {
   let params = _.reduce(
     args,
     (params, v, k) => {
-      console.log("Parsing", k, v);
       let gqlStr = toGql(v);
-      console.log("GQL", gqlStr);
       if (gqlStr !== "") params.push(`${k}: ${gqlStr}`);
       return params;
     },
