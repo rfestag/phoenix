@@ -537,7 +537,6 @@ export const CollectionLayer = Layer.extend({
           if (zoom < MIN_SIMPLIFY_ZOOM) {
             const p1 = coordinates[start];
             const p2 = coordinates[end];
-            if (p1 === undefined) console.log(start, end, coordinates);
             const pt1 = this._map.latLngToLayerPoint(
               new LatLng(p1[1], p1[0] + transform, p1[2])
             );
@@ -547,8 +546,8 @@ export const CollectionLayer = Layer.extend({
             points = [
               Math.floor(pt1.x),
               Math.floor(pt1.y),
-              Math.floor(pt2.x),
-              Math.floor(pt2.y)
+              Math.floor(pt2.x) + 1,
+              Math.floor(pt2.y) + 1
             ];
           } else {
             //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
@@ -562,14 +561,6 @@ export const CollectionLayer = Layer.extend({
                 pts.push(Math.floor(pt.x));
                 pts.push(Math.floor(pt.y));
               }
-              if (pts.length === 0 && i === coordinates.length - 1)
-                console.log(
-                  "Didn't find any points in range",
-                  start,
-                  end,
-                  coordinates.length,
-                  geom.times.length
-                );
               return pts;
             }, points);
           }
@@ -579,10 +570,6 @@ export const CollectionLayer = Layer.extend({
             if (points.length === 2) {
               points[2] = points[0] + 1;
               points[3] = points[1] + 1;
-            }
-            if (shape && shape.constructor !== Line) {
-              shape.destroy();
-              shape = undefined;
             }
             if (!shape) {
               shape = new Line({

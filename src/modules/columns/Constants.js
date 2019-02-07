@@ -14,12 +14,16 @@ const SELECT_COLUMN = {
 
 export const GETTERS = {
   latestValueGetter: params => {
-    if (params.data.properties[params.colDef.field] === undefined)
-      return undefined;
-    return params.data.properties[params.colDef.field].last;
+    let { properties } = params.data;
+    let { field, _type } = params.colDef;
+    if (properties[field] === undefined) return undefined;
+    let last = properties[field].last;
+    return _type === "numeric" ? Number(last) : last;
   },
   timeGetter: params => {
-    return params.data.when[params.colDef.field];
+    let { when } = params.data;
+    let { field } = params.colDef;
+    return when[field];
   }
 };
 export const FORMATTERS = {
