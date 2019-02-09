@@ -94,7 +94,14 @@ export const updateProperty = (prop, value, time) => {
   return prop;
 };
 export const ageoffProperty = (prop, time) => {
-  const index = prop.data.find(t => t >= time);
-  prop.data = prop.data.slice(index);
+  const index = prop.times.findIndex(t => t >= time);
+  //If more than one observation is old, remove up to the index
+  //This will ensure that no more than one observation was first seen before the ageoff.
+  //This is useful in cases we want to interpolate the value at the ageoff time later.
+  if (index > 1) {
+    prop.data.splice(0, index - 1);
+    prop.times.splice(0, index - 1);
+    prop.when.start = prop.times[0];
+  }
   return prop;
 };

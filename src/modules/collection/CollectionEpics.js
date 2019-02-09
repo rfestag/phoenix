@@ -2,6 +2,8 @@ import { withLatestFrom, mergeMap } from "rxjs/operators";
 import { of } from "rxjs/observable/of";
 import { interval } from "rxjs/observable/interval";
 import { deleteFromCollection } from "./CollectionActions";
+import { ageoffProperty } from "../entities/properties";
+import { ageoffGeometry } from "../entities/geometries";
 import _ from "lodash";
 import moment from "moment";
 
@@ -25,6 +27,14 @@ export const ageOffEpic = (action$, state$) => {
                 return ids;
               const t = entity.when.end || entity.when.start;
               if (t < ageoff) ids.push(id);
+              else {
+                _.each(entity.properties, p => {
+                  ageoffProperty(p, ageoff);
+                });
+                _.each(entity.geometries, g => {
+                  ageoffGeometry(g, ageoff);
+                });
+              }
               return ids;
             },
             []

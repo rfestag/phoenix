@@ -79,6 +79,23 @@ const mergeBounds = function(b1, b2) {
     b1[3] > b2[3] ? b1[3] : b2[3]
   ];
 };
+export const ageoffGeometry = (geometry, time) => {
+  for (let i in geometry.geometries) {
+    let g = geometry.geometries[i];
+    if (g.when.end < time) geometry.geometries.splice(i, 1);
+    else if (g.etype === "Track") {
+      let index = g.times.findIndex(t => t >= time);
+      //We don't want to lose the point that is just before the ageoff, in case
+      //we need to interpolate. So, we ensure more than one point needs to be removed
+      if (index > 1) {
+        g.coordinates.splice(0, index - 1);
+        g.times.splice(0, index - 1);
+        g.when.start = g.times[0];
+      }
+    }
+  }
+  return geometry;
+};
 const updateTrack = (geometry, pt, print) => {
   let segments = geometry.geometries;
   let segment = segments[segments.length - 1];
