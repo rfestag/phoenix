@@ -1,5 +1,6 @@
 import React from "react";
 import DropdownSubMenu from "./DropdownSubMenu";
+import { OpenInNewIcon } from "./Icons";
 import {
   UncontrolledButtonDropdown as Dropdown,
   DropdownToggle,
@@ -11,17 +12,22 @@ const HelpMenu = () => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>Help</DropdownToggle>
     <DropdownMenu right={true}>
-      <DropdownItem>Something</DropdownItem>
-      <DropdownItem>Another</DropdownItem>
+      <DropdownItem disabled>
+        Help Center <OpenInNewIcon />
+      </DropdownItem>
+      <DropdownItem disabled>
+        User Guide <OpenInNewIcon />
+      </DropdownItem>
+      <DropdownItem disabled>Keyboard Shortcuts</DropdownItem>
       <DropdownItem divider />
       <DropdownSubMenu direction="left">
         <DropdownToggle className="dropdown-item" caret>
-          SubMenu
+          Tours
         </DropdownToggle>
         <DropdownMenu>
-          <DropdownItem>1</DropdownItem>
-          <DropdownItem>2</DropdownItem>
-          <DropdownItem>3</DropdownItem>
+          <DropdownItem disabled>Overview</DropdownItem>
+          <DropdownItem disabled>Query Tour</DropdownItem>
+          <DropdownItem disabled>Filter Tour</DropdownItem>
         </DropdownMenu>
       </DropdownSubMenu>
     </DropdownMenu>

@@ -78,7 +78,7 @@ export function mapToCollection(action$) {
         //and we don't want to restart it on subscription
         adapter
           .pipe(
-            bufferTime(3000),
+            bufferTime(2000),
             filter(d => d.length > 0),
             collectBy(d => d.id)
           )
@@ -112,7 +112,8 @@ self.onconnect = function(e) {
   action$
     .pipe(
       ofType(CREATE_QUERY),
-      mapToCollection(action$),
+      mapToCollection(action$)
+      /*
       bufferTime(1000),
       filter(d => d.length > 0),
       map(actions => {
@@ -121,6 +122,7 @@ self.onconnect = function(e) {
         return others.concat(batchUpdateCollections(updates));
       }),
       mergeAll()
+      */
     )
     .subscribe(updates => port.postMessage(JSON.stringify(updates)));
 };

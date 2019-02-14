@@ -9,7 +9,9 @@ import {
   MdAdd,
   MdTimeline,
   MdPlaylistAdd,
-  MdDelete
+  MdOpenInNew,
+  MdDelete,
+  MdClose
 } from "react-icons/md";
 import {
   FaCheckSquare,
@@ -73,3 +75,5 @@ export const ZoomOutIcon = FaMinus;
 export const VisibleIcon = FaEye;
 export const HiddenIcon = FaEyeSlash;
 export const PullTrackIcon = MdTimeline;
+export const OpenInNewIcon = MdOpenInNew;
+export const CloseIcon = MdClose;

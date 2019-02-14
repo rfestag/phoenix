@@ -76,7 +76,18 @@ export const getDefaultColumns = () => {
     })
   };
 };
-export const createGeometryColumn = (field, value) => {};
+export const createGeometryColumn = (field, opts = {}) => {
+  let geomDef = {
+    field,
+    headerName: field,
+    hide: false,
+    latestOnly: true,
+    showHead: true, //Only applicable to tracks/lines
+    tension: 0.5 //Onely applicable to tracks/lines
+  };
+  if (opts && opts.etype === "Track") geomDef.latestOnly = false;
+  return { ...geomDef, ...opts };
+};
 export const getPropertiesForCollection = (state, props) => {
   if (
     props.collection &&

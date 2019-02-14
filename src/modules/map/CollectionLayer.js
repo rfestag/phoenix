@@ -325,10 +325,12 @@ export const CollectionLayer = Layer.extend({
         stage.position({ x, y });
       }
       //Update the entity shapes
+
       const newEntities = _.reduce(
         this.collection.data,
         (entities, entity, id) => {
           entities[id] = this._updateEntity(entity, id, minTime, maxTime);
+          delete this.entities[id];
           return entities;
         },
         {}
@@ -340,16 +342,17 @@ export const CollectionLayer = Layer.extend({
       if (!fast) {
         let destroyed = 0;
         _.each(this.entities, (entity, id) => {
-          if (newEntities[id] === undefined) {
-            _.each(this.entities[id], (geom, field) => {
-              _.each(geom, (shape, idx) => {
-                if (shape) {
-                  destroyed += 1;
-                  shape.destroy();
-                }
-              });
+          //if (newEntities[id] === undefined) {
+          _.each(entity, (geom, field) => {
+            _.each(geom, (shape, idx) => {
+              if (shape) {
+                destroyed += 1;
+                shape.geom = null;
+                shape.destroy();
+              }
             });
-          }
+          });
+          //}
         });
         if (destroyed > 0) console.log(`Destroyed ${destroyed} shapes`);
       }

@@ -1,31 +1,40 @@
 import React from "react";
+import PropTypes from "prop-types";
 import DropdownSubMenu from "./DropdownSubMenu";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 import {
   UncontrolledButtonDropdown as Dropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+import { openColumnPane, openLayerPane } from "../modules/panel/PanelActions";
 
-const ViewMenu = () => (
+const ViewMenu = ({ openColumnPane, openLayerPane }) => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>View</DropdownToggle>
     <DropdownMenu>
-      <DropdownItem>Something</DropdownItem>
-      <DropdownItem>Another</DropdownItem>
-      <DropdownItem divider />
-      <DropdownSubMenu direction="right">
-        <DropdownToggle className="dropdown-item" caret>
-          SubMenu
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem>1</DropdownItem>
-          <DropdownItem>2</DropdownItem>
-          <DropdownItem>3</DropdownItem>
-        </DropdownMenu>
-      </DropdownSubMenu>
+      <DropdownItem onClick={openColumnPane}>Manage Columns</DropdownItem>
+      <DropdownItem onClick={openLayerPane}>Manage Layers</DropdownItem>
+      <DropdownItem disabled>Manage Styles</DropdownItem>
+      <DropdownItem disabled>Manage Units</DropdownItem>
     </DropdownMenu>
   </Dropdown>
 );
+ViewMenu.propTypes = {
+  openColumnPane: PropTypes.func.required,
+  openLayerPane: PropTypes.func.required
+};
 
-export default ViewMenu;
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      openColumnPane,
+      openLayerPane
+    },
+    dispatch
+  );
+}
+
+export default connect(null, mapDispatchToProps)(ViewMenu);

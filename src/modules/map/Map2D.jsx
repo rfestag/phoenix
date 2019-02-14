@@ -127,6 +127,7 @@ export class Map2D extends Component {
         },
         this
       );
+      map.on("contextmenu", L.DomEvent.preventDefault);
       map.on(
         "mousemove",
         Util.throttle(
@@ -246,7 +247,7 @@ function mapStateToProps(state, props) {
     crs: state.map.crs,
     collections: state.collection.collections,
     //collections: getVisibleCollections(state, props),
-    heatmapPoints: getHeatmapPoints(state),
+    //heatmapPoints: getHeatmapPoints(state),
     overlays: state.map.overlays,
     layer: state.map.layer,
     panels: state.panel,

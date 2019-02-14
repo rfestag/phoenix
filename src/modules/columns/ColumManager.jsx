@@ -87,6 +87,7 @@ export class ColumnManager extends Component {
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <div style={{ flex: 1, overflowY: "hidden" }}>
           <PerfectScrollbar>
+            <h4>Fields</h4>
             {_.chain(this.state.columns)
               .sortBy("headerName")
               .map((column, name) => {
@@ -97,6 +98,21 @@ export class ColumnManager extends Component {
                       onClick={() => this.toggleColumn(column)}
                     />{" "}
                     {column.headerName}
+                  </div>
+                );
+              })
+              .value()}
+            <h4>Geometries</h4>
+            {_.chain(this.state.geometries)
+              .sortBy("headerName")
+              .map((geometries, name) => {
+                return (
+                  <div key={name}>
+                    <Checkbox
+                      selected={!geometries.hide}
+                      onClick={() => this.toggleColumn(geometries)}
+                    />{" "}
+                    {geometries.headerName}
                   </div>
                 );
               })

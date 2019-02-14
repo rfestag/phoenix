@@ -11,19 +11,10 @@ const FilterMenu = () => (
   <Dropdown setActiveFromChild>
     <DropdownToggle caret>Filter</DropdownToggle>
     <DropdownMenu>
-      <DropdownItem>Something</DropdownItem>
-      <DropdownItem>Another</DropdownItem>
+      <DropdownItem disabled>Add Filter</DropdownItem>
+      <DropdownItem disabled>Remove Filter</DropdownItem>
       <DropdownItem divider />
-      <DropdownSubMenu direction="right">
-        <DropdownToggle className="dropdown-item" caret>
-          SubMenu
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem>1</DropdownItem>
-          <DropdownItem>2</DropdownItem>
-          <DropdownItem>3</DropdownItem>
-        </DropdownMenu>
-      </DropdownSubMenu>
+      <DropdownItem disabled>Clear Filters</DropdownItem>
     </DropdownMenu>
   </Dropdown>
 );
