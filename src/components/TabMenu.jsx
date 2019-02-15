@@ -19,14 +19,20 @@ const TabMenu = ({
   onCancel = defaultHandler,
   onDelete = defaultHandler
 }) => (
-  <Dropdown>
-    {children}
+  <Dropdown style={{ display: "flex" }}>
+    <div style={{ flex: 1, overflow: "hidden", whiteSpace: "nowrap" }}>
+      {children}
+    </div>
     <DropdownToggle
       color={active ? "accent" : "secondary"}
       style={{ padding: "0 5px 0 0" }}
       caret
     />
-    <DropdownMenu right>
+    <DropdownMenu
+      right
+      modifiers={{ preventOverflow: { boundariesElement: "window" } }}
+      positionFixed={true}
+    >
       <DropdownItem onClick={defaultHandler("manage", item)}>
         Manage...
       </DropdownItem>

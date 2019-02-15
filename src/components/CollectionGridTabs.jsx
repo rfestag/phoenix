@@ -41,6 +41,7 @@ const Tabs = styled(Nav)`
   height: 42px;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 `;
 const Tab = styled(NavItem)`
   flex: 0 1;
