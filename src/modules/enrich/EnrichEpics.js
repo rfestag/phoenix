@@ -29,7 +29,7 @@ export const enrichNewEntitiesEpic = (action$, state$) => {
         let enrich = _.reduce(
           action.data,
           (enrich, update, id) => {
-            if (!enriched[id]) {
+            if (!enriched[id] && state.collection.collections[action.id]) {
               enrich[id] = state.collection.collections[action.id].data[id];
             }
             return enrich;

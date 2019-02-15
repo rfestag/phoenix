@@ -1,3 +1,4 @@
+import BroadcastChannel from "broadcast-channel";
 import uuid from "uuid/v4";
 import { Subject, ReplaySubject } from "rxjs";
 import { concat } from "rxjs/observable/concat";
@@ -105,6 +106,8 @@ export function mapToCollection(action$) {
 self.onconnect = function(e) {
   const action$ = new Subject();
   var port = e.ports[0];
+  const bcast = new BroadcastChannel("query");
+
   port.onmessage = function(e) {
     action$.next(JSON.parse(e.data));
   };
@@ -124,5 +127,5 @@ self.onconnect = function(e) {
       mergeAll()
       */
     )
-    .subscribe(updates => port.postMessage(JSON.stringify(updates)));
+    .subscribe(updates => bcast.postMessage(JSON.stringify(updates)));
 };

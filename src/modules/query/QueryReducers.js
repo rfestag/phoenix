@@ -1,3 +1,4 @@
+import BroadcastChannel from "broadcast-channel";
 import Worker from "./queries.shared.js";
 import { Observable } from "rxjs/Observable";
 import { ofType } from "redux-observable";
@@ -14,23 +15,33 @@ const initialState = {};
 
 export const sharedWorkerProxyEpic = (action$, state$) => {
   const worker = new Worker();
+  const bcast = new BroadcastChannel("query");
   const port = worker.port;
-  worker.onerror = e => console.error(e);
+  worker.onerror = e => console.error("HUH", e);
 
   //This observable takes all responses from the shared worker,
   //assues they are actions, and passes them back to redux
   //If an error occurs, this will die
   const observable = new Observable(observer => {
-    port.onmessage = function(e) {
+    bcast.onmessage = function(e) {
       //console.log("Got message from worker", e.data.length / 1000000 + "MB");
       //console.time("Parsing data");
-      let data = JSON.parse(e.data);
+      let data = JSON.parse(e);
       if (_.isArray(data)) {
         _.each(data, action => observer.next(action));
       } else {
         observer.next(data);
       }
       //console.timeEnd("Parsing data");
+    };
+    bcast.onerror = function(e) {
+      //TODO: We should put out some message that can be used to restart the worker,
+      //or at least log it.
+      console.error(
+        "An error occured in the receiver, we should probably do something smart",
+        e
+      );
+      observer.error(e);
     };
     port.onerror = function(e) {
       //TODO: We should put out some message that can be used to restart the worker,
@@ -39,7 +50,7 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
         "An error occured in the shared worker, we should probably do something smart",
         e
       );
-      observer.error(e.data);
+      observer.error(e);
     };
   });
 
@@ -58,7 +69,7 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
 
   //Finally, we start the port and return the observable. The observable is returned
   //because it is the stream of output actions from the worker
-  port.start();
+  //port.start();
   return observable;
 };
 
