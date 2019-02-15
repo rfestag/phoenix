@@ -14,51 +14,11 @@ import { Map, TileLayer } from "react-leaflet";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
 import _ from "lodash";
-import { createSelector } from "reselect";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L, { Util } from "leaflet";
 //import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
 import MiniMap from "./MiniMap";
-
-const collectionsSelector = state => state.collection.collections;
-const ptsSelector = collections => {
-  const result = _.reduce(
-    collections,
-    (points, collection) => {
-      return _.reduce(
-        collection.data,
-        (points, entity) => {
-          return _.reduce(
-            entity.geometries,
-            (points, geometryCollection) => {
-              return _.reduce(
-                geometryCollection.geometries,
-                (points, g) => {
-                  if (g.type === "Point")
-                    points.push({ location: g.coordinates, value: 1 });
-                  else if (g.type === "LineString")
-                    points.push({
-                      location: g.coordinates[0],
-                      value: g.coordinates.length
-                    });
-                  return points;
-                },
-                points
-              );
-            },
-            points
-          );
-        },
-        points
-      );
-    },
-    []
-  );
-  return result;
-};
-
-const getHeatmapPoints = createSelector(collectionsSelector, ptsSelector);
 
 export class Map2D extends Component {
   constructor(props) {
@@ -88,7 +48,6 @@ export class Map2D extends Component {
 
   componentDidMount() {
     const map = this.map.current && this.map.current.leafletElement;
-    const self = this;
     console.log("MOUNTING MAP");
     if (map) {
       map.invalidateSize();

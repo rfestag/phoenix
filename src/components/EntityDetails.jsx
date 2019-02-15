@@ -1,31 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import _ from "lodash";
-import {
-  ListGroup,
-  ListGroupItem,
-  ListGroupItemHeading,
-  ListGroupItemText,
-  Table
-} from "reactstrap";
-import { Media } from "reactstrap";
-import {
-  RevealVisibility,
-  RevealContainer,
-  RevealButtonGroup,
-  RevealButton
-} from "./Reveal";
+import { ListGroup, ListGroupItem, Table } from "reactstrap";
+import { RevealContainer, RevealButtonGroup, RevealButton } from "./Reveal";
 import EntityToolbar from "./EntityToolbar";
 
 const EntityHeaderWrapper = styled.div`
   background-color: ${props => props.theme.secondary};
   position: relative;
-`;
-const Header = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: ${props => props.theme.secondary};
 `;
 
 export default class EntityDetails extends Component {
@@ -35,7 +17,7 @@ export default class EntityDetails extends Component {
 
   render() {
     let { entity } = this.props;
-    let { id, label, when, properties } = entity;
+    let { label, properties } = entity;
     let fields = Object.keys(properties).sort();
     console.log(entity);
     return (
@@ -103,6 +85,5 @@ export default class EntityDetails extends Component {
         </Table>
       </div>
     );
-    return <span>{id}</span>;
   }
 }

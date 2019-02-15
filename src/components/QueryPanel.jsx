@@ -10,8 +10,6 @@ import * as sources from "../modules/sources/SourceMap";
 import Select from "./Select";
 import _ from "lodash";
 
-//let source = sources["ADSBApollo"];
-
 var RANDOM_WORDS = [
   "abstrusity",
   "advertisable",
@@ -128,7 +126,7 @@ function createRandomizedItem(depth) {
   return item;
 }
 
-const defaultQuery = { type: "and", rules: [], groups: [] };
+const defaultQuery = () => ({ type: "and", rules: [], groups: [] });
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
@@ -136,9 +134,9 @@ export class QueryPanel extends React.Component {
       name: "",
       source: sources["ADSBApollo"],
       query: {
-        data: { ...defaultQuery },
-        acft: { ...defaultQuery },
-        acftType: { ...defaultQuery }
+        data: defaultQuery(),
+        acft: defaultQuery(),
+        acftType: defaultQuery()
       },
       ageoff: { ageoff: 90, unit: "seconds" }
     };
@@ -151,9 +149,9 @@ export class QueryPanel extends React.Component {
       name: "",
       source: sources["ADSBApollo"],
       query: {
-        data: { ...defaultQuery },
-        acft: { ...defaultQuery },
-        acftType: { ...defaultQuery }
+        data: defaultQuery(),
+        acft: defaultQuery(),
+        acftType: defaultQuery()
       },
       ageoff: { ageoff: 90, unit: "seconds" }
     });
@@ -239,9 +237,9 @@ export class QueryPanel extends React.Component {
               <Label for="ageoff">Age-Off</Label>
               <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
             </FormGroup>
-            {/*<div style={{ float: "right" }}>
+            <div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
-            </div>*/}
+            </div>
             <h3>Criteria</h3>
             {source.Form && (
               <source.Form data={query} onChange={handleFormUpdate} />

@@ -1,5 +1,4 @@
 import React from "react";
-import DropdownSubMenu from "./DropdownSubMenu";
 import {
   UncontrolledButtonDropdown as Dropdown,
   DropdownToggle,

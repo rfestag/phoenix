@@ -4,7 +4,6 @@ import ColumnManager from "../modules/columns/ColumManager";
 import LayerManager from "../modules/map/LayerManager";
 import { Button, TabContent, TabPane } from "reactstrap";
 import { COLUMN_PANE, LAYER_PANE } from "../modules/panel/PanelActions";
-import { CloseIcon } from "./Icons";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { closeRightPanel } from "../modules/panel/PanelActions";

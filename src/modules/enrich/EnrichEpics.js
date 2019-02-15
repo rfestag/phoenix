@@ -6,13 +6,11 @@ import {
   mergeAll
 } from "rxjs/operators";
 import { from } from "rxjs/observable/from";
-import { interval } from "rxjs/observable/interval";
 import { ofType } from "redux-observable";
 import {
   UPDATE_COLLECTION,
   BATCH_UPDATE_COLLECTIONS
 } from "../collection/CollectionActions";
-import { enrichEntity } from "./EnrichActions";
 import * as enrichments from "./enrichments";
 import _ from "lodash";
 

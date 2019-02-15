@@ -554,7 +554,6 @@ export const CollectionLayer = Layer.extend({
             ];
           } else {
             //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
-            let foundStart = false;
             points = coordinates.reduce((pts, p, i) => {
               //TODO: Interpolate
               if (start <= i && i <= end) {

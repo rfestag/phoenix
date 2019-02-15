@@ -113,7 +113,6 @@ export class Grid extends Component {
     //it doesn't deal with the new mutable nature of the collection. This
     //appears to perform better, and handles mutable entities
     if (this.api) {
-      let start = Date.now();
       let transaction = { update: [], add: [], remove: [] };
       let keys = {};
       let count = 0;
@@ -158,8 +157,6 @@ export class Grid extends Component {
       //We explicitly do the synchronous update vs. async. The async
       //logic adds unnecessary overhead, taking 50-100ms longer.
       this.api.updateRowData(transaction);
-      //if (this.props.emitTimingMetric)
-      //this.props.emitTimingMetric("GRID_UPDATE", Date.now() - start);
     }
     return (
       <div

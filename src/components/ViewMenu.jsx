@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import DropdownSubMenu from "./DropdownSubMenu";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import {
@@ -23,8 +22,8 @@ const ViewMenu = ({ openColumnPane, openLayerPane }) => (
   </Dropdown>
 );
 ViewMenu.propTypes = {
-  openColumnPane: PropTypes.func.required,
-  openLayerPane: PropTypes.func.required
+  openColumnPane: PropTypes.func,
+  openLayerPane: PropTypes.func
 };
 
 function mapDispatchToProps(dispatch) {
