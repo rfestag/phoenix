@@ -92,10 +92,20 @@ export class Map2D extends Component {
         "mousemove",
         Util.throttle(
           e => {
+            let didHover = false;
             for (let ref of this.collectionLayerRefs) {
               if (ref && ref.leafletElement) {
-                ref.leafletElement._onMouseMove(e);
+                let element = ref.leafletElement;
+                element._onMouseMove(e);
+                didHover = didHover || element._hoverCursor;
               }
+            }
+            if (didHover && !this._hoverCursor) {
+              this.map.current.container.style.cursor = "pointer";
+              this._hoverCursor = true;
+            } else if (!didHover && this._hoverCursor) {
+              this.map.current.container.style.cursor = "";
+              this._hoverCursor = false;
             }
           },
           32,

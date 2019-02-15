@@ -696,10 +696,10 @@ export const CollectionLayer = Layer.extend({
         {}
       );
       if (didHover && !this._hoverCursor) {
-        this._container.style.cursor = "pointer";
+        //this._container.style.cursor = "pointer";
         this._hoverCursor = true;
       } else if (!didHover && this._hoverCursor) {
-        this._container.style.cursor = "";
+        //this._container.style.cursor = "";
         this._hoverCursor = false;
       }
     } catch (e) {
