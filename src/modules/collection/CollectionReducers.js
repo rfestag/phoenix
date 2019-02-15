@@ -9,6 +9,7 @@ import {
   SET_SELECTED_ENTITIES,
   SET_AGEOFF,
   TOGGLE_SELECTED_ENTITIES,
+  CLEAR_ALL_SELECTIONS,
   SET_CURRENT_COLLECTION,
   SET_FOCUSED_ENTITY
 } from "./CollectionActions";
@@ -146,6 +147,17 @@ export default function(state = initialState, action) {
       } else {
         return state;
       }
+    case CLEAR_ALL_SELECTIONS:
+      state.collections = _.reduce(
+        state.collections,
+        (collections, collection, id) => {
+          collection = { ...collection, selected: {} };
+          collections[id] = collection;
+          return collections;
+        },
+        {}
+      );
+      return { ...state };
     case SET_CURRENT_COLLECTION:
       return {
         ...state,

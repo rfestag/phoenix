@@ -11,6 +11,7 @@ $split-border: #29353b;
 $collapse-header-bg: #29353b;
 $collapse-header-hover-bg: darken(#29353b, .5);
 $map-control-bg: rgba(#13191c, .9);
+$selectbar-bg: rgba(orange, 0.7);
 
 //AG-Grid variables
 $icons-path: "~ag-grid/src/styles/balham-icons/";
@@ -49,6 +50,7 @@ $dialog-title-bar-height: 48px;
 
 $theme-colors: (
   "accent": $accent-color,
+  "select": $selectbar-bg,
   "map-control": $map-control-bg,
 );
 

@@ -13,6 +13,7 @@ import { Map, TileLayer } from "react-leaflet";
 //import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
+import Selectbar from "./Selectbar";
 import _ from "lodash";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L, { Util } from "leaflet";
@@ -154,6 +155,7 @@ export class Map2D extends Component {
         style={{ width: "100%", height: "100%" }}
       >
         <MapToolbar />
+        <Selectbar />
         <ViewControl
           miniMapActive={this.state.miniMapActive}
           toggleMiniMap={this.toggleMiniMap}

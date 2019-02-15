@@ -8,6 +8,7 @@ export const DELETE_FROM_COLLECTION = "DELETE_FROM_COLLECTION";
 export const SELECT_ENTITIES = "SELECT_ENTITIES";
 export const SET_SELECTED_ENTITIES = "SET_SELECTED_ENTITIES";
 export const TOGGLE_SELECTED_ENTITIES = "TOGGLE_SELECTED_ENTITIES";
+export const CLEAR_ALL_SELECTIONS = "CLEAR_ALL_SELECTIONS";
 export const UPDATE_COLLECTION = "UPDATE_COLLECTION";
 export const BATCH_UPDATE_COLLECTIONS = "BATCH_UPDATE_COLLECTIONS";
 export const UPDATE_COLLECTION_FIELDS = "UPDATE_COLLECTION_FIELDS";
@@ -137,6 +138,9 @@ export const setSelectedEntities = (id, ids, clear) => ({
   id,
   ids,
   clear
+});
+export const clearAllSelections = id => ({
+  type: CLEAR_ALL_SELECTIONS
 });
 /**
  * NOT IMPLEMENTED YET, DO NOT USE
