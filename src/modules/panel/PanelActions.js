@@ -23,9 +23,9 @@ export const collapsePanel = panel => ({ type: COLLAPSE_PANEL, panel });
 export const togglePane = (panel, pane) => ({ type: TOGGLE_PANE, panel, pane });
 export const setPane = (panel, pane) => ({ type: SET_PANE, panel, pane });
 
-export const collapseLeftPanel = () => collapsePanel(LEFT_PANEL);
-export const collapseRightPanel = () => collapsePanel(RIGHT_PANEL);
-export const collapseBottomPanel = () => collapsePanel(BOTTOM_PANEL);
+export const closeLeftPanel = () => collapsePanel(LEFT_PANEL);
+export const closeRightPanel = () => collapsePanel(RIGHT_PANEL);
+export const closeBottomPanel = () => collapsePanel(BOTTOM_PANEL);
 
 export const toggleQueryPane = () => togglePane(LEFT_PANEL, QUERY_PANE);
 export const toggleEntityPane = () => togglePane(LEFT_PANEL, ENTITY_PANE);
