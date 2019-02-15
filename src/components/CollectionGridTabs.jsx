@@ -23,6 +23,9 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 */
 
+const MAX_TAB_WIDTH_PCT = 13;
+const MAX_TABS = Math.floor(100 / MAX_TAB_WIDTH_PCT);
+
 const OuterPanel = styled.div`
   display: flex;
   flex-direction: column;
@@ -43,10 +46,31 @@ const Tabs = styled(Nav)`
   flex-direction: column;
   overflow-x: hidden;
 `;
+const fadeColor = ({ active, theme }) =>
+  active ? theme.accentColor : theme.secondary;
+const TabTitle = styled.span`
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100%;
+    background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      ${props => fadeColor(props)} 80%,
+      ${props => fadeColor(props)} 100%
+    );
+    pointer-events: none;
+  }
+`;
 const Tab = styled(NavItem)`
   flex: 0 1;
-  max-width: 250px;
-  min-width: 100px;
+  width: ${MAX_TAB_WIDTH_PCT}%;
   order: ${props => props.order};
   display: ${props => (props.order < 0 ? "none" : "")};
 `;
@@ -78,9 +102,8 @@ export class CollectionGridTabs extends React.Component {
     return this.state.position === 0;
   };
   nextDisabled = () => {
-    return (
-      this.state.position === Object.keys(this.props.collections).length - 1
-    );
+    const count = Object.keys(this.props.collections).length;
+    return count - this.state.position <= MAX_TABS;
   };
   nextTab = () => {
     const { position } = this.state;
@@ -110,9 +133,11 @@ export class CollectionGridTabs extends React.Component {
     return (
       <OuterPanel>
         <TabCarousel>
-          <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
-            <ChevronLeftIcon />
-          </Button>
+          {!this.prevDisabled() && (
+            <Button disabled={this.prevDisabled()} onClick={this.prevTab}>
+              <ChevronLeftIcon />
+            </Button>
+          )}
           <Tabs tabs>
             {_.map(this.props.collections, (collection, id) => (
               <Tab key={id} order={this.getOrder(id)}>
@@ -127,21 +152,25 @@ export class CollectionGridTabs extends React.Component {
                     active={this.props.activeTab === id}
                     onMenuAction={this.onMenuAction}
                   >
-                    <span
+                    <TabTitle
+                      title={collection.name}
+                      active={this.props.activeTab === id}
                       onClick={() => {
                         this.props.onTabChange(id);
                       }}
                     >
                       {collection.name}
-                    </span>
+                    </TabTitle>
                   </TabMenu>
                 </NavLink>
               </Tab>
             ))}
           </Tabs>
-          <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
-            <ChevronRightIcon />
-          </Button>
+          {!this.nextDisabled() && (
+            <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
+              <ChevronRightIcon />
+            </Button>
+          )}
           <Button
             active={this.props.columnPaneActive}
             onClick={this.props.onColumManagerClicked}

@@ -20,9 +20,7 @@ const TabMenu = ({
   onDelete = defaultHandler
 }) => (
   <Dropdown style={{ display: "flex" }}>
-    <div style={{ flex: 1, overflow: "hidden", whiteSpace: "nowrap" }}>
-      {children}
-    </div>
+    {children}
     <DropdownToggle
       color={active ? "accent" : "secondary"}
       style={{ padding: "0 5px 0 0" }}
