@@ -72,6 +72,8 @@ export const createPolygon = function(coordinates) {
     coordinates,
     when: { ...defaultPolygon.when }
   };
+  polygon.bbox = turf.bbox(polygon);
+  polygon.center = turf.centroid(polygon).geometry.coordinates;
   return polygon;
 };
 export const createCircle = function(center, radius) {

@@ -1,10 +1,12 @@
 import { Source } from "./source";
 import { interval } from "rxjs";
 import { map, take } from "rxjs/operators";
+import * as turf from "@turf/turf";
 import {
   createTrackPoint,
   createCircle,
   createSector,
+  createPolygon,
   createRing
 } from "../entities/geometries";
 import uuid from "uuid/v4";
@@ -80,7 +82,7 @@ export class TestSource extends Source {
   query({
     count = 1000,
     iterations = 30,
-    shapeTypes = ["None", "Track", "Circle", "Sector"]
+    shapeTypes = ["None", "Track", "Circle", "Sector", "Polygon"]
   }) {
     let entities = {};
     for (let i = 0; i < count; i++) {
@@ -145,6 +147,20 @@ export class TestSource extends Source {
               properties.radius = { time, value: r1 };
               properties.bearing1 = { time, value: a1 };
               properties.bearing2 = { time, value: a2 };
+            }
+            if (entity.gtype === "Polygon") {
+              let feature = turf.randomPolygon(1, {
+                max_radial_length: 1,
+                bbox: [lng - 1, lat - 1, lng + 1, lat + 1]
+              }).features[0];
+              let coords = feature.geometry.coordinates;
+              geometries.polygon = createPolygon(coords);
+              lat = geometries.polygon.center[1];
+              lng = geometries.polygon.center[0];
+              entity.lat = lat;
+              entity.lng = lng;
+              properties.lat = { time, value: lat };
+              properties.lng = { time, value: lng };
             }
             if (entity.gtype === "Ring") {
               entity.lat = lat;
