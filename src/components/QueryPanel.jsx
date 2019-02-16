@@ -237,9 +237,9 @@ export class QueryPanel extends React.Component {
               <Label for="ageoff">Age-Off</Label>
               <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
             </FormGroup>
-            <div style={{ float: "right" }}>
+            {/*<div style={{ float: "right" }}>
               <FilterableDropdownTree data={data} />
-            </div>
+            </div>*/}
             <h3>Criteria</h3>
             {source.Form && (
               <source.Form data={query} onChange={handleFormUpdate} />

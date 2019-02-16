@@ -33,6 +33,10 @@ const defaultTrack = {
   ...defaultLineString,
   etype: "Track"
 };
+const defaultPolygon = {
+  ...defaultGeometry,
+  type: "Polygon"
+};
 
 const crossesAntiMeridian = function(p1, p2) {
   if (p1 === undefined) return 0;
@@ -61,6 +65,58 @@ export const createTrackPoint = function(pt, time) {
   point.times = [time];
   point.etype = "Track";
   return point;
+};
+export const createPolygon = function(coordinates) {
+  let polygon = {
+    ...defaultPolygon,
+    coordinates,
+    when: { ...defaultPolygon.when }
+  };
+  return polygon;
+};
+export const createCircle = function(center, radius) {
+  //Turf expects radius to be in km by default, we will use m by default
+  let circle = turf.circle(center, radius / 1000).geometry;
+  circle.etype = "Circle";
+  circle.center = center;
+  circle.radius = radius;
+  circle.bbox = turf.bbox(circle);
+  circle.when = { ...defaultPolygon.when };
+  return circle;
+};
+export const createEllipse = function(center, smaj, smin, tilt) {
+  let coordinates = []; //TODO: Take parameters, outline polygon
+  let ellipse = createPolygon(coordinates);
+  ellipse.etype = "Ellipse";
+  ellipse.center = center;
+  ellipse.smaj = smaj;
+  ellipse.smin = smin;
+  ellipse.tilt = tilt;
+  ellipse.bbox = turf.bbox(ellipse);
+  return ellipse;
+};
+export const createSector = function(center, radius, bearing1, bearing2) {
+  //Turf expects radius to be in km by default, we will use m by default
+  let sector = turf.sector(center, radius / 1000, bearing1, bearing2).geometry;
+  sector.etype = "Sector";
+  sector.center = center;
+  sector.radius = radius;
+  sector.bearing1 = bearing1;
+  sector.bearing2 = bearing2;
+  sector.when = { ...defaultPolygon.when };
+  sector.bbox = turf.bbox(sector);
+  return sector;
+};
+export const createRing = function(center, outer, inner) {
+  let ring = createCircle(center, outer);
+  let c2 = createCircle(center, inner);
+  ring.etype = "Ring";
+  ring.coordinates.push(c2.coordinates);
+  ring.center = center;
+  ring.innerRadius = inner;
+  ring.outerRadius = outer;
+  ring.bbox = turf.bbox(ring);
+  return ring;
 };
 const trackFromPoint = function(pt) {
   let track = { ...defaultTrack };
@@ -168,6 +224,8 @@ export const updateGeometry = (geometry, update) => {
   if (update.etype === "Track") {
     return updateTrack(geometry, update);
   } else {
+    geometry.geometries.push(update);
+    return geometry;
     //Update generic GeometryCollection
   }
   return geometry;

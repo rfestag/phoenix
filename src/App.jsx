@@ -83,7 +83,7 @@ const App = ({ themeName, themeProps, muiThemeProps }) => (
             <MainPanels />
           </Main>
           <Banner>
-            Copyright &copy; 2018 Phoenix Project Team. All rights reserved
+            Copyright &copy; 2019 Phoenix Project Team. All rights reserved
           </Banner>
         </Outer>
       </MuiThemeProvider>

@@ -1,7 +1,12 @@
 import { Source } from "./source";
 import { interval } from "rxjs";
 import { map, take } from "rxjs/operators";
-import { createTrackPoint } from "../entities/geometries";
+import {
+  createTrackPoint,
+  createCircle,
+  createSector,
+  createRing
+} from "../entities/geometries";
 import uuid from "uuid/v4";
 import _ from "lodash";
 import { createPropertyColumn, getDefaultColumns } from "../columns/Constants";
@@ -72,7 +77,11 @@ export class TestSource extends Source {
    * @param {Object} def An object representing the query to execute
    * @return {Object} An RXJS Observable stream of *batches* of results.
    */
-  query({ count = 500, iterations = 30, shapeTypes = ["None", "Track"] }) {
+  query({
+    count = 500,
+    iterations = 30,
+    shapeTypes = ["None", "Track", "Circle", "Sector", "Ring"]
+  }) {
     let entities = {};
     for (let i = 0; i < count; i++) {
       let id = uuid();
@@ -97,12 +106,17 @@ export class TestSource extends Source {
             let lat = entity.lat || getRandomBetween(-80, 80);
             let lng = entity.lng || getRandomBetween(-170, 170);
             let alt = entity.alt || getRandomBetween(0, 50000);
+            let r1 = getRandomBetween(10000, 50000);
+            let r2 = getRandomBetween(51000, 60000);
+            let a1 = getRandomBetween(0, 350);
+            let a2 = a1 + getRandomBetween(10, 90);
             let speed = entity.speed || getRandomBetween(0, 500);
 
             lat += getRandomBetween(-0.5, 0.5);
             lng += getRandomBetween(-0.5, 0.5);
             alt += getRandomBetween(-1, 2);
             speed += getRandomBetween(-3, 1);
+
             if (entity.gtype === "Track") {
               entity.lat = lat;
               entity.lng = lng;
@@ -112,6 +126,35 @@ export class TestSource extends Source {
               properties.lng = { time, value: lng };
               properties.alt = { time, value: alt };
               properties.speed = { time, value: speed };
+            }
+            if (entity.gtype === "Circle") {
+              entity.lat = lat;
+              entity.lng = lng;
+              geometries.circle = createCircle([lng, lat], r1);
+              properties.lat = { time, value: lat };
+              properties.lng = { time, value: lng };
+              properties.radius = { time, value: r1 };
+            }
+            if (entity.gtype === "Sector") {
+              entity.lat = lat;
+              entity.lng = lng;
+              entity.alt = alt;
+              geometries.sector = createSector([lng, lat], r1, a1, a2);
+              properties.lat = { time, value: lat };
+              properties.lng = { time, value: lng };
+              properties.radius = { time, value: r1 };
+              properties.bearing1 = { time, value: a1 };
+              properties.bearing2 = { time, value: a2 };
+            }
+            if (entity.gtype === "Ring") {
+              entity.lat = lat;
+              entity.lng = lng;
+              entity.alt = alt;
+              geometries.ring = createRing([lng, lat], r1, r2);
+              properties.lat = { time, value: lat };
+              properties.lng = { time, value: lng };
+              properties.innerRadius = { time, value: r1 };
+              properties.outerRadius = { time, value: r2 };
             }
             properties.prop1 = { time, value: fakestr() };
             properties.prop2 = { time, value: fakestr() };

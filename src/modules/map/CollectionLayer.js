@@ -1,6 +1,6 @@
 import { MapLayer, withLeaflet } from "react-leaflet";
 import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
-import { Stage, Line, Circle, FastLayer } from "konva";
+import { Stage, Line, Ring, Wedge, Circle, FastLayer } from "konva";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 import moment from "moment";
@@ -21,6 +21,8 @@ function polarBounds(bounds, map) {
   let tr = bounds._northEast;
   let bl = bounds._southWest;
   let left, right, tl, br;
+  if (tr.lat < 0) tr.lat = 0;
+  if (bl.lat < 0) bl.lat = 0;
   //When we have a map, use actual pixel locations of corners to get unknown parts of bounds
   if (map) {
     let pbounds = map.getPixelBounds();
@@ -29,13 +31,15 @@ function polarBounds(bounds, map) {
     //corners
     try {
       tl = map.unproject([pbounds.min.x, pbounds.min.y]);
+      if (tl.lat < 0) tl.lat = 0;
     } catch (e) {
-      tl = { lat: 45, lng: (tr.lng + bl.lng) / 2 };
+      tl = { lat: 0, lng: (tr.lng + bl.lng) / 2 };
     }
     try {
       br = map.unproject([pbounds.max.x, pbounds.max.y]);
+      if (br.lat < 0) br.lat = 0;
     } catch (e) {
-      br = { lat: 45, lng: (tr.lng + bl.lng) / 2 };
+      br = { lat: 0, lng: (tr.lng + bl.lng) / 2 };
     }
   }
   //When we don't, just transform the box given to us. Not ideal, but no way around it.
@@ -181,11 +185,13 @@ function destroyNode(node) {
   node.destroy();
 }
 function style(shape, selected) {
-  shape.stroke(selected ? "blue" : "red");
+  shape.stroke(selected ? "rgba(0, 0, 255, 1)" : "rgba(255, 0, 0, 1)");
+  shape.fill(selected ? "rgba(0, 0, 255, 0.8)" : "rgba(255, 0, 0, 0.8)");
   //shape.moveToBottom();
 }
 function hoverStyle(shape) {
-  shape.stroke("yellow");
+  shape.stroke("rgba(255, 255, 0, 1)");
+  shape.stroke("rgba(255, 255, 0, 0.8)");
   shape.moveToTop();
 }
 function geomInTime(geom, minTime, maxTime) {
@@ -330,12 +336,14 @@ export const CollectionLayer = Layer.extend({
         this.collection.data,
         (entities, entity, id) => {
           entities[id] = this._updateEntity(entity, id, minTime, maxTime);
+          //We delete here beacuse we are effectively moving it from entities to newEntities
           delete this.entities[id];
           return entities;
         },
         {}
       );
 
+      //Any objects still in entities are dead and can be removed
       //Destroy cached shape that are no longer present
       //Only need to destroy shapes on "slow" updates (i.e., when
       //shapes themselves have changed, as opposd to pan/zoom)
@@ -448,17 +456,30 @@ export const CollectionLayer = Layer.extend({
         const selected =
           this.collection.selected && this.collection.selected[id];
         //Update the shape itself
-        if (geometry.etype === "Track" || geometry.type === "LineString") {
-          geom[idx] = this._renderLine(
-            geometry,
-            geom[idx],
-            hovered,
-            selected,
-            minTime,
-            maxTime
-          );
+        let renderer = null;
+        if (geometry.etype === "Circle") {
+          renderer = this._renderPolygon.bind(this);
+        } else if (geometry.etype === "Sector") {
+          /*else if (geometry.etype === "Ring") {
+          renderer = this._renderRing.bind(this)
+        }
+        */
+          renderer = this._renderPolygon.bind(this);
+        } else if (
+          /*
+        else if (geometry.type === "Polygon") {
+          renderer = this._renderPolygon.bind(this)
+        }
+        */
+          geometry.etype === "Track" ||
+          geometry.type === "LineString"
+        ) {
+          renderer = this._renderLine.bind(this);
         } else if (geometry.type === "Point") {
-          geom[idx] = this._renderPoint(
+          renderer = this._renderPoint.bind(this);
+        }
+        if (renderer) {
+          geom[idx] = renderer(
             geometry,
             geom[idx],
             hovered,
@@ -505,6 +526,149 @@ export const CollectionLayer = Layer.extend({
           shape.geom = geom;
           shape.x(x);
           shape.y(y);
+          hovered ? hoverStyle(shape) : style(shape, selected);
+          shape.show();
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
+    return shape;
+  },
+  _renderRing: function(geom, shape, hovered, selected, minTime, maxTime) {
+    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
+          rendered = true;
+          const coords = geom.center;
+          const pt = this._map.latLngToLayerPoint(
+            new LatLng(coords[1], coords[0] + transform, coords[2])
+          );
+          const pro = turf.destination(geom.center, geom.outerRadius / 1000, 0);
+          const pri = turf.destination(geom.center, geom.innerRadius / 1000, 0);
+          const innerRadius = pt.distanceTo(pri);
+          const outerRadius = pt.distanceTo(pro);
+          const x = Math.floor(pt.x);
+          const y = Math.floor(pt.y);
+
+          if (shape && shape.constructor !== Ring) {
+            shape.destroy();
+            shape = undefined;
+          }
+          if (!shape) {
+            shape = new Ring({
+              shadowForStrokeEnabled: false,
+              strokeHitEnabled: false,
+              listening: false,
+              perfectDrawEnabled: false,
+              strokeWidth: 1
+            });
+            this.layer.add(shape);
+          }
+          shape.geom = geom;
+          shape.x(x);
+          shape.y(y);
+          shape.innerRadius(innerRadius);
+          shape.outerRadius(outerRadius);
+          hovered ? hoverStyle(shape) : style(shape, selected);
+          shape.show();
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
+    return shape;
+  },
+  _renderCircle: function(geom, shape, hovered, selected, minTime, maxTime) {
+    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
+          rendered = true;
+          const coords = geom.center;
+          const pt = this._map.latLngToLayerPoint(
+            new LatLng(coords[1], coords[0] + transform, coords[2])
+          );
+          const pr = turf.destination(geom.center, geom.radius / 1000, 0);
+          const radius = pt.distanceTo(pr);
+          const x = Math.floor(pt.x);
+          const y = Math.floor(pt.y);
+
+          if (shape && shape.constructor !== Ring) {
+            shape.destroy();
+            shape = undefined;
+          }
+          if (!shape) {
+            shape = new Circle({
+              shadowForStrokeEnabled: false,
+              strokeHitEnabled: false,
+              listening: false,
+              perfectDrawEnabled: false,
+              strokeWidth: 1
+            });
+            this.layer.add(shape);
+          }
+          shape.geom = geom;
+          shape.x(x);
+          shape.y(y);
+          shape.radius(radius);
+          hovered ? hoverStyle(shape) : style(shape, selected);
+          shape.show();
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
+    return shape;
+  },
+  _renderSector: function(geom, shape, hovered, selected, minTime, maxTime) {
+    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
+          rendered = true;
+          const coords = geom.center;
+          const pt = this._map.latLngToLayerPoint(
+            new LatLng(coords[1], coords[0] + transform, coords[2])
+          );
+          const pr = turf.destination(geom.center, geom.radius / 1000, 0);
+          const radius = pt.distanceTo(pr);
+          const x = Math.floor(pt.x);
+          const y = Math.floor(pt.y);
+
+          if (shape && shape.constructor !== Wedge) {
+            shape.destroy();
+            shape = undefined;
+          }
+          if (!shape) {
+            shape = new Wedge({
+              shadowForStrokeEnabled: false,
+              strokeHitEnabled: false,
+              listening: false,
+              perfectDrawEnabled: false,
+              strokeWidth: 1
+            });
+            this.layer.add(shape);
+          }
+          shape.geom = geom;
+          shape.x(x);
+          shape.y(y);
+          shape.radius(radius);
+          //TODO: Verify rotation and angle. Documentation is incosistent,
+          //but this probably needs to be converted to radians, then rotated to have 0 be north,
+          //not east
+          shape.rotation(geom.bearing1);
+          shape.angle(geom.bearing2);
           hovered ? hoverStyle(shape) : style(shape, selected);
           shape.show();
         }
@@ -587,6 +751,59 @@ export const CollectionLayer = Layer.extend({
             shape.geom = geom;
             shape.points(points);
             shape.tension(0.5);
+            hovered ? hoverStyle(shape) : style(shape, selected);
+            shape.show();
+          } else {
+            console.log("Cannot render", start, end, minTime, geom);
+          }
+        }
+        return rendered;
+      },
+      false
+    );
+    if (shape && !rendered) shape.hide();
+    return shape;
+  },
+  _renderPolygon: function(geom, shape, hovered, selected, minTime, maxTime) {
+    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+
+    const rendered = _.reduce(
+      this._allBounds,
+      (rendered, bt) => {
+        if (rendered) return rendered;
+        const [bounds, transform] = bt;
+        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
+          rendered = true;
+          const zoom = this._map.getZoom();
+          let coordinates = geom.coordinates[0];
+          let start = 0;
+          let end = coordinates.length - 1;
+          let points = coordinates.reduce((pts, p, i) => {
+            if (start <= i && i <= end) {
+              const pt = this._map.latLngToLayerPoint(
+                new LatLng(p[1], p[0] + transform, p[2])
+              );
+              pts.push(Math.floor(pt.x));
+              pts.push(Math.floor(pt.y));
+            }
+            return pts;
+          }, []);
+          if (points.length > 0) {
+            if (!shape) {
+              shape = new Line({
+                shadowForStrokeEnabled: false,
+                fillEnabled: false,
+                strokeHitEnabled: false,
+                listening: false,
+                perfectDrawEnabled: true,
+                strokeWidth: 2,
+                closed: true
+              });
+              this.layer.add(shape);
+            }
+            shape.geom = geom;
+            shape.points(points);
+            //shape.tension(0);
             hovered ? hoverStyle(shape) : style(shape, selected);
             shape.show();
           } else {
