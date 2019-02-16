@@ -78,9 +78,9 @@ export class TestSource extends Source {
    * @return {Object} An RXJS Observable stream of *batches* of results.
    */
   query({
-    count = 500,
+    count = 1000,
     iterations = 30,
-    shapeTypes = ["None", "Track", "Circle", "Sector", "Ring"]
+    shapeTypes = ["None", "Track", "Circle", "Sector"]
   }) {
     let entities = {};
     for (let i = 0; i < count; i++) {

@@ -184,15 +184,18 @@ function destroyNode(node) {
   _.each(node.getChildren(), c => destroyNode(c));
   node.destroy();
 }
-function style(shape, selected) {
-  shape.stroke(selected ? "rgba(0, 0, 255, 1)" : "rgba(255, 0, 0, 1)");
-  shape.fill(selected ? "rgba(0, 0, 255, 0.8)" : "rgba(255, 0, 0, 0.8)");
-  //shape.moveToBottom();
-}
-function hoverStyle(shape) {
-  shape.stroke("rgba(255, 255, 0, 1)");
-  shape.stroke("rgba(255, 255, 0, 0.8)");
-  shape.moveToTop();
+function style(shape, selected, hovered) {
+  if (hovered) {
+    shape.stroke("rgba(255, 255, 0, 1)");
+    shape.fill("rgba(255, 255, 0, 0.65)");
+    shape.moveToTop();
+  } else if (selected) {
+    shape.stroke("rgba(0, 0, 255, 1)");
+    shape.fill("rgba(0, 0, 255, 0.65)");
+  } else {
+    shape.stroke("rgba(255, 0, 0, 1)");
+    shape.fill("rgba(255, 0, 0, 0.65)");
+  }
 }
 function geomInTime(geom, minTime, maxTime) {
   //We do this just in case there is only a start or end for some
@@ -460,17 +463,10 @@ export const CollectionLayer = Layer.extend({
         if (geometry.etype === "Circle") {
           renderer = this._renderPolygon.bind(this);
         } else if (geometry.etype === "Sector") {
-          /*else if (geometry.etype === "Ring") {
-          renderer = this._renderRing.bind(this)
-        }
-        */
+          renderer = this._renderPolygon.bind(this);
+        } else if (geometry.type === "Polygon") {
           renderer = this._renderPolygon.bind(this);
         } else if (
-          /*
-        else if (geometry.type === "Polygon") {
-          renderer = this._renderPolygon.bind(this)
-        }
-        */
           geometry.etype === "Track" ||
           geometry.type === "LineString"
         ) {
@@ -526,55 +522,7 @@ export const CollectionLayer = Layer.extend({
           shape.geom = geom;
           shape.x(x);
           shape.y(y);
-          hovered ? hoverStyle(shape) : style(shape, selected);
-          shape.show();
-        }
-        return rendered;
-      },
-      false
-    );
-    if (shape && !rendered) shape.hide();
-    return shape;
-  },
-  _renderRing: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-    const rendered = _.reduce(
-      this._allBounds,
-      (rendered, bt) => {
-        const [bounds, transform] = bt;
-        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
-          rendered = true;
-          const coords = geom.center;
-          const pt = this._map.latLngToLayerPoint(
-            new LatLng(coords[1], coords[0] + transform, coords[2])
-          );
-          const pro = turf.destination(geom.center, geom.outerRadius / 1000, 0);
-          const pri = turf.destination(geom.center, geom.innerRadius / 1000, 0);
-          const innerRadius = pt.distanceTo(pri);
-          const outerRadius = pt.distanceTo(pro);
-          const x = Math.floor(pt.x);
-          const y = Math.floor(pt.y);
-
-          if (shape && shape.constructor !== Ring) {
-            shape.destroy();
-            shape = undefined;
-          }
-          if (!shape) {
-            shape = new Ring({
-              shadowForStrokeEnabled: false,
-              strokeHitEnabled: false,
-              listening: false,
-              perfectDrawEnabled: false,
-              strokeWidth: 1
-            });
-            this.layer.add(shape);
-          }
-          shape.geom = geom;
-          shape.x(x);
-          shape.y(y);
-          shape.innerRadius(innerRadius);
-          shape.outerRadius(outerRadius);
-          hovered ? hoverStyle(shape) : style(shape, selected);
+          style(shape, selected, hovered);
           shape.show();
         }
         return rendered;
@@ -619,7 +567,7 @@ export const CollectionLayer = Layer.extend({
           shape.x(x);
           shape.y(y);
           shape.radius(radius);
-          hovered ? hoverStyle(shape) : style(shape, selected);
+          style(shape, selected, hovered);
           shape.show();
         }
         return rendered;
@@ -669,7 +617,7 @@ export const CollectionLayer = Layer.extend({
           //not east
           shape.rotation(geom.bearing1);
           shape.angle(geom.bearing2);
-          hovered ? hoverStyle(shape) : style(shape, selected);
+          style(shape, selected, hovered);
           shape.show();
         }
         return rendered;
@@ -751,7 +699,7 @@ export const CollectionLayer = Layer.extend({
             shape.geom = geom;
             shape.points(points);
             shape.tension(0.5);
-            hovered ? hoverStyle(shape) : style(shape, selected);
+            style(shape, selected, hovered);
             shape.show();
           } else {
             console.log("Cannot render", start, end, minTime, geom);
@@ -792,7 +740,7 @@ export const CollectionLayer = Layer.extend({
             if (!shape) {
               shape = new Line({
                 shadowForStrokeEnabled: false,
-                fillEnabled: false,
+                fillEnabled: true,
                 strokeHitEnabled: false,
                 listening: false,
                 perfectDrawEnabled: true,
@@ -804,7 +752,7 @@ export const CollectionLayer = Layer.extend({
             shape.geom = geom;
             shape.points(points);
             //shape.tension(0);
-            hovered ? hoverStyle(shape) : style(shape, selected);
+            style(shape, selected, hovered);
             shape.show();
           } else {
             console.log("Cannot render", start, end, minTime, geom);
@@ -859,47 +807,38 @@ export const CollectionLayer = Layer.extend({
       //TODO: Instead of create just an allBounds, I need an allBox and allGeos. Better,
       //create an array that has all three in them, since they are based on allBounds translate
       let didHover = false;
+      let didChange = false;
       //const pt = e.latlng //this._map.layerPointToLatLng(e);
       this.hovered = _.reduce(
         this.collection.data,
         (hits, entity, id) => {
+          const selected =
+            this.collection.selected && this.collection.selected[id];
           return _.reduce(
             entity.geometries,
             (hits, gc, field) => {
+              let gHit = false;
               return _.reduce(
                 gc.geometries,
                 (hits, geometry, idx) => {
                   if (this._closeTo(geometry, allBoxes)) {
                     didHover = true;
+                    gHit = true;
                     hits[id] = { [field]: true };
                     if (this.entities[id] && this.entities[id][field]) {
                       const geoms = this.entities[id][field];
                       _.each(geoms, (shape, idx) => {
-                        //Only redraw if it changed from not hovered to hovered
-                        if (
-                          shape &&
-                          (!this.hovered[id] || !this.hovered[id][field])
-                        ) {
-                          hoverStyle(shape);
-                          try {
-                            shape.draw();
-                          } catch (e) {}
-                        }
+                        if (shape) style(shape, selected, true);
                       });
                     }
-                  } else if (this.hovered[id] && this.hovered[id][field]) {
-                    //It is no longer a hover, re-style
+                  } else if (
+                    !gHit &&
+                    this.hovered[id] &&
+                    this.hovered[id][field]
+                  ) {
                     const geoms = this.entities[id][field];
                     _.each(geoms, (shape, idx) => {
-                      if (shape) {
-                        const selected =
-                          this.collection.selected &&
-                          this.collection.selected[id];
-                        style(shape, selected);
-                        try {
-                          shape.draw();
-                        } catch (e) {}
-                      }
+                      if (shape) style(shape, selected, false);
                     });
                   }
                   return hits;
@@ -919,6 +858,7 @@ export const CollectionLayer = Layer.extend({
         //this._container.style.cursor = "";
         this._hoverCursor = false;
       }
+      this.stage.batchDraw();
     } catch (e) {
       console.error(e);
     }
