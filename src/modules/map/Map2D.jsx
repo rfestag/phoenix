@@ -90,7 +90,8 @@ export class Map2D extends Component {
       map.on("contextmenu", L.DomEvent.preventDefault);
       map.on(
         "mousemove",
-        Util.throttle(
+        _.throttle(
+          //Util.throttle(
           e => {
             let didHover = false;
             for (let ref of this.collectionLayerRefs) {
@@ -108,8 +109,8 @@ export class Map2D extends Component {
               this._hoverCursor = false;
             }
           },
-          32,
-          this
+          100,
+          { leading: true, trailing: true }
         ),
         this
       );

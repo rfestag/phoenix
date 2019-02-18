@@ -1,6 +1,6 @@
 import { MapLayer, withLeaflet } from "react-leaflet";
 import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
-import { Stage, Line, Ring, Wedge, Circle, FastLayer } from "konva";
+import { Stage, Circle, Line, FastLayer } from "konva";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 import moment from "moment";
@@ -532,101 +532,6 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderCircle: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-    const rendered = _.reduce(
-      this._allBounds,
-      (rendered, bt) => {
-        const [bounds, transform] = bt;
-        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
-          rendered = true;
-          const coords = geom.center;
-          const pt = this._map.latLngToLayerPoint(
-            new LatLng(coords[1], coords[0] + transform, coords[2])
-          );
-          const pr = turf.destination(geom.center, geom.radius / 1000, 0);
-          const radius = pt.distanceTo(pr);
-          const x = Math.floor(pt.x);
-          const y = Math.floor(pt.y);
-
-          if (shape && shape.constructor !== Ring) {
-            shape.destroy();
-            shape = undefined;
-          }
-          if (!shape) {
-            shape = new Circle({
-              shadowForStrokeEnabled: false,
-              strokeHitEnabled: false,
-              listening: false,
-              perfectDrawEnabled: false,
-              strokeWidth: 1
-            });
-            this.layer.add(shape);
-          }
-          shape.geom = geom;
-          shape.x(x);
-          shape.y(y);
-          shape.radius(radius);
-          style(shape, selected, hovered);
-          shape.show();
-        }
-        return rendered;
-      },
-      false
-    );
-    if (shape && !rendered) shape.hide();
-    return shape;
-  },
-  _renderSector: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-    const rendered = _.reduce(
-      this._allBounds,
-      (rendered, bt) => {
-        const [bounds, transform] = bt;
-        if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
-          rendered = true;
-          const coords = geom.center;
-          const pt = this._map.latLngToLayerPoint(
-            new LatLng(coords[1], coords[0] + transform, coords[2])
-          );
-          const pr = turf.destination(geom.center, geom.radius / 1000, 0);
-          const radius = pt.distanceTo(pr);
-          const x = Math.floor(pt.x);
-          const y = Math.floor(pt.y);
-
-          if (shape && shape.constructor !== Wedge) {
-            shape.destroy();
-            shape = undefined;
-          }
-          if (!shape) {
-            shape = new Wedge({
-              shadowForStrokeEnabled: false,
-              strokeHitEnabled: false,
-              listening: false,
-              perfectDrawEnabled: false,
-              strokeWidth: 1
-            });
-            this.layer.add(shape);
-          }
-          shape.geom = geom;
-          shape.x(x);
-          shape.y(y);
-          shape.radius(radius);
-          //TODO: Verify rotation and angle. Documentation is incosistent,
-          //but this probably needs to be converted to radians, then rotated to have 0 be north,
-          //not east
-          shape.rotation(geom.bearing1);
-          shape.angle(geom.bearing2);
-          style(shape, selected, hovered);
-          shape.show();
-        }
-        return rendered;
-      },
-      false
-    );
-    if (shape && !rendered) shape.hide();
-    return shape;
-  },
   _renderLine: function(geom, shape, hovered, selected, minTime, maxTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
@@ -691,7 +596,7 @@ export const CollectionLayer = Layer.extend({
                 fillEnabled: false,
                 strokeHitEnabled: false,
                 listening: false,
-                perfectDrawEnabled: true,
+                perfectDrawEnabled: false,
                 strokeWidth: 2
               });
               this.layer.add(shape);
@@ -723,27 +628,30 @@ export const CollectionLayer = Layer.extend({
         if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
           rendered = true;
           const zoom = this._map.getZoom();
-          let coordinates = geom.coordinates[0];
-          let start = 0;
-          let end = coordinates.length - 1;
+          //TODO: Figure out how to use holes. A few issues right now:
+          //1) FastLayer doesn't support groups, but Layer is really slow from Konva.
+          //2) Requires globalCompositeOperation, but it isn't clear how that works with many
+          //   overlaying shapes.
+          let [coordinates, ...holes] = geom.coordinates;
           let points = coordinates.reduce((pts, p, i) => {
-            if (start <= i && i <= end) {
-              const pt = this._map.latLngToLayerPoint(
-                new LatLng(p[1], p[0] + transform, p[2])
-              );
-              pts.push(Math.floor(pt.x));
-              pts.push(Math.floor(pt.y));
-            }
+            const pt = this._map.latLngToLayerPoint(
+              new LatLng(p[1], p[0] + transform, p[2])
+            );
+            pts.push(Math.floor(pt.x));
+            pts.push(Math.floor(pt.y));
             return pts;
           }, []);
-          if (points.length > 0) {
+          //6 "points" really means 3 coordinates. Technically this should always be a minimum of
+          //8 (4 coordinates) beacuse GeoJSON requires the last coordinate to match the first
+          //coordinate, but we'll keep it looser here because Konva will close it for us
+          if (points.length >= 6) {
             if (!shape) {
               shape = new Line({
                 shadowForStrokeEnabled: false,
                 fillEnabled: true,
                 strokeHitEnabled: false,
                 listening: false,
-                perfectDrawEnabled: true,
+                perfectDrawEnabled: false,
                 strokeWidth: 2,
                 closed: true
               });
@@ -754,8 +662,6 @@ export const CollectionLayer = Layer.extend({
             //shape.tension(0);
             style(shape, selected, hovered);
             shape.show();
-          } else {
-            console.log("Cannot render", start, end, minTime, geom);
           }
         }
         return rendered;
@@ -818,33 +724,38 @@ export const CollectionLayer = Layer.extend({
             entity.geometries,
             (hits, gc, field) => {
               let gHit = false;
-              return _.reduce(
+              const wasHovered = this.hovered[id] && this.hovered[id][field];
+              hits = _.reduce(
                 gc.geometries,
                 (hits, geometry, idx) => {
-                  if (this._closeTo(geometry, allBoxes)) {
+                  if (!gHit && this._closeTo(geometry, allBoxes)) {
                     didHover = true;
                     gHit = true;
                     hits[id] = { [field]: true };
-                    if (this.entities[id] && this.entities[id][field]) {
+                    if (
+                      !wasHovered &&
+                      this.entities[id] &&
+                      this.entities[id][field]
+                    ) {
+                      didChange = true;
                       const geoms = this.entities[id][field];
                       _.each(geoms, (shape, idx) => {
                         if (shape) style(shape, selected, true);
                       });
                     }
-                  } else if (
-                    !gHit &&
-                    this.hovered[id] &&
-                    this.hovered[id][field]
-                  ) {
-                    const geoms = this.entities[id][field];
-                    _.each(geoms, (shape, idx) => {
-                      if (shape) style(shape, selected, false);
-                    });
                   }
                   return hits;
                 },
                 hits
               );
+              if (!gHit && wasHovered) {
+                didChange = true;
+                const geoms = this.entities[id][field];
+                _.each(geoms, (shape, idx) => {
+                  if (shape) style(shape, selected, false);
+                });
+              }
+              return hits;
             },
             hits
           );
@@ -858,7 +769,10 @@ export const CollectionLayer = Layer.extend({
         //this._container.style.cursor = "";
         this._hoverCursor = false;
       }
-      this.stage.batchDraw();
+      if (didChange) {
+        console.log("Did change");
+        this.stage.batchDraw();
+      }
     } catch (e) {
       console.error(e);
     }

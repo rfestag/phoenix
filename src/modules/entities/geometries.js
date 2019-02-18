@@ -113,7 +113,7 @@ export const createRing = function(center, outer, inner) {
   let ring = createCircle(center, outer);
   let c2 = createCircle(center, inner);
   ring.etype = "Ring";
-  ring.coordinates.push(c2.coordinates);
+  ring.coordinates = ring.coordinates.concat(c2.coordinates);
   ring.center = center;
   ring.innerRadius = inner;
   ring.outerRadius = outer;
