@@ -16,7 +16,7 @@ import MapToolbar from "./MapToolbar";
 import Selectbar from "./Selectbar";
 import _ from "lodash";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
-import L, { Util } from "leaflet";
+import L from "leaflet";
 //import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
 import MiniMap from "./MiniMap";
@@ -34,12 +34,12 @@ export class Map2D extends Component {
     };
   }
   static propTypes = {
-    crs: PropTypes.object.isRequired,
-    center: PropTypes.array.isRequired,
+    crs: PropTypes.object,
+    center: PropTypes.array,
     collections: PropTypes.object.isRequired,
-    zoom: PropTypes.number.isRequired,
-    layer: PropTypes.object.isRequired,
-    overlays: PropTypes.array.isRequired,
+    zoom: PropTypes.number,
+    layer: PropTypes.object,
+    overlays: PropTypes.array,
     panels: PropTypes.object,
     setFocusedEntity: PropTypes.func,
     setSelectedEntities: PropTypes.func,
@@ -132,7 +132,7 @@ export class Map2D extends Component {
     }
   }
   resize() {
-    const map = this.map.current.leafletElement;
+    const map = this.map.current && this.map.current.leafletElement;
     if (map) {
       map.invalidateSize();
     }
@@ -153,60 +153,62 @@ export class Map2D extends Component {
   render() {
     let cids = Object.keys(this.props.collections);
     return (
-      <Map
-        ref={this.map}
-        key={this.props.crs.name} //This is necessary. It forces the map to re-mount when crs changes
-        crs={this.props.crs.crs}
-        center={this.props.center}
-        {...this.props.crs.settings}
-        onLoad={this.mapMounted}
-        zoom={this.props.zoom}
-        zoomControl={false}
-        attributionControl={false}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <MapToolbar />
-        <Selectbar />
-        <ViewControl
-          miniMapActive={this.state.miniMapActive}
-          toggleMiniMap={this.toggleMiniMap}
-        />
-        {/*<HeatmapLayer
+      this.props.crs && (
+        <Map
+          ref={this.map}
+          key={this.props.crs.name} //This is necessary. It forces the map to re-mount when crs changes
+          crs={this.props.crs.crs}
+          center={this.props.center}
+          {...this.props.crs.settings}
+          onLoad={this.mapMounted}
+          zoom={this.props.zoom}
+          zoomControl={false}
+          attributionControl={false}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <MapToolbar />
+          <Selectbar />
+          <ViewControl
+            miniMapActive={this.state.miniMapActive}
+            toggleMiniMap={this.toggleMiniMap}
+          />
+          {/*<HeatmapLayer
           points={this.props.heatmapPoints}
           longitudeExtractor={m => m.location[0]}
           latitudeExtractor={m => m.location[1]}
           intensityExtractor={m => m.value}
         />*/}
-        <TileLayer {...this.props.layer.settings} />
-        {_.map(this.props.overlays, overlay => {
-          return overlay.active && <TileLayer {...overlay.settings} />;
-        })}
-        {_.map(this.props.collections, (collection, cid) => {
-          return (
-            <CollectionLayer
-              key={cid}
-              ref={ref => (this.collectionLayerRefs[cids.indexOf(cid)] = ref)}
-              collection={collection}
-              onFocus={this.props.setFocusedEntity}
-              onSelect={this.props.setSelectedEntities}
-              onToggle={this.props.toggleSelectedEntities}
-              onRender={this.props.emitTimingMetric}
-              minZoom={5}
-            />
-          );
-        })}
-        <MiniMap
-          key={this.props.crs.name}
-          projection={this.props.crs}
-          worldCopyJump={true}
-          center={this.state.center}
-          zoom={this.state.zoom}
-          active={this.state.miniMapActive}
-          bounds={this.state.bounds}
-        >
           <TileLayer {...this.props.layer.settings} />
-        </MiniMap>
-      </Map>
+          {_.map(this.props.overlays, overlay => {
+            return overlay.active && <TileLayer {...overlay.settings} />;
+          })}
+          {_.map(this.props.collections, (collection, cid) => {
+            return (
+              <CollectionLayer
+                key={cid}
+                ref={ref => (this.collectionLayerRefs[cids.indexOf(cid)] = ref)}
+                collection={collection}
+                onFocus={this.props.setFocusedEntity}
+                onSelect={this.props.setSelectedEntities}
+                onToggle={this.props.toggleSelectedEntities}
+                onRender={this.props.emitTimingMetric}
+                minZoom={5}
+              />
+            );
+          })}
+          <MiniMap
+            key={this.props.crs.name}
+            projection={this.props.crs}
+            worldCopyJump={true}
+            center={this.state.center}
+            zoom={this.state.zoom}
+            active={this.state.miniMapActive}
+            bounds={this.state.bounds}
+          >
+            <TileLayer {...this.props.layer.settings} />
+          </MiniMap>
+        </Map>
+      )
     );
   }
 }

@@ -1,4 +1,5 @@
 /* Types */
+export const SET_MAP_STATE = "SET_MAP_STATE";
 export const SET_PROJECTION = "SET_PROJECTION";
 
 export const SET_BASELAYER = "SET_BASELAYER";
@@ -24,3 +25,4 @@ export const showOverlay = layer => ({ type: SHOW_OVERLAY, layer });
 export const hideOverlay = layer => ({ type: HIDE_OVERLAY, layer });
 export const addOverlay = layer => ({ type: ADD_OVERLAY, layer });
 export const removeOverlay = layer => ({ type: REMOVE_OVERLAY, layer });
+export const setMapState = state => ({ type: SET_MAP_STATE, state });

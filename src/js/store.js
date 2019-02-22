@@ -5,6 +5,8 @@ import { combineEpics } from "redux-observable";
 import collection from "../modules/collection/CollectionReducers";
 import { ageOffEpic } from "../modules/collection/CollectionEpics";
 import { enrichNewEntitiesEpic } from "../modules/enrich/EnrichEpics";
+import { manageSettings } from "../modules/settings/SettingsEpics";
+import { manageMapState } from "../modules/map/MapEpics";
 import map from "../modules/map/MapReducers";
 import panel from "../modules/panel/PanelReducers";
 import metrics from "../modules/metrics/MetricsReducers";
@@ -17,7 +19,9 @@ import { timeActionsMiddleware } from "../modules/metrics/MetricsMiddleware";
 export const rootEpic = combineEpics(
   sharedWorkerProxyEpic,
   ageOffEpic,
-  enrichNewEntitiesEpic
+  enrichNewEntitiesEpic,
+  manageSettings,
+  manageMapState
 );
 //export const rootEpic = combineEpics(sharedWorkerProxyEpic, ageOffEpic);
 
