@@ -80,8 +80,8 @@ export class TestSource extends Source {
    * @return {Object} An RXJS Observable stream of *batches* of results.
    */
   query({
-    count = 1000,
-    iterations = 10,
+    count = 100,
+    iterations = 30,
     shapeTypes = ["None", "Track", "Circle", "Sector", "Polygon"]
   }) {
     let entities = {};
