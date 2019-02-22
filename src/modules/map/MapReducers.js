@@ -1,4 +1,8 @@
 import {
+  SET_CENTER,
+  SET_ZOOM,
+  SET_BOUNDS,
+  SET_VIEWPORT,
   SET_MAP_STATE,
   SET_PROJECTION,
   SET_BASELAYER,
@@ -44,6 +48,15 @@ export default function(state = initialState, action) {
   switch (action.type) {
     case SET_MAP_STATE:
       return action.state;
+    case SET_CENTER:
+      return { ...state, center: action.center };
+    case SET_ZOOM:
+      return { ...state, zoom: action.zoom };
+    case SET_BOUNDS:
+      return { ...state, bounds: action.bounds };
+    case SET_VIEWPORT:
+      let { bounds, zoom, center } = action;
+      return { ...state, bounds, zoom, center };
     case SET_PROJECTION:
       return { ...state, crs: action.projection };
     case SET_BASELAYER:

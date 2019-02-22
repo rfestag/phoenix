@@ -23,7 +23,6 @@ const getThemeProps = createSelector([getTheme], theme => {
 });
 const getMuiThemeProps = createSelector([getTheme], themeName => {
   let theme = themeProps[themeName];
-  console.log("Theme", themeName, theme);
   return createMuiTheme({
     palette: {
       type: themeName,

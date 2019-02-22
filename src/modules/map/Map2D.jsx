@@ -30,17 +30,18 @@ export class Map2D extends Component {
     this.state = {
       miniMapActive: false,
       center: props.center,
-      zoom: props.zoom
+      zoom: props.zoom - 4
     };
   }
   static propTypes = {
     crs: PropTypes.object,
-    center: PropTypes.array,
+    center: PropTypes.any,
     collections: PropTypes.object.isRequired,
     zoom: PropTypes.number,
     layer: PropTypes.object,
     overlays: PropTypes.array,
     panels: PropTypes.object,
+    setViewport: PropTypes.func,
     setFocusedEntity: PropTypes.func,
     setSelectedEntities: PropTypes.func,
     toggleSelectedEntities: PropTypes.func,
@@ -49,16 +50,19 @@ export class Map2D extends Component {
 
   componentDidMount() {
     const map = this.map.current && this.map.current.leafletElement;
-    console.log("MOUNTING MAP");
     if (map) {
       map.invalidateSize();
       map.on(
         "zoomend",
         () => {
           try {
+            this.props.setViewport({
+              zoom: map.getZoom(),
+              center: map.getCenter(),
+              bounds: map.getBounds()
+            });
             this.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
           } catch (e) {
-            console.log("Sad panda zoom");
             //Do nothing. This can happen in polar projections when you pan too far out
           }
         },
@@ -68,9 +72,13 @@ export class Map2D extends Component {
         "moveend",
         () => {
           try {
+            this.props.setViewport({
+              zoom: map.getZoom(),
+              center: map.getCenter(),
+              bounds: map.getBounds()
+            });
             this.setState({ center: map.getCenter(), bounds: map.getBounds() });
           } catch (e) {
-            console.log("Sad panda move");
             //Do nothing. This can happen in polar projections when you pan too far out
           }
         },
@@ -114,9 +122,10 @@ export class Map2D extends Component {
         ),
         this
       );
+      map.setView(this.props.center, this.props.zoom);
 
       this.setState({
-        center: map.getCenter(),
+        center: this.props.center,
         zoom: map.getZoom() - 4,
         bounds: map.getBounds()
       });
@@ -127,7 +136,6 @@ export class Map2D extends Component {
       this.resize();
     }
     if (this.props.crs !== prevProps.crs) {
-      console.log("Should bind map events");
       this.componentDidMount();
     }
   }
@@ -142,12 +150,6 @@ export class Map2D extends Component {
   };
   toggleMiniMap = () => {
     this.setState({ miniMapActive: !this.state.miniMapActive });
-  };
-  mapMounted = () => {
-    console.log("Map mounted");
-  };
-  featureChanged = feature => {
-    console.log("Feature changed!", feature);
   };
 
   render() {

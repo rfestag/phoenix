@@ -6,6 +6,10 @@ import { withLatestFrom } from "rxjs/operators";
 import { ofType } from "redux-observable";
 import {
   setMapState,
+  SET_VIEWPORT,
+  SET_ZOOM,
+  SET_CENTER,
+  SET_BOUNDS,
   SET_PROJECTION,
   SET_BASELAYER,
   ADD_BASELAYER,
@@ -17,6 +21,10 @@ import {
 } from "./MapActions";
 
 const MAP_ACTIONS = [
+  SET_VIEWPORT,
+  SET_ZOOM,
+  SET_CENTER,
+  SET_BOUNDS,
   SET_PROJECTION,
   SET_BASELAYER,
   ADD_BASELAYER,
@@ -217,16 +225,15 @@ export const manageMapState = (action$, state$) => {
   } catch (e) {
     savedState = DEFAULT_STATE;
   }
-  console.log("MAP", savedState);
   savedState.crs = projections.find(p => p.name === savedState.crs.name);
   savedState.projections = projections;
 
   //This will, out of band, update settings in local storage
   action$
     .pipe(ofType(...MAP_ACTIONS), withLatestFrom(state$))
-    .subscribe(([, state]) =>
-      localStorage.setItem("map", JSON.stringify(state.map))
-    );
+    .subscribe(([, state]) => {
+      localStorage.setItem("map", JSON.stringify(state.map));
+    });
 
   //When the epic starts, overwrite library defaults with local storage.
   return of(setMapState(savedState));
