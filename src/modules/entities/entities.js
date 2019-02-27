@@ -42,6 +42,7 @@ export const updateEntity = (e, updates, fields) => {
   const entity = updates.reduce((entity, update) => {
     if (!entity.id) entity.id = update.id;
     if (!entity.label) entity.label = update.label;
+    if (!entity.provider) entity.provider = update.provider;
 
     if (update.properties) {
       //TODO: Do more testing of this. Right now, it seems like the "cheap" version

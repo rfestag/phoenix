@@ -79,6 +79,10 @@ export function mapToCollection(action$) {
         //and we don't want to restart it on subscription
         adapter
           .pipe(
+            map(d => {
+              d.provider = action.source;
+              return d;
+            }),
             bufferTime(2000),
             filter(d => d.length > 0),
             collectBy(d => d.id)

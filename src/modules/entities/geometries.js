@@ -66,17 +66,30 @@ export const createTrackPoint = function(pt, time) {
   point.etype = "Track";
   return point;
 };
-export const createPolygon = function(coordinates) {
+export const createLineString = function(coordinates, start, end) {
+  let line = {
+    ...defaultLineString,
+    coordinates,
+    when: { ...defaultPolygon.when }
+  };
+  line.when.start = start;
+  line.when.end = start || end;
+  line.bbox = turf.bbox(line);
+  return line;
+};
+export const createPolygon = function(coordinates, start, end) {
   let polygon = {
     ...defaultPolygon,
     coordinates,
     when: { ...defaultPolygon.when }
   };
+  polygon.when.start = start;
+  polygon.when.end = start || end;
   polygon.bbox = turf.bbox(polygon);
   polygon.center = turf.centroid(polygon).geometry.coordinates;
   return polygon;
 };
-export const createCircle = function(center, radius) {
+export const createCircle = function(center, radius, start, end) {
   //Turf expects radius to be in km by default, we will use m by default
   let circle = turf.circle(center, radius / 1000).geometry;
   circle.etype = "Circle";
@@ -84,9 +97,11 @@ export const createCircle = function(center, radius) {
   circle.radius = radius;
   circle.bbox = turf.bbox(circle);
   circle.when = { ...defaultPolygon.when };
+  circle.when.start = start;
+  circle.when.end = start || end;
   return circle;
 };
-export const createEllipse = function(center, smaj, smin, tilt) {
+export const createEllipse = function(center, smaj, smin, tilt, start, end) {
   let coordinates = []; //TODO: Take parameters, outline polygon
   let ellipse = createPolygon(coordinates);
   ellipse.etype = "Ellipse";
@@ -95,9 +110,18 @@ export const createEllipse = function(center, smaj, smin, tilt) {
   ellipse.smin = smin;
   ellipse.tilt = tilt;
   ellipse.bbox = turf.bbox(ellipse);
+  ellipse.when.start = start;
+  ellipse.when.end = start || end;
   return ellipse;
 };
-export const createSector = function(center, radius, bearing1, bearing2) {
+export const createSector = function(
+  center,
+  radius,
+  bearing1,
+  bearing2,
+  start,
+  end
+) {
   //Turf expects radius to be in km by default, we will use m by default
   let sector = turf.sector(center, radius / 1000, bearing1, bearing2).geometry;
   sector.etype = "Sector";
@@ -107,9 +131,11 @@ export const createSector = function(center, radius, bearing1, bearing2) {
   sector.bearing2 = bearing2;
   sector.when = { ...defaultPolygon.when };
   sector.bbox = turf.bbox(sector);
+  sector.when.start = start;
+  sector.when.end = start || end;
   return sector;
 };
-export const createRing = function(center, outer, inner) {
+export const createRing = function(center, outer, inner, start, end) {
   let ring = createCircle(center, outer);
   let c2 = createCircle(center, inner);
   ring.etype = "Ring";
@@ -118,6 +144,8 @@ export const createRing = function(center, outer, inner) {
   ring.innerRadius = inner;
   ring.outerRadius = outer;
   ring.bbox = turf.bbox(ring);
+  ring.when.start = start;
+  ring.when.end = start || end;
   return ring;
 };
 const trackFromPoint = function(pt) {

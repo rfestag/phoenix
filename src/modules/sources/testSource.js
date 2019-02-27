@@ -4,6 +4,7 @@ import { map, take } from "rxjs/operators";
 import * as turf from "@turf/turf";
 import {
   createTrackPoint,
+  createLineString,
   createCircle,
   createSector,
   createPolygon,
@@ -82,7 +83,7 @@ export class TestSource extends Source {
   query({
     count = 100,
     iterations = 30,
-    shapeTypes = ["None", "Track", "Circle", "Sector", "Polygon"]
+    shapeTypes = ["None", "Track", "LineString", "Circle", "Sector", "Polygon"]
   }) {
     let entities = {};
     for (let i = 0; i < count; i++) {
@@ -114,8 +115,8 @@ export class TestSource extends Source {
             let a2 = a1 + getRandomBetween(10, 90);
             let speed = entity.speed || getRandomBetween(0, 500);
 
-            lat += getRandomBetween(-0.5, 0.5);
-            lng += getRandomBetween(-0.5, 0.5);
+            lat += getRandomBetween(-0.25, 0.25);
+            lng += getRandomBetween(-0.25, 0.25);
             alt += getRandomBetween(-1, 2);
             speed += getRandomBetween(-3, 1);
 
@@ -132,7 +133,12 @@ export class TestSource extends Source {
             if (entity.gtype === "Circle") {
               entity.lat = lat;
               entity.lng = lng;
-              geometries.circle = createCircle([lng, lat], r1);
+              geometries.circle = createCircle(
+                [lng, lat],
+                r1,
+                time,
+                time - 3000
+              );
               properties.lat = { time, value: lat };
               properties.lng = { time, value: lng };
               properties.radius = { time, value: r1 };
@@ -141,7 +147,14 @@ export class TestSource extends Source {
               entity.lat = lat;
               entity.lng = lng;
               entity.alt = alt;
-              geometries.sector = createSector([lng, lat], r1, a1, a2);
+              geometries.sector = createSector(
+                [lng, lat],
+                r1,
+                a1,
+                a2,
+                time,
+                time - 3000
+              );
               properties.lat = { time, value: lat };
               properties.lng = { time, value: lng };
               properties.radius = { time, value: r1 };
@@ -154,9 +167,23 @@ export class TestSource extends Source {
                 bbox: [lng - 1, lat - 1, lng + 1, lat + 1]
               }).features[0];
               let coords = feature.geometry.coordinates;
-              geometries.polygon = createPolygon(coords);
+              geometries.polygon = createPolygon(coords, time, time - 3000);
               lat = geometries.polygon.center[1];
               lng = geometries.polygon.center[0];
+              entity.lat = lat;
+              entity.lng = lng;
+              properties.lat = { time, value: lat };
+              properties.lng = { time, value: lng };
+            }
+            if (entity.gtype === "LineString") {
+              let feature = turf.randomLineString(1, {
+                bbox: [lng - 1, lat - 1, lng + 1, lat + 1],
+                max_length: 0.25
+              }).features[0];
+              let coords = feature.geometry.coordinates;
+              geometries.line = createLineString(coords, time, time - 3000);
+              lat = geometries.line.coordinates[0][1];
+              lng = geometries.line.coordinates[0][0];
               entity.lat = lat;
               entity.lng = lng;
               properties.lat = { time, value: lat };
@@ -166,7 +193,13 @@ export class TestSource extends Source {
               entity.lat = lat;
               entity.lng = lng;
               entity.alt = alt;
-              geometries.ring = createRing([lng, lat], r1, r2);
+              geometries.ring = createRing(
+                [lng, lat],
+                r1,
+                r2,
+                time,
+                time - 3000
+              );
               properties.lat = { time, value: lat };
               properties.lng = { time, value: lng };
               properties.innerRadius = { time, value: r1 };
