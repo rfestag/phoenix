@@ -18,7 +18,7 @@ const getGridThemeName = createSelector([getTheme], theme => {
   return theme === "light" ? "ag-theme-balham" : "ag-theme-balham-dark";
 });
 const getGridThemeCss = createSelector([getTheme], theme => {
-  return require(`../../node_modules/ag-grid/dist/styles/ag-theme-balham${
+  return require(`../../node_modules/ag-grid-community/dist/styles/ag-theme-balham${
     theme === "light" ? "" : "-dark"
   }.css`);
 });
@@ -37,6 +37,7 @@ export class Grid extends Component {
     columns: PropTypes.array,
     /** The theme to use */
     themeName: PropTypes.string,
+    defaultColDef: PropTypes.object,
     themeCss: PropTypes.any,
     selected: PropTypes.object,
     emitTimingMetric: PropTypes.func,
@@ -44,6 +45,7 @@ export class Grid extends Component {
     onRowFocusChanged: PropTypes.func
   };
   static defaultProps = {
+    defaultColDef: { resizable: true },
     data: [],
     columns: []
   };
@@ -174,6 +176,7 @@ export class Grid extends Component {
           onSelectionChanged={this.onSelectionChanged}
           onCellFocused={this.onCellFocused}
           suppressPropertyNamesCheck={true}
+          defaultColDef={this.props.defaultColDef}
         />
       </div>
     );

@@ -11,7 +11,10 @@ import {
   SHOW_OVERLAY,
   HIDE_OVERLAY,
   ADD_OVERLAY,
-  REMOVE_OVERLAY
+  REMOVE_OVERLAY,
+  SET_PANNABLE,
+  SET_TIMELINE_VISIBILITY,
+  TOGGLE_TIMELINE_VISIBILITY
 } from "./MapActions";
 
 const initialState = {
@@ -21,6 +24,8 @@ const initialState = {
   layer: null,
   overlays: [],
   projections: [],
+  pannable: true,
+  timelineVisible: true,
   zoom: 3
 };
 function setActiveBaselayer(layers, layer) {
@@ -48,6 +53,12 @@ export default function(state = initialState, action) {
   switch (action.type) {
     case SET_MAP_STATE:
       return action.state;
+    case SET_PANNABLE:
+      return { ...state, pannable: action.pannable };
+    case SET_TIMELINE_VISIBILITY:
+      return { ...state, timelineVisible: action.visible };
+    case TOGGLE_TIMELINE_VISIBILITY:
+      return { ...state, timelineVisible: !state.timelineVisible };
     case SET_CENTER:
       return { ...state, center: action.center };
     case SET_ZOOM:

@@ -14,6 +14,7 @@ import { Map, TileLayer } from "react-leaflet";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
 import Selectbar from "./Selectbar";
+import TimeControl from "./TimeControl";
 import _ from "lodash";
 //import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
@@ -45,7 +46,9 @@ export class Map2D extends Component {
     setFocusedEntity: PropTypes.func,
     setSelectedEntities: PropTypes.func,
     toggleSelectedEntities: PropTypes.func,
-    emitTimingMetric: PropTypes.func
+    emitTimingMetric: PropTypes.func,
+    timelineVisible: PropTypes.boolean,
+    pannable: PropTypes.boolean
   };
 
   componentDidMount() {
@@ -154,6 +157,10 @@ export class Map2D extends Component {
 
   render() {
     let cids = Object.keys(this.props.collections);
+    const map = this.map.current && this.map.current.leafletElement;
+    if (map) {
+      this.props.pannable ? map.dragging.enable() : map.dragging.disable();
+    }
     return (
       this.props.crs && (
         <Map
@@ -209,6 +216,7 @@ export class Map2D extends Component {
           >
             <TileLayer {...this.props.layer.settings} />
           </MiniMap>
+          {this.props.timelineVisible && <TimeControl />}
         </Map>
       )
     );
@@ -227,7 +235,9 @@ function mapStateToProps(state, props) {
     overlays: state.map.overlays,
     layer: state.map.layer,
     panels: state.panel,
-    zoom: state.map.zoom
+    zoom: state.map.zoom,
+    pannable: state.map.pannable,
+    timelineVisible: state.map.timelineVisible
   };
 }
 

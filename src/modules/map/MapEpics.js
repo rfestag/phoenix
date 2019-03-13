@@ -227,6 +227,7 @@ export const manageMapState = (action$, state$) => {
   }
   savedState.crs = projections.find(p => p.name === savedState.crs.name);
   savedState.projections = projections;
+  savedState.pannable = true;
 
   //This will, out of band, update settings in local storage
   action$

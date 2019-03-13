@@ -16,6 +16,10 @@ export const SET_ZOOM = "SET_ZOOM";
 export const SET_BOUNDS = "SET_BOUNDS";
 export const SET_VIEWPORT = "SET_VIEWPORT";
 
+export const SET_PANNABLE = "SET_PANNABLE";
+export const SET_TIMELINE_VISIBILITY = "SET_TIMELINE_VISIBILITY";
+export const TOGGLE_TIMELINE_VISIBILITY = "TOGGLE_TIMELINE_VISIBILITY";
+
 /* Actions */
 export const setProjection = projection => ({
   type: SET_PROJECTION,
@@ -41,3 +45,21 @@ export const hideOverlay = layer => ({ type: HIDE_OVERLAY, layer });
 export const addOverlay = layer => ({ type: ADD_OVERLAY, layer });
 export const removeOverlay = layer => ({ type: REMOVE_OVERLAY, layer });
 export const setMapState = state => ({ type: SET_MAP_STATE, state });
+
+export const setPannable = pannable => ({ type: SET_PANNABLE, pannable });
+export const enablePanning = () => ({ type: SET_PANNABLE, pannable: true });
+export const disablePanning = () => ({ type: SET_PANNABLE, pannable: false });
+
+export const setTimelineVisibility = visible => ({
+  type: SET_TIMELINE_VISIBILITY,
+  visible
+});
+export const toggleTimeline = () => ({ type: TOGGLE_TIMELINE_VISIBILITY });
+export const showTimeline = () => ({
+  type: SET_TIMELINE_VISIBILITY,
+  visible: true
+});
+export const hideTimeline = () => ({
+  type: SET_TIMELINE_VISIBILITY,
+  visible: false
+});

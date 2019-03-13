@@ -16,6 +16,7 @@ import {
 
 const Wrapper = styled.div`
   flex: 1 1;
+  min-width: 0;
 `;
 
 const MainPanels = ({ leftPane, rightPane, bottomPane }) => (

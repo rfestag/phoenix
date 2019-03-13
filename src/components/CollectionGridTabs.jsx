@@ -201,7 +201,10 @@ export class CollectionGridTabs extends React.Component {
           </Button>
         </AppBar>
         */}
-        <TabContent activeTab={this.props.activeTab} style={{ flex: "1" }}>
+        <TabContent
+          activeTab={this.props.activeTab}
+          style={{ flex: "1", overflow: "hidden" }}
+        >
           <TabPane tabId={this.props.activeTab} style={{ height: "100%" }}>
             <Grid
               collectionId={this.props.activeTab}

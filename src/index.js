@@ -1,7 +1,7 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "react-reflex/styles.css";
-import "ag-grid/dist/styles/ag-grid.css";
+import "ag-grid-community/dist/styles/ag-grid.css";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import React from "react";
 import ReactDOM from "react-dom";
