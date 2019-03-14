@@ -1,0 +1,77 @@
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import {
+  UncontrolledButtonDropdown as Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem
+} from "reactstrap";
+import { SortAscending, SortDescending } from "../../components/Icons";
+
+const ColumnMenu = ({ column }) => (
+  <Dropdown style={{ display: "flex" }}>
+    <DropdownToggle
+      color="header-dropdown"
+      style={{ padding: "0 5px 0 0", transition: "none" }}
+      caret
+    />
+    <DropdownMenu
+      right
+      modifiers={{ preventOverflow: { boundariesElement: "window" } }}
+      positionFixed={true}
+    >
+      <DropdownItem>Action 1</DropdownItem>
+      <DropdownItem divider />
+      <DropdownItem>Action 2</DropdownItem>
+    </DropdownMenu>
+  </Dropdown>
+);
+ColumnMenu.propTypes = {
+  column: PropTypes.object
+};
+
+export default class CustomHeader extends Component {
+  static propTypes = {
+    column: PropTypes.object,
+    api: PropTypes.object,
+    displayName: PropTypes.string,
+    setSort: PropTypes.func
+  };
+  render() {
+    let { column } = this.props;
+    let { sort } = column;
+    let SortIcon = undefined;
+
+    let sortedColumns = this.props.api.sortController.getColumnsWithSortingOrdered();
+    let index = sortedColumns.findIndex(c => c === column);
+
+    if (sort === "asc") SortIcon = SortAscending;
+    else if (sort === "desc") SortIcon = SortDescending;
+
+    return (
+      <div style={{ display: "flex" }}>
+        <div
+          onClick={this.onSortRequested}
+          style={{ display: "flex", flex: 1 }}
+        >
+          <div>{this.props.displayName}</div>
+          <div style={{ paddingLeft: 8, flex: 1 }}>
+            {sortedColumns.length > 1 && index >= 0 && index + 1}
+            {SortIcon && <SortIcon />}
+          </div>
+        </div>
+        <ColumnMenu />
+      </div>
+    );
+  }
+
+  onSortRequested = event => {
+    let sort = this.props.column.sort;
+
+    if (!sort) sort = "asc";
+    else if (sort === "asc") sort = "desc";
+    else sort = undefined;
+
+    this.props.setSort(sort, event.shiftKey);
+  };
+}

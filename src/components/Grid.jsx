@@ -3,10 +3,14 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
-import { getColumnDefs } from "../modules/columns/Constants";
+import {
+  getPropertiesForCollection,
+  getColumnDefs
+} from "../modules/columns/Constants";
 import {
   setSelectedEntities,
-  setFocusedEntity
+  setFocusedEntity,
+  updateCollectionFields
 } from "../modules/collection/CollectionActions";
 import { createSelector } from "reselect";
 import { emitTimingMetric } from "../modules/metrics/MetricsActions";
@@ -35,6 +39,7 @@ export class Grid extends Component {
     data: PropTypes.array,
     /** Column definitions for this grid */
     columns: PropTypes.array,
+    properties: PropTypes.object,
     /** The theme to use */
     themeName: PropTypes.string,
     defaultColDef: PropTypes.object,
@@ -42,10 +47,11 @@ export class Grid extends Component {
     selected: PropTypes.object,
     emitTimingMetric: PropTypes.func,
     onSelectionChanged: PropTypes.func,
-    onRowFocusChanged: PropTypes.func
+    onRowFocusChanged: PropTypes.func,
+    updateCollectionFields: PropTypes.func
   };
   static defaultProps = {
-    defaultColDef: { resizable: true },
+    defaultColDef: { sortable: true, resizable: true },
     data: [],
     columns: []
   };
@@ -109,6 +115,50 @@ export class Grid extends Component {
       }
     }
   };
+  onSortChanged = e => {
+    let sortedColumns = this.api.sortController.getColumnsWithSortingOrdered();
+    let columns = this.api.columnController.getAllGridColumns();
+    let properties = { ...this.props.properties };
+    //First, clear all sorting fields.
+    _.each(columns, column => {
+      let field = column.colDef.field;
+      let prop = { ...properties[field] };
+      prop.sort = undefined;
+      prop.sortedAt = undefined;
+      properties[field] = prop;
+    });
+    //Then, replace any sorting related fields (sort and sortedAt)
+    _.each(sortedColumns, (column, i) => {
+      let field = column.colDef.field;
+      let prop = properties[field];
+      prop.sort = column.sort;
+      prop.sortedAt = column.sortedAt;
+    });
+    this.props.updateCollectionFields(this.props.collection.id, { properties });
+  };
+  onColumnMoved = e => {
+    let columns = this.api.columnController.getAllGridColumns();
+    let properties = { ...this.props.properties };
+    let i = 0;
+    _.each(columns, column => {
+      let field = column.colDef.field;
+      let prop = _.find(properties, p => p.field === column.colDef.field);
+      if (!prop) return;
+      prop = { ...properties[field] };
+      prop.position = i++;
+      properties[field] = prop;
+    });
+    this.props.updateCollectionFields(this.props.collection.id, { properties });
+  };
+  onColumnResized = _.debounce(e => {
+    let { column } = e;
+    let { field } = column.colDef;
+    let properties = { ...this.props.properties };
+    let prop = _.find(properties, p => p.field === field);
+    properties[field] = { ...prop };
+    properties[field].width = column.actualWidth;
+    this.props.updateCollectionFields(this.props.collection.id, { properties });
+  }, 200);
 
   render() {
     //I found that using delta mode was a little slow (often over 100ms), and
@@ -169,11 +219,14 @@ export class Grid extends Component {
         <AgGridReact
           onGridReady={this.onGridReady}
           columnDefs={this.props.columns}
-          enableSorting={true}
           rowSelection="multiple"
           suppressRowClickSelection={true}
+          suppressDragLeaveHidesColumns={true}
           getRowNodeId={data => data.id}
           onSelectionChanged={this.onSelectionChanged}
+          onSortChanged={this.onSortChanged}
+          onColumnMoved={this.onColumnMoved}
+          onColumnResized={this.onColumnResized}
           onCellFocused={this.onCellFocused}
           suppressPropertyNamesCheck={true}
           defaultColDef={this.props.defaultColDef}
@@ -186,6 +239,7 @@ function mapStateToProps(state, props) {
   return {
     data: getCollectionData(state, props),
     selected: getSelected(state, props),
+    properties: getPropertiesForCollection(state, props),
     columns: getColumnDefs(state, props),
     themeName: getGridThemeName(state, props),
     themeCss: getGridThemeCss(state, props)
@@ -197,7 +251,8 @@ function mapDispatchToProps(dispatch) {
     {
       emitTimingMetric,
       onSelectionChanged: setSelectedEntities,
-      onRowFocusChanged: setFocusedEntity
+      onRowFocusChanged: setFocusedEntity,
+      updateCollectionFields
     },
     dispatch
   );

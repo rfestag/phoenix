@@ -47,8 +47,8 @@ export class Map2D extends Component {
     setSelectedEntities: PropTypes.func,
     toggleSelectedEntities: PropTypes.func,
     emitTimingMetric: PropTypes.func,
-    timelineVisible: PropTypes.boolean,
-    pannable: PropTypes.boolean
+    timelineVisible: PropTypes.bool,
+    pannable: PropTypes.bool
   };
 
   componentDidMount() {

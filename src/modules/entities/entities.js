@@ -80,8 +80,11 @@ export const updateEntity = (e, updates, fields) => {
             : createProperty(entity.properties[field]);
           updatedProperties[field] = updateProperty(prop, value, time);
           updateWhen(entity, time);
-          if (!fields.properties[field])
+          if (!fields.properties[field]) {
+            let idx = Object.keys(fields.properties).length;
             fields.properties[field] = createPropertyColumn(field, value);
+            fields.properties[field].position = idx;
+          }
           return updatedProperties;
         },
         entity.properties

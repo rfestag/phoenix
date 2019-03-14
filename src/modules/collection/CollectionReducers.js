@@ -107,6 +107,7 @@ export default function(state = initialState, action) {
         return state;
       }
     case UPDATE_COLLECTION_FIELDS:
+      console.log("Updating collection fields", action);
       collection = state.collections[id];
       if (collection) {
         collection = { ...collection, fields: action.fields };

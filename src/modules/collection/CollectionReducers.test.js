@@ -16,21 +16,23 @@ describe("collection reducer", () => {
           fields: {
             geometries: {},
             properties: {
-              whenEnd: {
+              end: {
                 _formatterName: "timeFormatter",
                 _getterName: "timeGetter",
                 _type: "time",
                 field: "end",
                 headerName: "Last seen",
-                hide: false
+                hide: false,
+                position: 0
               },
-              whenStart: {
+              start: {
                 _formatterName: "timeFormatter",
                 _getterName: "timeGetter",
                 _type: "time",
                 field: "start",
                 headerName: "First seen",
-                hide: false
+                hide: false,
+                position: 0
               }
             }
           },

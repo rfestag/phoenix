@@ -11,7 +11,9 @@ import {
   MdPlaylistAdd,
   MdOpenInNew,
   MdDelete,
-  MdClose
+  MdClose,
+  MdArrowUpward,
+  MdArrowDownward
 } from "react-icons/md";
 import {
   FaCheckSquare,
@@ -41,6 +43,8 @@ import { FaRegSquare, FaRegStar } from "react-icons/fa";
 
 export const AddGroupIcon = MdPlaylistAdd;
 export const AddRuleIcon = MdAdd;
+export const SortAscending = MdArrowUpward;
+export const SortDescending = MdArrowDownward;
 export const ChevronLeftIcon = FaChevronLeft;
 export const ChevronRightIcon = FaChevronRight;
 export const ColumnsIcon = FaColumns;

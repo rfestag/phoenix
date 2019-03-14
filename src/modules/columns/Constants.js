@@ -1,6 +1,7 @@
 import { createSelector } from "reselect";
 import moment from "moment";
 import _ from "lodash";
+import ColumnHeader from "./ColumnHeader";
 
 const SELECT_COLUMN = {
   checkboxSelection: true,
@@ -8,8 +9,8 @@ const SELECT_COLUMN = {
   suppressMenu: true,
   headerCheckboxSelection: true,
   width: 40,
-  suppressResize: true,
-  suppressSizeToFit: true
+  suppressSizeToFit: true,
+  resize: false
 };
 
 export const GETTERS = {
@@ -40,6 +41,7 @@ export const createPropertyColumn = (field, sample, opts = {}) => {
     field,
     headerName: field,
     hide: true,
+    position: 0,
     _getterName: "latestValueGetter"
   };
   if (sample) {
@@ -60,14 +62,14 @@ export const createPropertyColumn = (field, sample, opts = {}) => {
 };
 export const getDefaultColumns = () => {
   return {
-    whenStart: createPropertyColumn("start", null, {
+    start: createPropertyColumn("start", null, {
       headerName: "First seen",
       hide: false,
       _type: "time",
       _getterName: "timeGetter",
       _formatterName: "timeFormatter"
     }),
-    whenEnd: createPropertyColumn("end", null, {
+    end: createPropertyColumn("end", null, {
       headerName: "Last seen",
       hide: false,
       _type: "time",
@@ -112,12 +114,13 @@ export const getColumnDefs = createSelector(
       _.map(columns, c => {
         return {
           ...c,
-          //cellRendererFramework: ValueRenderer,
           valueGetter: GETTERS[c._getterName],
-          valueFormatter: FORMATTERS[c._formatterName]
+          valueFormatter: FORMATTERS[c._formatterName],
+          headerComponentFramework: ColumnHeader
         };
-      })
+      }).sort((a, b) => a.position - b.position)
     );
+    console.log(defs);
     return defs;
   }
 );

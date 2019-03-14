@@ -23,7 +23,12 @@ const TabMenu = ({
     {children}
     <DropdownToggle
       color={active ? "accent" : "secondary"}
-      style={{ padding: "0 5px 0 0", transition: "none" }}
+      style={{
+        flex: "unset",
+        padding: 0,
+        margin: "0 .25rem 0 0",
+        transition: "none"
+      }}
       caret
     />
     <DropdownMenu

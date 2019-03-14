@@ -145,7 +145,7 @@ export class CollectionGridTabs extends React.Component {
                   className={classnames({
                     active: this.props.activeTab === id
                   })}
-                  style={{ padding: ".5rem 0 .5rem 1rem" }}
+                  style={{ padding: "0.5rem 0 0 0.5rem", lineHeight: 2 }}
                 >
                   <TabMenu
                     item={collection}
