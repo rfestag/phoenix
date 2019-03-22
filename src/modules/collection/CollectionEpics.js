@@ -2,6 +2,7 @@ import { withLatestFrom, mergeMap } from "rxjs/operators";
 import { of } from "rxjs/observable/of";
 import { interval } from "rxjs/observable/interval";
 import { deleteFromCollection } from "./CollectionActions";
+import { ageoffHistory } from "../entities/entities";
 import { ageoffProperty } from "../entities/properties";
 import { ageoffGeometry } from "../entities/geometries";
 import _ from "lodash";
@@ -12,7 +13,7 @@ export const ageOffEpic = (action$, state$) => {
     withLatestFrom(state$),
     mergeMap(([, state]) => {
       const collections = state.collection.collections;
-      const actions = _.reduce(
+      let actions = _.reduce(
         collections,
         (actions, collection, id) => {
           if (!collection.ageoff) return actions;
@@ -28,9 +29,12 @@ export const ageOffEpic = (action$, state$) => {
               const t = entity.when.end || entity.when.start;
               if (t < ageoff) ids.push(id);
               else {
+                ageoffHistory(entity, ageoff);
+                /*
                 _.each(entity.properties, p => {
                   ageoffProperty(p, ageoff);
                 });
+                */
                 _.each(entity.geometries, g => {
                   ageoffGeometry(g, ageoff);
                 });

@@ -150,10 +150,10 @@ export const createRing = function(center, outer, inner, start, end) {
 };
 const trackFromPoint = function(pt) {
   let track = { ...defaultTrack };
-  track.coordinates = [[...pt.coordinates]];
-  track.bbox = [...pt.bbox];
-  track.times = [...pt.times];
-  track.when = { ...pt.when };
+  track.coordinates = [pt.coordinates];
+  track.bbox = pt.bbox;
+  track.times = pt.times;
+  track.when = pt.when;
   return track;
 };
 const mergeBounds = function(b1, b2) {
@@ -256,7 +256,6 @@ export const updateGeometry = (geometry, update) => {
   } else {
     geometry.geometries.push(update);
     return geometry;
-    //Update generic GeometryCollection
   }
   return geometry;
 };

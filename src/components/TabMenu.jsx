@@ -15,8 +15,6 @@ const TabMenu = ({
   active,
   item,
   onManage = defaultHandler,
-  onPause = defaultHandler,
-  onCancel = defaultHandler,
   onDelete = defaultHandler
 }) => (
   <Dropdown style={{ display: "flex" }}>
@@ -39,10 +37,8 @@ const TabMenu = ({
       <DropdownItem onClick={defaultHandler("manage", item)}>
         Manage...
       </DropdownItem>
-      <DropdownItem divider />
-      <DropdownItem onClick={defaultHandler("pause", item)}>Pause</DropdownItem>
-      <DropdownItem onClick={defaultHandler("cancel", item)}>
-        Cancel
+      <DropdownItem onClick={defaultHandler("manage", item)}>
+        Set Color
       </DropdownItem>
       <DropdownItem onClick={defaultHandler("delete", item)}>
         Delete
@@ -56,8 +52,6 @@ TabMenu.propTypes = {
   item: PropTypes.any,
   children: PropTypes.any,
   onManage: PropTypes.func,
-  onPause: PropTypes.func,
-  onCancel: PropTypes.func,
   onDelete: PropTypes.func
 };
 

@@ -19,7 +19,7 @@ import { timeActionsMiddleware } from "../modules/metrics/MetricsMiddleware";
 export const rootEpic = combineEpics(
   sharedWorkerProxyEpic,
   ageOffEpic,
-  enrichNewEntitiesEpic,
+  //enrichNewEntitiesEpic,
   manageSettings,
   manageMapState
 );

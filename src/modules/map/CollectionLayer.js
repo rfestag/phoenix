@@ -267,7 +267,8 @@ export const CollectionLayer = Layer.extend({
     this.stage.add(this.layer);
   },
   onRemove: function() {
-    destroyNode(this.stage);
+    //destroyNode(this.stage);
+    this.stage.destroy();
     DomUtil.remove(this._container);
     this._map.off("moveend", this.throttleRedraw);
     delete this._container;
@@ -450,9 +451,11 @@ export const CollectionLayer = Layer.extend({
     minTime,
     maxTime
   ) {
-    return (geoms[field] = _.reduce(
+    let tmp = { ...geoms[field] };
+    geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
+        delete tmp[idx];
         //geometry = timeBoundedGeom(geometry, minTime, maxTime)
         //if (geometry === undefined) return geom
         const hovered = this.hovered[id] && this.hovered[id][field];
@@ -487,7 +490,16 @@ export const CollectionLayer = Layer.extend({
         return geom;
       },
       geoms[field] || {}
-    ));
+    );
+    //if part of the geometry has aged off, we need delete it
+    _.each(tmp, (shape, idx) => {
+      if (geoms[field][idx]) {
+        shape.geom = null;
+        shape.destroy();
+        delete geoms[field][idx];
+      }
+    });
+    return geoms[field];
   },
   _renderPoint: function(geom, shape, hovered, selected, minTime, maxTime) {
     if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;

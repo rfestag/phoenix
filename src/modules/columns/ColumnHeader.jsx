@@ -6,9 +6,10 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+import DropdownSubMenu from "../../components/DropdownSubMenu";
 import { SortAscending, SortDescending } from "../../components/Icons";
 
-const ColumnMenu = ({ column }) => (
+const ColumnMenu = ({ column, displayName }) => (
   <Dropdown style={{ display: "flex" }}>
     <DropdownToggle
       color="header-dropdown"
@@ -20,13 +21,16 @@ const ColumnMenu = ({ column }) => (
       modifiers={{ preventOverflow: { boundariesElement: "window" } }}
       positionFixed={true}
     >
-      <DropdownItem>Action 1</DropdownItem>
+      <DropdownItem>Configure...</DropdownItem>
+      <DropdownItem>Color By...</DropdownItem>
+      <DropdownItem>Configure Color...</DropdownItem>
       <DropdownItem divider />
-      <DropdownItem>Action 2</DropdownItem>
+      <DropdownItem>Copy All</DropdownItem>
     </DropdownMenu>
   </Dropdown>
 );
 ColumnMenu.propTypes = {
+  displayName: PropTypes.string,
   column: PropTypes.object
 };
 
@@ -60,7 +64,7 @@ export default class CustomHeader extends Component {
             {SortIcon && <SortIcon />}
           </div>
         </div>
-        <ColumnMenu />
+        <ColumnMenu displayName={this.props.displayName} column={column} />
       </div>
     );
   }

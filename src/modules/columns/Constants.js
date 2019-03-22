@@ -18,7 +18,7 @@ export const GETTERS = {
     let { properties } = params.data;
     let { field, _type } = params.colDef;
     if (properties[field] === undefined) return undefined;
-    let last = properties[field].last;
+    let last = properties[field].value;
     return _type === "numeric" ? Number(last) : last;
   },
   timeGetter: params => {
@@ -120,7 +120,6 @@ export const getColumnDefs = createSelector(
         };
       }).sort((a, b) => a.position - b.position)
     );
-    console.log(defs);
     return defs;
   }
 );
