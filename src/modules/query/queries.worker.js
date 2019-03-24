@@ -83,7 +83,7 @@ export function mapToCollection(action$) {
               d.provider = action.source;
               return d;
             }),
-            bufferTime(2000),
+            bufferTime(1000),
             filter(d => d.length > 0),
             collectBy(d => d.id)
           )
@@ -107,29 +107,19 @@ export function mapToCollection(action$) {
   };
 }
 
-self.onconnect = function(e) {
-  const action$ = new Subject();
-  var port = e.ports[0];
-  const bcast = new BroadcastChannel("query");
+const action$ = new Subject();
+const bcast = new BroadcastChannel("query");
 
-  port.onmessage = function(e) {
-    action$.next(JSON.parse(e.data));
-  };
+action$
+  .pipe(
+    ofType(CREATE_QUERY),
+    mapToCollection(action$)
+    //mergeAll()
+  )
+  .subscribe(updates => bcast.postMessage(JSON.stringify(updates)));
 
-  action$
-    .pipe(
-      ofType(CREATE_QUERY),
-      mapToCollection(action$)
-      /*
-      bufferTime(1000),
-      filter(d => d.length > 0),
-      map(actions => {
-        const updates = actions.filter(a => a.type === UPDATE_COLLECTION);
-        const others = actions.filter(a => a.type !== UPDATE_COLLECTION);
-        return others.concat(batchUpdateCollections(updates));
-      }),
-      mergeAll()
-      */
-    )
-    .subscribe(updates => bcast.postMessage(JSON.stringify(updates)));
-};
+console.log("Worker", self);
+self.addEventListener("message", e => {
+  console.log("Got message", JSON.parse(e.data));
+  action$.next(JSON.parse(e.data));
+});

@@ -1,5 +1,5 @@
 import BroadcastChannel from "broadcast-channel";
-import Worker from "./queries.shared.js";
+import Worker from "./queries.worker.js";
 import { Observable } from "rxjs/Observable";
 import { ofType } from "redux-observable";
 import {
@@ -12,12 +12,14 @@ import {
 import _ from "lodash";
 
 const initialState = {};
+// eslint-disable-next-line import/no-webpack-loader-syntax
+//const Worker = require("worker-loader!./queries.worker.js");
 
 export const sharedWorkerProxyEpic = (action$, state$) => {
   const worker = new Worker();
   const bcast = new BroadcastChannel("query");
-  const port = worker.port;
-  worker.onerror = e => console.error("HUH", e);
+  //const port = worker.port;
+  //worker.onerror = e => console.error("HUH", e);
 
   //This observable takes all responses from the shared worker,
   //assues they are actions, and passes them back to redux
@@ -43,7 +45,7 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
       );
       observer.error(e);
     };
-    port.onerror = function(e) {
+    worker.onerror = function(e) {
       //TODO: We should put out some message that can be used to restart the worker,
       //or at least log it.
       console.error(
@@ -65,7 +67,10 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
         CANCEL_QUERY
       )
     )
-    .subscribe(action => port.postMessage(JSON.stringify(action)));
+    .subscribe(action => {
+      console.log("Sending", action);
+      worker.postMessage(JSON.stringify(action));
+    });
 
   //Finally, we start the port and return the observable. The observable is returned
   //because it is the stream of output actions from the worker

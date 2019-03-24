@@ -51,14 +51,6 @@ const Main = styled.div`
   overflow: hidden;
 `;
 
-/*
-  componentDidMount() {
-    if (window.WebSocket) {
-      this.props.createQuery("ADSBApollo", {}, "ADSB Exchange");
-    }
-  }
-  */
-
 const App = ({ themeName, themeProps, muiThemeProps }) => (
   <div>
     <link

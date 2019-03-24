@@ -258,7 +258,7 @@ export const CollectionLayer = Layer.extend({
     this.getPane().appendChild(this._container);
     //TODO: Properly register this so that we can remove the handler
     //We check for dragging outside of the actual throttle so we can still render after
-    this.throttleRedraw = _.throttle(this.redraw, 200, this);
+    this.throttleRedraw = _.throttle(this.redraw, 300, this);
     this._map.on("movestart", this._onMoveStart, this);
     this._map.on("moveend", this._onMoveEnd, this);
     this._map.on("zoomend", this.throttleRedraw, this);
@@ -336,12 +336,36 @@ export const CollectionLayer = Layer.extend({
       }
       //Update the entity shapes
 
+      let deleted = 0;
+      let destroyed = 0;
+      for (var [id, entity] of this.entities) {
+        if (!this.collection.data[id]) {
+          _.each(entity, (geom, field) => {
+            _.each(geom, (shape, idx) => {
+              if (shape) {
+                destroyed += 1;
+                //shape.geom = null;
+                shape.destroy();
+              }
+            });
+          });
+          deleted += 1;
+          this.entities.delete(id);
+        }
+      }
+      if (deleted > 0)
+        console.log(`Destroyed ${destroyed} shapes (${deleted} deleted)`);
+      _.each(this.collection.data, (entity, id) => {
+        let geoms = this._updateEntity(entity, id, minTime, maxTime);
+        this.entities.set(id, geoms);
+      });
+      /*
       const newEntities = _.reduce(
         this.collection.data,
         (entities, entity, id) => {
           entities[id] = this._updateEntity(entity, id, minTime, maxTime);
           //We delete here beacuse we are effectively moving it from entities to newEntities
-          delete this.entities[id];
+          this.entities.delete(id);
           return entities;
         },
         {}
@@ -359,7 +383,6 @@ export const CollectionLayer = Layer.extend({
             _.each(geom, (shape, idx) => {
               if (shape) {
                 destroyed += 1;
-                shape.geom = null;
                 shape.destroy();
               }
             });
@@ -371,13 +394,14 @@ export const CollectionLayer = Layer.extend({
 
       //Replace entities with the newly generated ones
       this.entities = newEntities;
+      */
 
       stage.batchDraw();
     }
     return this;
   },
   initialize: function(collection, props, timeRange) {
-    this.entities = {};
+    this.entities = new Map();
     this.hovered = {};
     this.onSelect = props.onSelect;
     this.onToggle = props.onToggle;
@@ -426,7 +450,8 @@ export const CollectionLayer = Layer.extend({
     );
   },
   _updateEntity: function(entity, id, minTime, maxTime) {
-    const e = (this.entities[id] = _.reduce(
+    let geoms = this.entities.get(id);
+    return _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
         geoms[field] = this._updateGeometry(
@@ -439,9 +464,8 @@ export const CollectionLayer = Layer.extend({
         );
         return geoms;
       },
-      this.entities[id] || {}
-    ));
-    return e;
+      geoms || {}
+    );
   },
   _updateGeometry: function(
     geometryCollection,
@@ -451,11 +475,16 @@ export const CollectionLayer = Layer.extend({
     minTime,
     maxTime
   ) {
-    let tmp = { ...geoms[field] };
+    if (
+      geoms[field] &&
+      geoms[field].length > geometryCollection.geometries.length
+    ) {
+      let diff = geoms[field].length - geometryCollection.geometries.length;
+      geoms[field].splice(0, diff);
+    }
     geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
-        delete tmp[idx];
         //geometry = timeBoundedGeom(geometry, minTime, maxTime)
         //if (geometry === undefined) return geom
         const hovered = this.hovered[id] && this.hovered[id][field];
@@ -464,21 +493,21 @@ export const CollectionLayer = Layer.extend({
         //Update the shape itself
         let renderer = null;
         if (geometry.etype === "Circle") {
-          renderer = this._renderPolygon.bind(this);
+          renderer = "_renderPolygon";
         } else if (geometry.etype === "Sector") {
-          renderer = this._renderPolygon.bind(this);
+          renderer = "_renderPolygon";
         } else if (geometry.type === "Polygon") {
-          renderer = this._renderPolygon.bind(this);
+          renderer = "_renderPolygon";
         } else if (
           geometry.etype === "Track" ||
           geometry.type === "LineString"
         ) {
-          renderer = this._renderLine.bind(this);
+          renderer = "_renderLine";
         } else if (geometry.type === "Point") {
-          renderer = this._renderPoint.bind(this);
+          renderer = "_renderPoint";
         }
         if (renderer) {
-          geom[idx] = renderer(
+          geom[idx] = this[renderer](
             geometry,
             geom[idx],
             hovered,
@@ -489,20 +518,12 @@ export const CollectionLayer = Layer.extend({
         }
         return geom;
       },
-      geoms[field] || {}
+      geoms[field] || []
     );
-    //if part of the geometry has aged off, we need delete it
-    _.each(tmp, (shape, idx) => {
-      if (geoms[field][idx]) {
-        shape.geom = null;
-        shape.destroy();
-        delete geoms[field][idx];
-      }
-    });
     return geoms[field];
   },
   _renderPoint: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -531,7 +552,7 @@ export const CollectionLayer = Layer.extend({
             });
             this.layer.add(shape);
           }
-          shape.geom = geom;
+          //shape.geom = geom;
           shape.x(x);
           shape.y(y);
           style(shape, selected, hovered);
@@ -545,7 +566,7 @@ export const CollectionLayer = Layer.extend({
     return shape;
   },
   _renderLine: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
     const rendered = _.reduce(
       this._allBounds,
@@ -613,7 +634,7 @@ export const CollectionLayer = Layer.extend({
               });
               this.layer.add(shape);
             }
-            shape.geom = geom;
+            //shape.geom = geom;
             shape.points(points);
             shape.tension(0.5);
             style(shape, selected, hovered);
@@ -630,7 +651,7 @@ export const CollectionLayer = Layer.extend({
     return shape;
   },
   _renderPolygon: function(geom, shape, hovered, selected, minTime, maxTime) {
-    if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
+    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
 
     const rendered = _.reduce(
       this._allBounds,
@@ -669,7 +690,7 @@ export const CollectionLayer = Layer.extend({
               });
               this.layer.add(shape);
             }
-            shape.geom = geom;
+            //shape.geom = geom;
             shape.points(points);
             //shape.tension(0);
             style(shape, selected, hovered);
@@ -688,7 +709,7 @@ export const CollectionLayer = Layer.extend({
     if (this.dragging) return;
     try {
       const map = this._map;
-      const t = 4; //Threshold
+      const t = 6; //Threshold
       const nw = map.layerPointToLatLng(
         new Point(e.layerPoint.x - t, e.layerPoint.y - t)
       );
@@ -744,13 +765,10 @@ export const CollectionLayer = Layer.extend({
                     didHover = true;
                     gHit = true;
                     hits[id] = { [field]: true };
-                    if (
-                      !wasHovered &&
-                      this.entities[id] &&
-                      this.entities[id][field]
-                    ) {
+                    let e = this.entities.get(id);
+                    if (!wasHovered && e && e[field]) {
                       didChange = true;
-                      const geoms = this.entities[id][field];
+                      const geoms = e[field];
                       _.each(geoms, (shape, idx) => {
                         if (shape) style(shape, selected, true);
                       });
@@ -762,7 +780,7 @@ export const CollectionLayer = Layer.extend({
               );
               if (!gHit && wasHovered) {
                 didChange = true;
-                const geoms = this.entities[id][field];
+                const geoms = this.entities.get(id)[field];
                 _.each(geoms, (shape, idx) => {
                   if (shape) style(shape, selected, false);
                 });
@@ -775,15 +793,13 @@ export const CollectionLayer = Layer.extend({
         {}
       );
       if (didHover && !this._hoverCursor) {
-        //this._container.style.cursor = "pointer";
         this._hoverCursor = true;
       } else if (!didHover && this._hoverCursor) {
-        //this._container.style.cursor = "";
         this._hoverCursor = false;
       }
       if (didChange) {
-        console.log("Did change");
-        this.stage.batchDraw();
+        this.throttleRedraw();
+        //this.stage.batchDraw();
       }
     } catch (e) {
       console.error(e);

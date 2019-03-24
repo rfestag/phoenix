@@ -69,6 +69,13 @@ export const MetricsTable = ({ data }) => {
               cellRenderer={numberFormatter}
             />
             <Column
+              label="Last"
+              dataKey="last"
+              width={50}
+              columnData={{ fixed: 1 }}
+              cellRenderer={numberFormatter}
+            />
+            <Column
               label="Count"
               dataKey="count"
               width={75}

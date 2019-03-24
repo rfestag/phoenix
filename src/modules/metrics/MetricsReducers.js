@@ -9,13 +9,14 @@ export default function(state = initialState, action) {
   switch (action.type) {
     case TIMING_METRIC:
       let duration = action.duration;
-      let { min, max, avg, count, total } = state.timing[metric] || {
+      let { min, max, avg, count, last, total } = state.timing[metric] || {
         min: Number.MAX_VALUE,
         max: -Number.MIN_VALUE,
         avg: 0,
         count: 0,
         total: 0
       };
+      last = duration;
       min = duration < min ? duration : min;
       max = duration > max ? duration : max;
       avg = (avg * count + duration) / (count + 1);
@@ -23,7 +24,7 @@ export default function(state = initialState, action) {
       count += 1;
       const timing = {
         ...state.timing,
-        [metric]: { min, max, avg, count, total }
+        [metric]: { min, max, avg, count, last, total }
       };
       return { ...state, timing };
     case COUNT_METRIC:

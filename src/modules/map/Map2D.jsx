@@ -101,28 +101,23 @@ export class Map2D extends Component {
       map.on("contextmenu", L.DomEvent.preventDefault);
       map.on(
         "mousemove",
-        _.throttle(
-          //Util.throttle(
-          e => {
-            let didHover = false;
-            for (let ref of this.collectionLayerRefs) {
-              if (ref && ref.leafletElement) {
-                let element = ref.leafletElement;
-                element._onMouseMove(e);
-                didHover = didHover || element._hoverCursor;
-              }
+        _.throttle(e => {
+          let didHover = false;
+          for (let ref of this.collectionLayerRefs) {
+            if (ref && ref.leafletElement) {
+              let element = ref.leafletElement;
+              element._onMouseMove(e);
+              didHover = didHover || element._hoverCursor;
             }
-            if (didHover && !this._hoverCursor) {
-              this.map.current.container.style.cursor = "pointer";
-              this._hoverCursor = true;
-            } else if (!didHover && this._hoverCursor) {
-              this.map.current.container.style.cursor = "";
-              this._hoverCursor = false;
-            }
-          },
-          100,
-          { leading: true, trailing: true }
-        ),
+          }
+          if (didHover && !this._hoverCursor) {
+            this.map.current.container.style.cursor = "pointer";
+            this._hoverCursor = true;
+          } else if (!didHover && this._hoverCursor) {
+            this.map.current.container.style.cursor = "";
+            this._hoverCursor = false;
+          }
+        }, 100),
         this
       );
       map.setView(this.props.center, this.props.zoom);

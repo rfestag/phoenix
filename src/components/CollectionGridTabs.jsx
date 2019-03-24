@@ -16,6 +16,7 @@ import {
   toggleColumnPane
 } from "../modules/panel/PanelActions";
 import TabMenu from "./TabMenu";
+import ReactResizeDetector from "react-resize-detector";
 
 /*
 import AppBar from '@material-ui/core/AppBar';
@@ -24,7 +25,7 @@ import Tab from '@material-ui/core/Tab';
 */
 
 const MAX_TAB_WIDTH_PCT = 13;
-const MAX_TABS = Math.floor(100 / MAX_TAB_WIDTH_PCT);
+const MAX_TAB_WIDTH = 150;
 
 const OuterPanel = styled.div`
   display: flex;
@@ -71,6 +72,7 @@ const TabTitle = styled.span`
 const Tab = styled(NavItem)`
   flex: 0 1;
   width: ${MAX_TAB_WIDTH_PCT}%;
+  min-width: ${MAX_TAB_WIDTH}px;
   order: ${props => props.order};
   display: ${props => (props.order < 0 ? "none" : "")};
 `;
@@ -86,10 +88,12 @@ export class CollectionGridTabs extends React.Component {
   constructor(props) {
     super(props);
 
+    this.tabsRef = React.createRef();
     this.state = {
       activeTab: 0,
       position: 0,
-      sliding: false
+      sliding: false,
+      maxTabs: Math.floor(100 / MAX_TAB_WIDTH_PCT)
     };
   }
   getOrder(id) {
@@ -103,7 +107,7 @@ export class CollectionGridTabs extends React.Component {
   };
   nextDisabled = () => {
     const count = Object.keys(this.props.collections).length;
-    return count - this.state.position <= MAX_TABS;
+    return count - this.state.position <= this.state.maxTabs;
   };
   nextTab = () => {
     const { position } = this.state;
@@ -129,6 +133,12 @@ export class CollectionGridTabs extends React.Component {
     this.props.onTabChange(collections[activeTab]);
     this.setState({ activeTab });
   };
+  calcTabs = size => {
+    let maxTabs = Math.floor(size / MAX_TAB_WIDTH);
+    if (maxTabs / 100 > MAX_TAB_WIDTH_PCT)
+      maxTabs = Math.floor(100 / MAX_TAB_WIDTH_PCT);
+    this.setState({ maxTabs });
+  };
   render() {
     return (
       <OuterPanel>
@@ -138,34 +148,36 @@ export class CollectionGridTabs extends React.Component {
               <ChevronLeftIcon />
             </Button>
           )}
-          <Tabs tabs>
-            {_.map(this.props.collections, (collection, id) => (
-              <Tab key={id} order={this.getOrder(id)}>
-                <NavLink
-                  className={classnames({
-                    active: this.props.activeTab === id
-                  })}
-                  style={{ padding: "0.5rem 0 0 0.5rem", lineHeight: 2 }}
-                >
-                  <TabMenu
-                    item={collection}
-                    active={this.props.activeTab === id}
-                    onMenuAction={this.onMenuAction}
+          <ReactResizeDetector handleWidth onResize={this.calcTabs}>
+            <Tabs tabs ref={this.tabsRef}>
+              {_.map(this.props.collections, (collection, id) => (
+                <Tab key={id} order={this.getOrder(id)}>
+                  <NavLink
+                    className={classnames({
+                      active: this.props.activeTab === id
+                    })}
+                    style={{ padding: "0.5rem 0 0 0.5rem", lineHeight: 2 }}
                   >
-                    <TabTitle
-                      title={collection.name}
+                    <TabMenu
+                      item={collection}
                       active={this.props.activeTab === id}
-                      onClick={() => {
-                        this.props.onTabChange(id);
-                      }}
+                      onMenuAction={this.onMenuAction}
                     >
-                      {collection.name}
-                    </TabTitle>
-                  </TabMenu>
-                </NavLink>
-              </Tab>
-            ))}
-          </Tabs>
+                      <TabTitle
+                        title={collection.name}
+                        active={this.props.activeTab === id}
+                        onClick={() => {
+                          this.props.onTabChange(id);
+                        }}
+                      >
+                        {collection.name}
+                      </TabTitle>
+                    </TabMenu>
+                  </NavLink>
+                </Tab>
+              ))}
+            </Tabs>
+          </ReactResizeDetector>
           {!this.nextDisabled() && (
             <Button disabled={this.nextDisabled()} onClick={this.nextTab}>
               <ChevronRightIcon />

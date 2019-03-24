@@ -36,7 +36,7 @@ export class RightPanel extends Component {
           <Button
             close
             onClick={this.props.closeRightPanel}
-            style={{ height: "100%" }}
+            style={{ height: "100%", width: 40 }}
           />
         </h2>
         <TabPane tabId={COLUMN_PANE} style={{ flex: 1 }}>

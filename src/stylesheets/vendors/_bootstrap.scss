@@ -19,6 +19,9 @@ input:focus {
 .dropdown-menu {
   top: -5px !important;
 }
+.dropdown-item {
+  line-height: 1.5;
+}
 .nav-link .dropdown-toggle {
   &:focus, 
   &:hover {
