@@ -93,7 +93,7 @@ export class CollectionGridTabs extends React.Component {
       activeTab: 0,
       position: 0,
       sliding: false,
-      maxTabs: Math.floor(100 / MAX_TAB_WIDTH_PCT)
+      maxTabs: Math.floor(100 / MAX_TAB_WIDTH_PCT) - 1
     };
   }
   getOrder(id) {
@@ -134,9 +134,9 @@ export class CollectionGridTabs extends React.Component {
     this.setState({ activeTab });
   };
   calcTabs = size => {
-    let maxTabs = Math.floor(size / MAX_TAB_WIDTH);
+    let maxTabs = Math.floor(size / MAX_TAB_WIDTH) - 1;
     if (maxTabs / 100 > MAX_TAB_WIDTH_PCT)
-      maxTabs = Math.floor(100 / MAX_TAB_WIDTH_PCT);
+      maxTabs = Math.floor(100 / MAX_TAB_WIDTH_PCT) - 1;
     this.setState({ maxTabs });
   };
   render() {

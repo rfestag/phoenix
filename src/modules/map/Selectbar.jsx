@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import styled from "styled-components";
-import { Input, Button, ButtonGroup } from "reactstrap";
+import { Button, ButtonGroup } from "reactstrap";
 import { clearAllSelections } from "../collection/CollectionActions";
 import _ from "lodash";
 

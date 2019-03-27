@@ -11,7 +11,7 @@ describe("collection reducer", () => {
     ).toEqual({
       collections: {
         cid: {
-          ageoff: { unit: "minute", value: 1 },
+          ageoff: undefined,
           data: {},
           fields: {
             geometries: {},

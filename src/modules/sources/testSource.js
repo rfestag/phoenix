@@ -13,17 +13,7 @@ import {
 import uuid from "uuid/v4";
 import _ from "lodash";
 import { createPropertyColumn, getDefaultColumns } from "../columns/Constants";
-import {
-  DISTANCE,
-  FEET,
-  SPEED,
-  KNOTS,
-  FEET_PER_SECOND,
-  LATITUDE,
-  LONGITUDE,
-  ROTATION,
-  DEGREES
-} from "./Constants";
+import { SPEED, KNOTS, LATITUDE, LONGITUDE } from "./Constants";
 
 function fakestr() {
   var text = "";
@@ -96,7 +86,7 @@ export class TestSource extends Source {
     }
 
     console.log("Generating fake data");
-    return interval(3000).pipe(
+    return interval(500).pipe(
       map(v => {
         return _.reduce(
           entities,
@@ -220,27 +210,6 @@ export class TestSource extends Source {
           },
           []
         );
-        /*
-        const data = [];
-        for (let i = 0; i < 100; i++) {
-          let time = Date.now();
-          let lat = { time, value: Math.random() * 180 - 90 };
-          let lng = { time, value: Math.random() * 360 - 180 };
-          let alt = { time, value: Math.random() * 50000 };
-          let geometries = {
-            track: createTrackPoint([lng.value, lat.value], time)
-          };
-
-          data[i] = {
-            id: i,
-            label: i,
-            time,
-            geometries,
-            properties: { lat, lng, Alt: alt }
-          };
-        }
-        return data;
-        */
       }),
       take(iterations)
     );

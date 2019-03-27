@@ -37,6 +37,7 @@ function updateCollection(collection, action) {
       fields = updatedFields;
       return data;
     },
+    //collection.data
     { ...collection.data }
   );
   return { ...collection, fields, data };
@@ -47,13 +48,14 @@ export default function(state = initialState, action) {
   switch (action.type) {
     case CREATE_COLLECTION:
       collection = state.collections[id];
+      console.log("Creating", action);
       if (collection) {
         console.error("Cannot create collection (already exists)", id);
         return state;
       } else {
         collection = {
           id,
-          ageoff: { value: 1, unit: "minute" },
+          ageoff: action.ageoff, //{ value: 1, unit: "minute" },
           name: action.name,
           queries: action.queries,
           visible: true,

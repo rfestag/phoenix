@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
-import DropdownSubMenu from "../../components/DropdownSubMenu";
 import { SortAscending, SortDescending } from "../../components/Icons";
 
 const ColumnMenu = ({ column, displayName }) => (

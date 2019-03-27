@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { Button, ButtonGroup, Form, FormGroup, Label, Input } from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
 import PerfectScrollbar from "react-perfect-scrollbar";
@@ -176,7 +177,8 @@ export class QueryPanel extends React.Component {
     this.props.createQuery(
       this.state.source.name,
       this.state.query,
-      this.state.name
+      this.state.name,
+      this.state.ageoff
     );
   };
   handleFormUpdate = (event, value, selectedKey) => {
@@ -260,9 +262,12 @@ export class QueryPanel extends React.Component {
 }
 
 function mapDispatchToProps(dispatch) {
-  return {
-    createQuery: (src, opts, name) => dispatch(createQuery(src, opts, name))
-  };
+  return bindActionCreators(
+    {
+      createQuery
+    },
+    dispatch
+  );
 }
 
 export default connect(null, mapDispatchToProps)(QueryPanel);

@@ -179,11 +179,6 @@ function getBoundsAndTransforms(bounds, map, boundsFromMap = true) {
   }
 }
 
-function destroyNode(node) {
-  if (node === undefined) return;
-  _.each(node.getChildren(), c => destroyNode(c));
-  node.destroy();
-}
 function style(shape, selected, hovered) {
   if (hovered) {
     shape.stroke("rgba(255, 255, 0, 1)");
@@ -267,7 +262,6 @@ export const CollectionLayer = Layer.extend({
     this.stage.add(this.layer);
   },
   onRemove: function() {
-    //destroyNode(this.stage);
     this.stage.destroy();
     DomUtil.remove(this._container);
     this._map.off("moveend", this.throttleRedraw);
@@ -307,7 +301,6 @@ export const CollectionLayer = Layer.extend({
         container = this._container,
         size = b.getSize(),
         m = Browser.retina ? 2 : 1;
-      let ageoff = this.collection.ageoff;
       let minTime = this.getMinTime();
       let maxTime = undefined; //This is a placeholder until we have full time regions
 
@@ -339,7 +332,7 @@ export const CollectionLayer = Layer.extend({
       let deleted = 0;
       let destroyed = 0;
       for (var [id, entity] of this.entities) {
-        if (!this.collection.data[id]) {
+        if (this.collection.data[id] === undefined) {
           _.each(entity, (geom, field) => {
             _.each(geom, (shape, idx) => {
               if (shape) {
@@ -355,46 +348,11 @@ export const CollectionLayer = Layer.extend({
       }
       if (deleted > 0)
         console.log(`Destroyed ${destroyed} shapes (${deleted} deleted)`);
+
       _.each(this.collection.data, (entity, id) => {
         let geoms = this._updateEntity(entity, id, minTime, maxTime);
         this.entities.set(id, geoms);
       });
-      /*
-      const newEntities = _.reduce(
-        this.collection.data,
-        (entities, entity, id) => {
-          entities[id] = this._updateEntity(entity, id, minTime, maxTime);
-          //We delete here beacuse we are effectively moving it from entities to newEntities
-          this.entities.delete(id);
-          return entities;
-        },
-        {}
-      );
-
-      //Any objects still in entities are dead and can be removed
-      //Destroy cached shape that are no longer present
-      //Only need to destroy shapes on "slow" updates (i.e., when
-      //shapes themselves have changed, as opposd to pan/zoom)
-      if (!fast) {
-        let destroyed = 0;
-        _.each(this.entities, (entity, id) => {
-          //if (newEntities[id] === undefined) {
-          _.each(entity, (geom, field) => {
-            _.each(geom, (shape, idx) => {
-              if (shape) {
-                destroyed += 1;
-                shape.destroy();
-              }
-            });
-          });
-          //}
-        });
-        if (destroyed > 0) console.log(`Destroyed ${destroyed} shapes`);
-      }
-
-      //Replace entities with the newly generated ones
-      this.entities = newEntities;
-      */
 
       stage.batchDraw();
     }
@@ -418,9 +376,9 @@ export const CollectionLayer = Layer.extend({
   },
   getMinTime: function() {
     let ageoff = this.collection.ageoff;
-    return ageoff
+    return ageoff && ageoff.ageoff > 0
       ? moment()
-          .subtract(ageoff.value, ageoff.unit)
+          .subtract(ageoff.ageoff, ageoff.unit)
           .valueOf()
       : undefined;
   },
@@ -480,7 +438,8 @@ export const CollectionLayer = Layer.extend({
       geoms[field].length > geometryCollection.geometries.length
     ) {
       let diff = geoms[field].length - geometryCollection.geometries.length;
-      geoms[field].splice(0, diff);
+      let deleted = geoms[field].splice(0, diff);
+      _.each(deleted, shape => shape && shape.destroy());
     }
     geoms[field] = _.reduce(
       geometryCollection.geometries,
@@ -537,10 +496,6 @@ export const CollectionLayer = Layer.extend({
           const x = Math.floor(pt.x);
           const y = Math.floor(pt.y);
 
-          if (shape && shape.constructor !== Circle) {
-            shape.destroy();
-            shape = undefined;
-          }
           if (!shape) {
             shape = new Circle({
               shadowForStrokeEnabled: false,
@@ -660,12 +615,15 @@ export const CollectionLayer = Layer.extend({
         const [bounds, transform] = bt;
         if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
           rendered = true;
-          const zoom = this._map.getZoom();
           //TODO: Figure out how to use holes. A few issues right now:
           //1) FastLayer doesn't support groups, but Layer is really slow from Konva.
           //2) Requires globalCompositeOperation, but it isn't clear how that works with many
           //   overlaying shapes.
           let [coordinates, ...holes] = geom.coordinates;
+          //TODO: Use holes to create holes in the rendered geometry. Requires changes
+          //to Konva to support the holes.
+          //An idea on how to implement it is here:
+          //https://stackoverflow.com/questions/13618844/polygon-with-a-hole-in-the-middle-with-html5s-canvas
           let points = coordinates.reduce((pts, p, i) => {
             const pt = this._map.latLngToLayerPoint(
               new LatLng(p[1], p[0] + transform, p[2])
@@ -814,21 +772,17 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw();
   },
   _onClick: function(e) {
-    console.log("Checking click on", this.collection.id, e);
     let { shiftKey, ctrlKey } = e.originalEvent;
     let clear = !shiftKey && !ctrlKey;
-    console.log("Should clear", clear);
     let clicked = Object.keys(this.hovered).reduce((clicked, id) => {
       if (this.collection.data[id]) clicked.push(this.collection.data[id]);
       return clicked;
     }, []);
     if (clicked.length === 1) {
-      console.log("Clicked", clicked[0], this.onToggle);
       if (this.onToggle)
         this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
       if (this.onFocus) this.onFocus(clicked[0].id);
     } else if (clicked.length > 1) {
-      console.log("Find closest", clicked);
       if (this.onToggle)
         this.onToggle(this.collection.id, clicked.map(e => e.id), clear);
     }

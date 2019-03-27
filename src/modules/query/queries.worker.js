@@ -12,7 +12,8 @@ import {
   RESUME_QUERY,
   PAUSE_QUERY,
   CANCEL_QUERY,
-  DELETE_QUERY
+  DELETE_QUERY,
+  cancelQuery
 } from "./QueryActions";
 import {
   UPDATE_COLLECTION,
@@ -27,13 +28,15 @@ import {
   bufferTime,
   bufferToggle,
   takeUntil,
+  takeWhile,
   filter,
   map,
   mergeMap,
   switchMap,
   buffer,
   mergeAll,
-  pipe
+  pipe,
+  catchError
 } from "rxjs/operators";
 import "babel-polyfill";
 import _ from "lodash";
@@ -70,36 +73,43 @@ export function mapToCollection(action$) {
         const name = action.name || id;
         const source = new ReplaySubject(1); //We use a replay subject so that, on unpause, we immediately emit the current value
         const buffered = new Subject(); //Our buffer of data during pause
-
         const isComplete = action$.pipe(queryCancelled(id));
-
         const pauseQuery = action$.pipe(queryPaused(id, false));
 
         //We separate the query's observable from the source because we assume it 'cold',
         //and we don't want to restart it on subscription
-        adapter
-          .pipe(
+        concat(
+          adapter.pipe(
             map(d => {
               d.provider = action.source;
               return d;
             }),
             bufferTime(1000),
             filter(d => d.length > 0),
-            collectBy(d => d.id)
-          )
-          .subscribe(source);
-        source.pipe(buffer(pauseQuery), mergeAll()).subscribe(buffered);
-
-        const collectionId = uuid();
-        return concat(
-          of(
-            createCollection(collectionId, name),
-            updateCollectionFields(collectionId, dictionary)
-          ),
-          pauseQuery.pipe(
-            switchMap(paused => (paused ? buffered : source)),
+            collectBy(d => d.id),
             map(data => updateCollection(collectionId, id, data)),
             takeUntil(isComplete)
+          ),
+          of(cancelQuery(action.id, `Completed Successfully`))
+        ).subscribe(source);
+
+        const collectionId = uuid();
+        const pausable = pauseQuery.pipe(
+          switchMap(
+            paused =>
+              paused ? source.pipe(buffer(pauseQuery), mergeAll()) : source
+          ),
+          takeUntil(isComplete)
+        );
+        return concat(
+          of(
+            createCollection(collectionId, name, [action.id], action.ageoff),
+            updateCollectionFields(collectionId, dictionary)
+          ),
+          pausable
+        ).pipe(
+          catchError(e =>
+            of(cancelQuery(action.id, `Completed with error: ${e}`))
           )
         );
       })
@@ -120,6 +130,5 @@ action$
 
 console.log("Worker", self);
 self.addEventListener("message", e => {
-  console.log("Got message", JSON.parse(e.data));
   action$.next(JSON.parse(e.data));
 });

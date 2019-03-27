@@ -40,11 +40,12 @@ export const SET_FOCUSED_ENTITY = "SET_FOCUSED_ENTITY";
  * @param {string[]} queries - An array of query uuids that feed into this collection.
  * @return {Object} A CREAT_COLLECTION action object.
  */
-export const createCollection = (id, name, queries) => ({
+export const createCollection = (id, name, queries, ageoff) => ({
   type: CREATE_COLLECTION,
   id,
   name,
-  queries
+  queries,
+  ageoff
 });
 
 /**

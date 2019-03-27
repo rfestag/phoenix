@@ -68,7 +68,6 @@ export const sharedWorkerProxyEpic = (action$, state$) => {
       )
     )
     .subscribe(action => {
-      console.log("Sending", action);
       worker.postMessage(JSON.stringify(action));
     });
 
@@ -85,6 +84,7 @@ export const handleCreateQuery = (state, action) => {
     [action.id]: {
       paused: false,
       done: false,
+      detail: "",
       id: action.id,
       name: action.name,
       source: action.source,
@@ -99,7 +99,9 @@ export const handlePauseQuery = (state, action) => {
   return { ...state, [action.id]: { ...state[action.id], paused: true } };
 };
 export const handleCancelQuery = (state, action) => {
-  return { ...state, [action.id]: { ...state[action.id], done: true } };
+  console.log("Query cancelled", action);
+  const { detail } = action;
+  return { ...state, [action.id]: { ...state[action.id], detail, done: true } };
 };
 export const handleDeleteQuery = (state, action) => {
   const { [action.id]: toRemove, ...newState } = state;

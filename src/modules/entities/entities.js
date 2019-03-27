@@ -1,4 +1,4 @@
-import { createProperty, updateProperty } from "./properties";
+//import { createProperty, updateProperty } from "./properties";
 import { createGeometry, updateGeometry } from "./geometries";
 import { updateWhen } from "./common";
 import {
@@ -66,6 +66,7 @@ export const updateEntity = (e, updates, fields) => {
             }
           } else {
             properties[field] = update;
+            createPropertyColumn(field, update.value);
           }
           updateWhen(entity, update.time);
           return properties;
@@ -97,7 +98,7 @@ export const updateEntity = (e, updates, fields) => {
     }
     if (update.geometries) {
       //Mutable version
-      let updatedGeometries = _.reduce(
+      _.reduce(
         update.geometries,
         (updatedGeometries, update, field) => {
           const prop = updatedGeometries[field]

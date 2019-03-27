@@ -257,5 +257,4 @@ export const updateGeometry = (geometry, update) => {
     geometry.geometries.push(update);
     return geometry;
   }
-  return geometry;
 };

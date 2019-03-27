@@ -3,7 +3,7 @@ import { of } from "rxjs/observable/of";
 import { interval } from "rxjs/observable/interval";
 import { deleteFromCollection } from "./CollectionActions";
 import { ageoffHistory } from "../entities/entities";
-import { ageoffProperty } from "../entities/properties";
+//import { ageoffProperty } from "../entities/properties";
 import { ageoffGeometry } from "../entities/geometries";
 import _ from "lodash";
 import moment from "moment";
@@ -16,9 +16,10 @@ export const ageOffEpic = (action$, state$) => {
       let actions = _.reduce(
         collections,
         (actions, collection, id) => {
-          if (!collection.ageoff) return actions;
+          if (!collection.ageoff || !collection.ageoff.ageoff > 0)
+            return actions;
           const ageoff = moment().subtract(
-            collection.ageoff.value,
+            collection.ageoff.ageoff,
             collection.ageoff.unit
           );
           const ids = _.reduce(
