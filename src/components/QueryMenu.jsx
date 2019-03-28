@@ -50,6 +50,8 @@ const QueryMenu = ({ activeQueries, completeQueries, savedQueries }) => (
   <Dropdown setActiveFromChild>
     <SelectFeedBtn>Select feed...</SelectFeedBtn>
     <DropdownMenu>
+      {activeQueries.length + completeQueries.length + savedQueries.length ===
+        0 && <DropdownItem header>No active or saved queries</DropdownItem>}
       <div>{queryList("Active", activeQueries)}</div>
       <div>{queryList("Complete", completeQueries)}</div>
       <div>{queryList("Saved", savedQueries)}</div>
