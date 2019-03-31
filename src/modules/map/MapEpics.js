@@ -19,6 +19,7 @@ import {
   ADD_OVERLAY,
   REMOVE_OVERLAY
 } from "./MapActions";
+import { WMS, TILE, GROUP } from "./MapConstants";
 
 const MAP_ACTIONS = [
   SET_VIEWPORT,
@@ -80,7 +81,7 @@ let baseLayers = [
   {
     name: "Night",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: true,
     settings: {
       zoomOffset: -1,
@@ -92,7 +93,7 @@ let baseLayers = [
   {
     name: "World Imagery",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       zoomOffset: -1,
@@ -104,7 +105,7 @@ let baseLayers = [
   {
     name: "Gray Canvas",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       zoomOffset: -1,
@@ -116,7 +117,7 @@ let baseLayers = [
   {
     name: "Open Street Map",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       zoomOffset: -1,
@@ -127,15 +128,14 @@ let baseLayers = [
   {
     name: "Polar",
     projection: "ESPG:3575",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       zoomOffset: 0,
       tileSize: 512,
-      url: "https://tile.gbif.org/3575/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic".replace(
-        "{r}",
-        pixel_ratio
-      )
+      r: pixel_ratio,
+      url:
+        "https://tile.gbif.org/3575/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic"
     }
   }
 ];
@@ -144,7 +144,7 @@ let overlays = [
   {
     name: "Open Weather Map - Clouds",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
@@ -156,7 +156,7 @@ let overlays = [
   {
     name: "Open Weather Map - Precipitation",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
@@ -168,7 +168,7 @@ let overlays = [
   {
     name: "Open Weather Map - Pressure",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
@@ -180,7 +180,7 @@ let overlays = [
   {
     name: "Open Weather Map - Temperature",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
@@ -192,7 +192,7 @@ let overlays = [
   {
     name: "Open Weather Map - Wind",
     projection: "EPSG:3857",
-    type: "tile",
+    type: TILE,
     active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
@@ -220,6 +220,7 @@ export const manageMapState = (action$, state$) => {
   //messed up local state. If we ever fail to pull settings form local storage,
   //simply revert to defaults.
   try {
+    throw "Boom";
     settings = localStorage.getItem("map");
     savedState = settings ? JSON.parse(settings) : DEFAULT_STATE;
   } catch (e) {

@@ -9,7 +9,7 @@ import {
   toggleSelectedEntities
 } from "../collection/CollectionActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
-import { Map, TileLayer } from "react-leaflet";
+import { Map } from "react-leaflet";
 //import HeatmapLayer from "react-leaflet-heatmap-layer";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
@@ -21,6 +21,8 @@ import L from "leaflet";
 //import EditControl from "./EditControl";
 import ViewControl from "./ViewControl";
 import MiniMap from "./MiniMap";
+
+import { LAYER_TYPE_MAP } from "./MapConstants";
 
 export class Map2D extends Component {
   constructor(props) {
@@ -156,6 +158,8 @@ export class Map2D extends Component {
     if (map) {
       this.props.pannable ? map.dragging.enable() : map.dragging.disable();
     }
+    let BaseLayer = LAYER_TYPE_MAP[this.props.layer.type];
+    console.log(this.props.layer.type, BaseLayer, LAYER_TYPE_MAP);
     return (
       this.props.crs && (
         <Map
@@ -182,9 +186,10 @@ export class Map2D extends Component {
           latitudeExtractor={m => m.location[1]}
           intensityExtractor={m => m.value}
         />*/}
-          <TileLayer {...this.props.layer.settings} />
+          <BaseLayer {...this.props.layer.settings} />
           {_.map(this.props.overlays, overlay => {
-            return overlay.active && <TileLayer {...overlay.settings} />;
+            let Overlay = LAYER_TYPE_MAP[overlay.type];
+            return overlay.active && <Overlay {...overlay.settings} />;
           })}
           {_.map(this.props.collections, (collection, cid) => {
             return (
@@ -209,7 +214,7 @@ export class Map2D extends Component {
             active={this.state.miniMapActive}
             bounds={this.state.bounds}
           >
-            <TileLayer {...this.props.layer.settings} />
+            <BaseLayer {...this.props.layer.settings} />
           </MiniMap>
           {this.props.timelineVisible && <TimeControl />}
         </Map>

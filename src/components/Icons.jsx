@@ -17,6 +17,7 @@ import {
 } from "react-icons/md";
 import {
   FaCheckSquare,
+  FaMinusSquare,
   FaChevronLeft,
   FaChevronRight,
   FaCircle,
@@ -61,6 +62,7 @@ export const GridPanelIcon = FaTh;
 export const MiniMapIcon = MdPictureInPictureAlt;
 export const CheckedIcon = FaCheckSquare;
 export const UncheckedIcon = FaRegSquare;
+export const IndeterminateCheckIcon = FaMinusSquare;
 export const FilterIcon = FaFilter;
 export const LabelToolIcon = FaFont;
 export const PolygonToolIcon = FaDrawPolygon;

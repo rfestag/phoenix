@@ -5,7 +5,8 @@ import {
   CollapsedIcon,
   ExpandedIcon,
   CheckedIcon,
-  UncheckedIcon
+  UncheckedIcon,
+  IndeterminateCheckIcon
 } from "./Icons";
 import _ from "lodash";
 
@@ -18,24 +19,52 @@ ExpandIndicator.propTypes = {
   expanded: PropTypes.bool.isRequired,
   expandable: PropTypes.bool.isRequired
 };
-const Checkbox = ({ selected, onClick }) => {
+const Checkbox = ({ selected, indeterminate, onClick }) => {
   return selected ? (
     <CheckedIcon onClick={onClick} />
+  ) : indeterminate ? (
+    <IndeterminateCheckIcon onClick={onClick} />
   ) : (
     <UncheckedIcon onClick={onClick} />
   );
 };
 Checkbox.propTypes = {
   selected: PropTypes.bool,
+  indeterminate: PropTypes.bool,
   onClick: PropTypes.func.isRequired
 };
 const setSubtreeSelection = (item, selection) => {
   item.selected = selection;
+  item.indeterminate = false; //On explicit selection/de-selection, we are no longer indetermiante
   if (item.children) {
     item.allChildrenSelected = selection;
     for (const child of item.children) {
       setSubtreeSelection(child, selection);
     }
+  }
+};
+const setAncestorsIndeterminate = ancestors => {
+  //Assume ancestors are in order of closeness to the recently changed child.
+  //In other words, parent is first, grandparent is second, etc..
+  for (let ancestor of ancestors) {
+    let allSelected = true; //This determines if the parent should be auto-selected
+    let noneSelected = true; //This determines of the parent should be auto-deselected
+    for (let child of ancestor.children) {
+      if (child.selected) {
+        noneSelected = false;
+      } else {
+        allSelected = false;
+      }
+      //if any child is indeterminate, some descendent is selected.
+      //So we treat this as something being selected.
+      if (child.indeterminate) {
+        noneSelected = false;
+      }
+    }
+    //Auto-select the ancestor if all of its children are selected. This also
+    //implies all sub-children are selected.
+    ancestor.selected = allSelected;
+    ancestor.indeterminate = !(allSelected || noneSelected);
   }
 };
 
@@ -54,7 +83,7 @@ class Tree extends React.Component {
     }
     return false;
   };
-  renderItem = (item, keyPrefix) => {
+  renderItem = (item, ancestors, keyPrefix) => {
     var children = [];
     var hasChildren = false;
     var itemText = " " + item.name;
@@ -82,12 +111,14 @@ class Tree extends React.Component {
       const key = event.keyCode;
       if (key === 13) {
         setSubtreeSelection(item, !item.selected);
+        setAncestorsIndeterminate(ancestors);
         this.recompute();
       }
     };
     var handleSelectChange = event => {
       event.stopPropagation();
       setSubtreeSelection(item, !item.selected);
+      setAncestorsIndeterminate(ancestors);
       if (this.props.onSelectChange) this.props.onSelectChange(item);
       this.refList.current.recomputeRowHeights();
       this.refList.current.forceUpdate();
@@ -97,7 +128,11 @@ class Tree extends React.Component {
       children = _.chain(item.children)
         .filter(c => this.filterItem(c) || this.shouldShowTree(c))
         .map((child, index) => {
-          return this.renderItem(child, keyPrefix + "-" + index);
+          return this.renderItem(
+            child,
+            [item, ...ancestors],
+            keyPrefix + "-" + index
+          );
         })
         .value();
     }
@@ -124,7 +159,13 @@ class Tree extends React.Component {
               expandable={hasChildren}
             />
           }
-          {<Checkbox selected={item.selected} onClick={handleSelectChange} />}
+          {
+            <Checkbox
+              selected={item.selected}
+              indeterminate={item.indeterminate}
+              onClick={handleSelectChange}
+            />
+          }
           {itemText}
         </div>
       );
@@ -142,7 +183,7 @@ class Tree extends React.Component {
   };
 
   rowRenderer = ({ key, index, style }) => {
-    var renderedCell = this.renderItem(this.state.data[index], index);
+    var renderedCell = this.renderItem(this.state.data[index], [], index);
 
     return (
       <div
