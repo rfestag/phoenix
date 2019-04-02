@@ -67,12 +67,16 @@ const setAncestorsIndeterminate = ancestors => {
     ancestor.indeterminate = !(allSelected || noneSelected);
   }
 };
+const FOCUSABLE_ELEMENTS =
+  'a:not([disabled]), button:not([disabled]), input[type=text]:not([disabled]), [tabindex]:not([disabled]):not([tabindex="-1"])';
 
 class Tree extends React.Component {
   constructor(props) {
     super(props);
+    console.log("Created new tree");
     this.state = { data: JSON.parse(JSON.stringify(props.data)) };
     this.refList = React.createRef();
+    this.element = React.createRef();
   }
   shouldShowTree = item => {
     if (item.children) {
@@ -83,6 +87,30 @@ class Tree extends React.Component {
     }
     return false;
   };
+  focusNext = () => {
+    this.focusOffset(1);
+  };
+  focusPrev = () => {
+    this.focusOffset(-1);
+  };
+  focusOffset = offset => {
+    const root = this.element.current;
+    const focused = document.activeElement;
+    //add all elements we want to include in our selection
+    if (root && focused) {
+      const parentElement = root.firstChild.firstChild.firstChild;
+      let focussable = Array.prototype.filter.call(
+        parentElement.querySelectorAll(FOCUSABLE_ELEMENTS),
+        e => e.offsetWidth > 0 || e.offsetHeight > 0 || e === focused
+      );
+      var index = focussable.indexOf(focused);
+      var target = index + offset;
+      if (target >= 0 && target <= focussable.length - 1) {
+        var nextElement = focussable[target] || focussable[0];
+        nextElement.focus();
+      }
+    }
+  };
   renderItem = (item, ancestors, keyPrefix) => {
     var children = [];
     var hasChildren = false;
@@ -90,7 +118,6 @@ class Tree extends React.Component {
 
     var onClick = event => {
       event.stopPropagation();
-      console.log("Clicked", event.target);
       event.target.focus();
       if (hasChildren) {
         item.expanded = !item.expanded;
@@ -102,24 +129,56 @@ class Tree extends React.Component {
       }
     };
     var onKeyDown = event => {
-      //Note - we don't implement any special key navigation
-      //Browser should inherently do the following:
-      //1) Tab - Move to next element
-      //2) Shift+Tab - Move to prev element
-      //3) Space - Act like click (causes expand/contract)
-      //4) Enter - This is the only one we implement. Causes selection
-      const key = event.keyCode;
-      if (key === 13) {
-        setSubtreeSelection(item, !item.selected);
-        setAncestorsIndeterminate(ancestors);
-        this.recompute();
+      try {
+        //1) Tab - Move to next element
+        //2) Shift+Tab - Move to prev element
+        //3) Space - Act like click (causes expand/contract)
+        //4) Enter - Select
+        //5) Left - Collapse
+        //6) Right - Expand
+        //7) Up - Act like Shift+Tab
+        //8) Down - Act like Tab
+        const key = event.keyCode;
+        if (key === 13) {
+          setSubtreeSelection(item, !item.selected);
+          setAncestorsIndeterminate(ancestors);
+          this.recompute();
+        }
+        //Up
+        if (key === 38) {
+          this.focusPrev();
+        }
+        //Down
+        if (key === 40) {
+          this.focusNext();
+        }
+        if (key === 39) {
+          if (hasChildren) {
+            item.expanded = true;
+            if (this.props.onExpand) this.props.onExpand(item);
+            this.refList.current.recomputeRowHeights();
+            this.refList.current.forceUpdate();
+          }
+        }
+        if (key === 37) {
+          if (hasChildren) {
+            item.expanded = false;
+            if (this.props.onCollapse) this.props.onCollapse(item);
+            this.refList.current.recomputeRowHeights();
+            this.refList.current.forceUpdate();
+          }
+        }
+      } catch (e) {
+        console.log(e);
+        //This can happen randomly if the user is holding down the up/down arrows
+        //and the nodes aren't in the dom yet.
       }
     };
     var handleSelectChange = event => {
       event.stopPropagation();
       setSubtreeSelection(item, !item.selected);
       setAncestorsIndeterminate(ancestors);
-      if (this.props.onSelectChange) this.props.onSelectChange(item);
+      if (this.props.onSelectChange) this.props.onSelectChange(item, ancestors);
       this.refList.current.recomputeRowHeights();
       this.refList.current.forceUpdate();
     };
@@ -148,6 +207,7 @@ class Tree extends React.Component {
           onClick={onClick}
           onKeyDown={onKeyDown}
           key="label"
+          role="button"
           style={{
             paddingLeft: hasChildren ? 0 : 16,
             cursor: hasChildren ? "pointer" : "auto"
@@ -242,19 +302,21 @@ class Tree extends React.Component {
   }
   render() {
     return (
-      <AutoSizer>
-        {({ height, width }) => (
-          <List
-            height={height}
-            overscanRowCount={10}
-            ref={this.refList}
-            rowHeight={this.rowHeight}
-            rowRenderer={this.rowRenderer}
-            rowCount={this.state.data.length}
-            width={width}
-          />
-        )}
-      </AutoSizer>
+      <div ref={this.element} style={{ height: "100%" }}>
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              height={height}
+              overscanRowCount={10}
+              ref={this.refList}
+              rowHeight={this.rowHeight}
+              rowRenderer={this.rowRenderer}
+              rowCount={this.state.data.length}
+              width={width}
+            />
+          )}
+        </AutoSizer>
+      </div>
     );
   }
 }

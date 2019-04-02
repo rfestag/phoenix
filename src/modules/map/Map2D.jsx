@@ -159,7 +159,6 @@ export class Map2D extends Component {
       this.props.pannable ? map.dragging.enable() : map.dragging.disable();
     }
     let BaseLayer = LAYER_TYPE_MAP[this.props.layer.type];
-    console.log(this.props.layer.type, BaseLayer, LAYER_TYPE_MAP);
     return (
       this.props.crs && (
         <Map
