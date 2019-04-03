@@ -123,7 +123,14 @@ const bcast = new BroadcastChannel("query");
 action$
   .pipe(
     ofType(CREATE_QUERY),
-    mapToCollection(action$)
+    mapToCollection(action$),
+    bufferTime(2000),
+    filter(d => d.length > 0),
+    map(actions => {
+      const updates = actions.filter(a => a.type === UPDATE_COLLECTION);
+      const others = actions.filter(a => a.type !== UPDATE_COLLECTION);
+      return others.concat(batchUpdateCollections(updates));
+    })
     //mergeAll()
   )
   .subscribe(updates => bcast.postMessage(JSON.stringify(updates)));
