@@ -6,16 +6,20 @@ import {
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { deleteCollection } from "../modules/collection//CollectionActions";
 
 const defaultHandler = (action, item) => () => {
   console.log(action, item);
 };
-const TabMenu = ({
+export const TabMenu = ({
   children,
   active,
   item,
-  onManage = defaultHandler,
-  onDelete = defaultHandler
+  onManageClicked = defaultHandler,
+  onColorClicked = defaultHandler,
+  onDeleteClicked
 }) => (
   <Dropdown style={{ display: "flex" }}>
     {children}
@@ -34,13 +38,13 @@ const TabMenu = ({
       modifiers={{ preventOverflow: { boundariesElement: "window" } }}
       positionFixed={true}
     >
-      <DropdownItem onClick={defaultHandler("manage", item)}>
+      <DropdownItem onClick={onManageClicked("manage", item)}>
         Manage...
       </DropdownItem>
-      <DropdownItem onClick={defaultHandler("manage", item)}>
+      <DropdownItem onClick={onColorClicked("color", item)}>
         Set Color
       </DropdownItem>
-      <DropdownItem onClick={defaultHandler("delete", item)}>
+      <DropdownItem onClick={() => onDeleteClicked(item.id)}>
         Delete
       </DropdownItem>
     </DropdownMenu>
@@ -51,8 +55,18 @@ TabMenu.propTypes = {
   active: PropTypes.bool,
   item: PropTypes.any,
   children: PropTypes.any,
-  onManage: PropTypes.func,
-  onDelete: PropTypes.func
+  onManageClicked: PropTypes.func,
+  onColorClicked: PropTypes.func,
+  onDeleteClicked: PropTypes.func
 };
 
-export default TabMenu;
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(
+    {
+      onDeleteClicked: deleteCollection
+    },
+    dispatch
+  );
+}
+
+export default connect(null, mapDispatchToProps)(TabMenu);

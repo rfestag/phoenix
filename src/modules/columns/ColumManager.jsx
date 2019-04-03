@@ -126,7 +126,11 @@ export class ColumnManager extends Component {
           <Button style={{ flex: 1 }} onClick={this.resetColumns}>
             Cancel
           </Button>
-          <Button style={{ flex: 1 }} onClick={this.applyChanges}>
+          <Button
+            style={{ flex: 1 }}
+            color="accent"
+            onClick={this.applyChanges}
+          >
             Apply
           </Button>
         </ButtonGroup>

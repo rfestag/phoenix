@@ -138,7 +138,7 @@ export class SettingsModal extends React.Component {
           </Row>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={this.apply}>
+          <Button color="accent" onClick={this.apply}>
             Apply
           </Button>{" "}
           <Button color="secondary" onClick={this.toggle}>

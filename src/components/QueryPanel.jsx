@@ -254,7 +254,7 @@ export class QueryPanel extends React.Component {
           <Button style={{ flex: 1 }} onClick={clear}>
             Clear
           </Button>
-          <Button style={{ flex: 1 }} onClick={execute}>
+          <Button style={{ flex: 1 }} color="accent" onClick={execute}>
             Query
           </Button>
         </ButtonGroup>
