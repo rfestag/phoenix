@@ -198,7 +198,6 @@ const DEFAULT_STATE = {
 };
 
 function preferencesToState(pref) {
-  console.log("Before load", pref);
   let map = { ...DEFAULT_STATE };
   map.layer = BASE_LAYERS.find(l => l.name === pref.layer) || BASE_LAYERS[0];
   map.layer.active = true;
@@ -209,21 +208,17 @@ function preferencesToState(pref) {
     l.active = (pref.overlays || []).includes(l.name);
     return l;
   });
-  console.log("Centers", map.center, map.crs.settings.center);
   map.center = pref.center || map.crs.settings.center;
   map.zoom = pref.zoom || 3;
-  console.log("Loading", map);
   return map;
 }
 function stateToPreferences(map) {
   let pref = { ...map };
-  console.log("Before save", map, pref);
   pref.crs = undefined;
   pref.baseLayers = undefined;
   pref.projections = undefined;
   pref.layer = pref.layer.name;
   pref.overlays = pref.overlays.filter(l => l.active).map(l => l.name);
-  console.log("Saving", pref);
   return pref;
 }
 export const manageMapState = (action$, state$) => {
@@ -244,7 +239,6 @@ export const manageMapState = (action$, state$) => {
   action$
     .pipe(ofType(...MAP_ACTIONS), withLatestFrom(state$))
     .subscribe(([, state]) => {
-      console.log("Got update, saving");
       localStorage.setItem(
         "map",
         JSON.stringify(stateToPreferences(state.map))

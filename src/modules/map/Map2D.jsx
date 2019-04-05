@@ -103,7 +103,6 @@ export class Map2D extends Component {
     const map = this.map.current && this.map.current.leafletElement;
     if (map) {
       map.invalidateSize();
-      console.log(this.props.center, this.props.zoom);
       map.setView(this.props.center, this.props.zoom);
 
       this.setState({
