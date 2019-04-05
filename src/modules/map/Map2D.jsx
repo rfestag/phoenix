@@ -52,76 +52,58 @@ export class Map2D extends Component {
     timelineVisible: PropTypes.bool,
     pannable: PropTypes.bool
   };
+  updateViewport = e => {
+    const map = this.map.current && this.map.current.leafletElement;
+    try {
+      let center = map.getCenter();
+      this.props.setViewport({
+        zoom: map.getZoom(),
+        center: [center.lat, center.lng],
+        bounds: map.getBounds()
+      });
+      this.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
+    } catch (e) {
+      //Do nothing. This can happen in polar projections when you pan too far out
+    }
+  };
+  onClick = e => {
+    for (let ref of this.collectionLayerRefs) {
+      if (ref && ref.leafletElement) {
+        ref.leafletElement._onClick(e);
+      }
+    }
+  };
+  onContextmenu = () => {
+    L.DomEvent.preventDefault;
+  };
+  onMousemove = _.throttle(
+    e => {
+      const map = this.map.current && this.map.current.leafletElement;
+      let didHover = false;
+      for (let ref of this.collectionLayerRefs) {
+        if (ref && ref.leafletElement) {
+          let element = ref.leafletElement;
+          element._onMouseMove(e);
+          didHover = didHover || element._hoverCursor;
+        }
+      }
+      if (didHover && !this._hoverCursor) {
+        this.map.current.container.style.cursor = "pointer";
+        this._hoverCursor = true;
+      } else if (!didHover && this._hoverCursor) {
+        this.map.current.container.style.cursor = "";
+        this._hoverCursor = false;
+      }
+    },
+    100,
+    this
+  );
 
   componentDidMount() {
     const map = this.map.current && this.map.current.leafletElement;
     if (map) {
       map.invalidateSize();
-      map.on(
-        "zoomend",
-        () => {
-          try {
-            this.props.setViewport({
-              zoom: map.getZoom(),
-              center: map.getCenter(),
-              bounds: map.getBounds()
-            });
-            this.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
-          } catch (e) {
-            //Do nothing. This can happen in polar projections when you pan too far out
-          }
-        },
-        this
-      );
-      map.on(
-        "moveend",
-        () => {
-          try {
-            this.props.setViewport({
-              zoom: map.getZoom(),
-              center: map.getCenter(),
-              bounds: map.getBounds()
-            });
-            this.setState({ center: map.getCenter(), bounds: map.getBounds() });
-          } catch (e) {
-            //Do nothing. This can happen in polar projections when you pan too far out
-          }
-        },
-        this
-      );
-      map.on(
-        "click",
-        e => {
-          for (let ref of this.collectionLayerRefs) {
-            if (ref && ref.leafletElement) {
-              ref.leafletElement._onClick(e);
-            }
-          }
-        },
-        this
-      );
-      map.on("contextmenu", L.DomEvent.preventDefault);
-      map.on(
-        "mousemove",
-        _.throttle(e => {
-          let didHover = false;
-          for (let ref of this.collectionLayerRefs) {
-            if (ref && ref.leafletElement) {
-              let element = ref.leafletElement;
-              element._onMouseMove(e);
-              didHover = didHover || element._hoverCursor;
-            }
-          }
-          if (didHover && !this._hoverCursor) {
-            this.map.current.container.style.cursor = "pointer";
-            this._hoverCursor = true;
-          } else if (!didHover && this._hoverCursor) {
-            this.map.current.container.style.cursor = "";
-            this._hoverCursor = false;
-          }
-        }, 100),
-        this
-      );
+      console.log(this.props.center, this.props.zoom);
       map.setView(this.props.center, this.props.zoom);
 
       this.setState({
@@ -168,6 +150,11 @@ export class Map2D extends Component {
           center={this.props.center}
           {...this.props.crs.settings}
           onLoad={this.mapMounted}
+          onClick={this.onClick}
+          onMousemove={this.onMousemove}
+          onZoomend={this.updateViewport}
+          onMoveend={this.updateViewport}
+          onContextmenu={this.onContextmenu}
           zoom={this.props.zoom}
           zoomControl={false}
           attributionControl={false}

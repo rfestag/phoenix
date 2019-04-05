@@ -58,7 +58,7 @@ const polar = new L.Proj.CRS(
     resolutions: resolutions
   }
 );
-const projections = [
+const PROJECTIONS = [
   {
     name: "Web Mercator",
     projection: "EPSG:3857",
@@ -77,12 +77,11 @@ const projections = [
     }
   }
 ];
-let baseLayers = [
+let BASE_LAYERS = [
   {
     name: "Night",
     projection: "EPSG:3857",
     type: TILE,
-    active: true,
     settings: {
       zoomOffset: -1,
       tileSize: 512,
@@ -94,7 +93,6 @@ let baseLayers = [
     name: "World Imagery",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       zoomOffset: -1,
       tileSize: 512,
@@ -106,7 +104,6 @@ let baseLayers = [
     name: "Gray Canvas",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       zoomOffset: -1,
       tileSize: 512,
@@ -116,9 +113,7 @@ let baseLayers = [
   },
   {
     name: "Open Street Map",
-    projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       zoomOffset: -1,
       tileSize: 512,
@@ -129,7 +124,6 @@ let baseLayers = [
     name: "Polar",
     projection: "ESPG:3575",
     type: TILE,
-    active: false,
     settings: {
       zoomOffset: 0,
       tileSize: 512,
@@ -140,12 +134,11 @@ let baseLayers = [
   }
 ];
 
-let overlays = [
+let OVERLAYS = [
   {
     name: "Open Weather Map - Clouds",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
       opacity: 0.5,
@@ -157,7 +150,6 @@ let overlays = [
     name: "Open Weather Map - Precipitation",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
       opacity: 0.5,
@@ -169,7 +161,6 @@ let overlays = [
     name: "Open Weather Map - Pressure",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
       opacity: 0.5,
@@ -181,7 +172,6 @@ let overlays = [
     name: "Open Weather Map - Temperature",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
       opacity: 0.5,
@@ -193,7 +183,6 @@ let overlays = [
     name: "Open Weather Map - Wind",
     projection: "EPSG:3857",
     type: TILE,
-    active: false,
     settings: {
       apiKey: "586a2c891fc0b7bed36e2b2425199e21",
       opacity: 0.5,
@@ -204,15 +193,39 @@ let overlays = [
 ];
 
 const DEFAULT_STATE = {
-  baseLayers,
-  center: projections[0].settings.center,
-  crs: projections[0],
-  layer: baseLayers[0],
-  overlays,
-  projections,
-  zoom: 3
+  baseLayers: BASE_LAYERS,
+  projections: PROJECTIONS
 };
 
+function preferencesToState(pref) {
+  console.log("Before load", pref);
+  let map = { ...DEFAULT_STATE };
+  map.layer = BASE_LAYERS.find(l => l.name === pref.layer) || BASE_LAYERS[0];
+  map.layer.active = true;
+  map.crs =
+    PROJECTIONS.find(p => p.name === map.layer.projection) || PROJECTIONS[0];
+  map.overlays = OVERLAYS.map(layer => {
+    let l = { ...layer };
+    l.active = (pref.overlays || []).includes(l.name);
+    return l;
+  });
+  console.log("Centers", map.center, map.crs.settings.center);
+  map.center = pref.center || map.crs.settings.center;
+  map.zoom = pref.zoom || 3;
+  console.log("Loading", map);
+  return map;
+}
+function stateToPreferences(map) {
+  let pref = { ...map };
+  console.log("Before save", map, pref);
+  pref.crs = undefined;
+  pref.baseLayers = undefined;
+  pref.projections = undefined;
+  pref.layer = pref.layer.name;
+  pref.overlays = pref.overlays.filter(l => l.active).map(l => l.name);
+  console.log("Saving", pref);
+  return pref;
+}
 export const manageMapState = (action$, state$) => {
   let settings, savedState;
 
@@ -220,21 +233,22 @@ export const manageMapState = (action$, state$) => {
   //messed up local state. If we ever fail to pull settings form local storage,
   //simply revert to defaults.
   try {
-    throw "Boom";
     settings = localStorage.getItem("map");
-    savedState = settings ? JSON.parse(settings) : DEFAULT_STATE;
+    savedState = preferencesToState(JSON.parse(settings));
   } catch (e) {
-    savedState = DEFAULT_STATE;
+    savedState = preferencesToState({});
   }
-  savedState.crs = projections.find(p => p.name === savedState.crs.name);
-  savedState.projections = projections;
   savedState.pannable = true;
 
   //This will, out of band, update settings in local storage
   action$
     .pipe(ofType(...MAP_ACTIONS), withLatestFrom(state$))
     .subscribe(([, state]) => {
-      localStorage.setItem("map", JSON.stringify(state.map));
+      console.log("Got update, saving");
+      localStorage.setItem(
+        "map",
+        JSON.stringify(stateToPreferences(state.map))
+      );
     });
 
   //When the epic starts, overwrite library defaults with local storage.
