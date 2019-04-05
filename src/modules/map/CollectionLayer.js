@@ -253,7 +253,7 @@ export const CollectionLayer = Layer.extend({
     this.getPane().appendChild(this._container);
     //TODO: Properly register this so that we can remove the handler
     //We check for dragging outside of the actual throttle so we can still render after
-    this.throttleRedraw = _.throttle(this.redraw, 300, this);
+    this.throttleRedraw = _.throttle(this.redraw, 100, this);
     this._map.on("movestart", this._onMoveStart, this);
     this._map.on("moveend", this._onMoveEnd, this);
     this._map.on("zoomend", this.throttleRedraw, this);
@@ -791,7 +791,7 @@ export const CollectionLayer = Layer.extend({
 
 class ReactCollectionLayer extends MapLayer {
   createLeafletElement(props) {
-    this.redraw = _.throttle(() => this.leafletElement.redraw(true), 2000);
+    //this.redraw = _.throttle(() => this.leafletElement.redraw(true), 2000);
     return new CollectionLayer(props.collection.data, this.getOptions(props));
   }
   updateLeafletElement(fromProps, toProps) {
