@@ -113,6 +113,7 @@ let BASE_LAYERS = [
   },
   {
     name: "Open Street Map",
+    projection: "EPSG:3857",
     type: TILE,
     settings: {
       zoomOffset: -1,
