@@ -60,15 +60,20 @@ export const updateEntity = (e, updates, fields) => {
       entity.properties = _.reduce(
         update.properties,
         (properties, update, field) => {
+          const { value, time } = update;
           if (properties[field]) {
-            if (properties[field].time < update.time) {
+            if (properties[field].time < time) {
               properties[field] = update;
             }
           } else {
             properties[field] = update;
-            createPropertyColumn(field, update.value);
           }
-          updateWhen(entity, update.time);
+          updateWhen(entity, time);
+          if (!fields.properties[field]) {
+            let idx = Object.keys(fields.properties).length;
+            fields.properties[field] = createPropertyColumn(field, value);
+            fields.properties[field].position = idx;
+          }
           return properties;
         },
         entity.properties || {}
