@@ -41,7 +41,6 @@ export class QueryPanel extends React.Component {
     this.setState({ ageoff });
   };
   setSource = option => {
-    console.log("Setting source", option.value);
     this.setState({ source: option.value });
   };
   setQuery = query => {
@@ -52,7 +51,6 @@ export class QueryPanel extends React.Component {
     this.setState({ filter });
   };
   execute = event => {
-    console.log(this.state);
     this.props.createQuery(
       this.state.source.name,
       this.state.query,
@@ -77,7 +75,6 @@ export class QueryPanel extends React.Component {
       value
     }));
     let currentSource = { label: source.name, value: source };
-    console.log("Source", source, currentSource);
     return (
       <div
         style={{

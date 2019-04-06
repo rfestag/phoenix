@@ -75,6 +75,7 @@ export class TestSource extends Source {
   query({
     count = 100,
     iterations = 30,
+    updateInterval = 500,
     shapeTypes = ["None", "Track", "LineString", "Circle", "Sector", "Polygon"]
   }) {
     let entities = {};
@@ -88,7 +89,7 @@ export class TestSource extends Source {
     }
 
     console.log("Generating fake data");
-    return interval(500).pipe(
+    return interval(updateInterval).pipe(
       map(v => {
         return _.reduce(
           entities,
