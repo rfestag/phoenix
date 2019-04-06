@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import FilterableDropdownTree from "../../components/FilterableDropdownTree";
 import { Input, FormGroup, Label } from "reactstrap";
 import Select from "../../components/Select";
+import Duration from "../../components/Duration";
+
 var RANDOM_WORDS = [
   "abstrusity",
   "advertisable",
@@ -131,7 +133,7 @@ const DEFAULT_PROPS = {
   tree: RANDOM_DATA,
   count: 100,
   iterations: 30,
-  interval: 500,
+  updateInterval: { value: 1, unit: "seconds" },
   shapeTypes: ALLOWED_SHAPES
 };
 
@@ -151,22 +153,21 @@ class TestForm extends React.Component {
     const iterations = e.target.value;
     this.props.onChange({ ...this.props.data, iterations });
   };
-  setInterval = e => {
-    const interval = e.target.value;
-    this.props.onChange({ ...this.props.data, interval });
+  setInterval = updateInterval => {
+    this.props.onChange({ ...this.props.data, updateInterval });
   };
   setShapeTypes = types => {
     const shapeTypes = types.map(t => t.value);
     this.props.onChange({ ...this.props.data, shapeTypes });
   };
   render() {
-    let { onChange, data, ...props } = this.props;
+    let { data } = this.props;
     //We do some gymnastics here because the default object is empty.
     //We want to override defaults if any expected settings are passed in.
     //We don't ever want any expected values to be undefined, because the Input
     //elements will be created as Uncontrolled instead of Controlled.
     data = { ...DEFAULT_PROPS, ...data };
-    let { tree, count, iterations, interval, shapeTypes } = data;
+    let { tree, count, iterations, updateInterval, shapeTypes } = data;
     let { setCount, setIterations, setShapeTypes, setInterval } = this;
     let shapeTypeValues = shapeTypes
       ? shapeTypes.map(t => ({ label: t, value: t }))
@@ -195,12 +196,10 @@ class TestForm extends React.Component {
           />
         </FormGroup>
         <FormGroup>
-          <Label>Interval (ms)</Label>
-          <Input
-            value={interval}
-            type="number"
-            name="updateInterval"
-            placeholder="Update Rate (ms)"
+          <Label>Interval</Label>
+          <Duration
+            value={updateInterval}
+            placeholder="Update Rate"
             onChange={setInterval}
           />
         </FormGroup>

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Input, FormText } from "reactstrap";
+import { Input } from "reactstrap";
 import Select from "./Select";
 
 const options = [
@@ -9,37 +9,42 @@ const options = [
   { label: "hrs", value: "hours" },
   { label: "days", value: "days" }
 ];
-const Ageoff = ({ value, onChange }) => {
-  const { ageoff, unit } = value;
+const Ageoff = ({ value, onChange, name, placeholder, children }) => {
+  const durationValue = value.value;
+  const unit = value.unit;
   const unitOpt = options.find(opt => opt.value === unit);
-  const invalid = ageoff < 0;
+  const invalid = durationValue < 0;
   return (
     <div>
       <div style={{ display: "flex" }}>
         <Input
-          value={ageoff}
+          value={durationValue}
           type="numeric"
-          name="ageoff"
-          id="ageoff"
-          placeholder="Ageoff (blank means no ageoff)"
-          onChange={e => onChange({ ageoff: e.target.value, unit })}
+          name={name}
+          placeholder={placeholder}
+          onChange={e => onChange({ value: Number(e.target.value), unit })}
           invalid={invalid}
         />
         <div style={{ width: 150 }}>
           <Select
             options={options}
             value={unitOpt}
-            onChange={opt => onChange({ ageoff, unit: opt.value })}
+            onChange={opt =>
+              onChange({ value: durationValue, unit: opt.value })
+            }
           />
         </div>
       </div>
-      <FormText>Ageoff must be positive or blank</FormText>
+      {children}
     </div>
   );
 };
 
 Ageoff.propTypes = {
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.object.isRequired
+  value: PropTypes.object.isRequired,
+  name: PropTypes.string,
+  placeholder: PropTypes.string,
+  children: PropTypes.any
 };
 export default Ageoff;

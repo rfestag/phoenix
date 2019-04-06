@@ -74,11 +74,10 @@ export class Map2D extends Component {
     }
   };
   onContextmenu = () => {
-    L.DomEvent.preventDefault;
+    L.DomEvent.preventDefault();
   };
   onMousemove = _.throttle(
     e => {
-      const map = this.map.current && this.map.current.leafletElement;
       let didHover = false;
       for (let ref of this.collectionLayerRefs) {
         if (ref && ref.leafletElement) {

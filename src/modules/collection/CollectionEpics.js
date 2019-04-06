@@ -16,10 +16,11 @@ export const ageOffEpic = (action$, state$) => {
       let actions = _.reduce(
         collections,
         (actions, collection, id) => {
-          if (!collection.ageoff || !collection.ageoff.ageoff > 0)
+          console.log("Ageoff", collection.ageoff);
+          if (!collection.ageoff || !collection.ageoff.value > 0)
             return actions;
           const ageoff = moment().subtract(
-            collection.ageoff.ageoff,
+            collection.ageoff.value,
             collection.ageoff.unit
           );
           const ids = _.reduce(

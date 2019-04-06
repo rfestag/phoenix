@@ -2,16 +2,22 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { Button, ButtonGroup, Form, FormGroup, Label, Input } from "reactstrap";
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormText
+} from "reactstrap";
 import { createQuery } from "../modules/query/QueryActions";
 import PerfectScrollbar from "react-perfect-scrollbar";
-import FilterableDropdownTree from "./FilterableDropdownTree";
-import Ageoff from "./Ageoff";
+import Duration from "./Duration";
 import * as sources from "../modules/sources/SourceMap";
 import Select from "./Select";
 import _ from "lodash";
 
-const defaultQuery = () => ({ type: "and", rules: [], groups: [] });
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
@@ -19,7 +25,7 @@ export class QueryPanel extends React.Component {
       name: "",
       source: sources["Test"],
       query: {},
-      ageoff: { ageoff: 5, unit: "minutes" }
+      ageoff: { value: 5, unit: "minutes" }
     };
   }
   static propTypes = {
@@ -30,7 +36,7 @@ export class QueryPanel extends React.Component {
       name: "",
       source: sources["Test"],
       query: {},
-      ageoff: { ageoff: 5, unit: "minutes" }
+      ageoff: { value: 5, unit: "minutes" }
     });
   };
   setName = e => {
@@ -60,16 +66,7 @@ export class QueryPanel extends React.Component {
   };
   render() {
     const { name, query, source, ageoff } = this.state;
-    const {
-      setName,
-      setSource,
-      setAgeoff,
-      setQuery,
-      data,
-      clear,
-      execute,
-      handleFormUpdate
-    } = this;
+    const { setName, setSource, setAgeoff, setQuery, clear, execute } = this;
     const sourceOptions = _.map(sources, value => ({
       label: value.name,
       value
@@ -109,13 +106,10 @@ export class QueryPanel extends React.Component {
               </FormGroup>
               <FormGroup>
                 <Label for="ageoff">Age-Off</Label>
-                <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
+                <Duration name="ageoff" onChange={setAgeoff} value={ageoff}>
+                  <FormText>Ageoff must be positive or blank</FormText>
+                </Duration>
               </FormGroup>
-              {/*
-                <div>
-                  <FilterableDropdownTree data={data} />
-                </div>
-              */}
               <h3>Criteria</h3>
               {source.Form && <source.Form data={query} onChange={setQuery} />}
             </div>

@@ -376,9 +376,9 @@ export const CollectionLayer = Layer.extend({
   },
   getMinTime: function() {
     let ageoff = this.collection.ageoff;
-    return ageoff && ageoff.ageoff > 0
+    return ageoff && ageoff.value > 0
       ? moment()
-          .subtract(ageoff.ageoff, ageoff.unit)
+          .subtract(ageoff.value, ageoff.unit)
           .valueOf()
       : undefined;
   },
@@ -615,15 +615,8 @@ export const CollectionLayer = Layer.extend({
         const [bounds, transform] = bt;
         if (touchBounds(geom, bounds) && geomInTime(geom, minTime, maxTime)) {
           rendered = true;
-          //TODO: Figure out how to use holes. A few issues right now:
-          //1) FastLayer doesn't support groups, but Layer is really slow from Konva.
-          //2) Requires globalCompositeOperation, but it isn't clear how that works with many
-          //   overlaying shapes.
+          //TODO: Once Konva accepts the pull request to support holes, use them here
           let [coordinates, ...holes] = geom.coordinates;
-          //TODO: Use holes to create holes in the rendered geometry. Requires changes
-          //to Konva to support the holes.
-          //An idea on how to implement it is here:
-          //https://stackoverflow.com/questions/13618844/polygon-with-a-hole-in-the-middle-with-html5s-canvas
           let points = coordinates.reduce((pts, p, i) => {
             const pt = this._map.latLngToLayerPoint(
               new LatLng(p[1], p[0] + transform, p[2])

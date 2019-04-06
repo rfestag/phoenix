@@ -2,6 +2,7 @@ import { Source } from "./source";
 import { interval } from "rxjs";
 import { map, take } from "rxjs/operators";
 import * as turf from "@turf/turf";
+import moment from "moment";
 import {
   createTrackPoint,
   createLineString,
@@ -75,7 +76,7 @@ export class TestSource extends Source {
   query({
     count = 100,
     iterations = 30,
-    updateInterval = 500,
+    updateInterval = { value: 1, unit: "seconds" },
     shapeTypes = ["None", "Track", "LineString", "Circle", "Sector", "Polygon"]
   }) {
     let entities = {};
@@ -87,9 +88,11 @@ export class TestSource extends Source {
         gtype: shapeTypes[Math.floor(Math.random() * shapeTypes.length)]
       };
     }
+    let intervalMs = moment
+      .duration(updateInterval.value, updateInterval.unit)
+      .asMilliseconds();
 
-    console.log("Generating fake data");
-    return interval(updateInterval).pipe(
+    return interval(intervalMs).pipe(
       map(v => {
         return _.reduce(
           entities,
