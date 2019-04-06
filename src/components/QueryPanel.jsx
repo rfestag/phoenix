@@ -11,135 +11,15 @@ import * as sources from "../modules/sources/SourceMap";
 import Select from "./Select";
 import _ from "lodash";
 
-var RANDOM_WORDS = [
-  "abstrusity",
-  "advertisable",
-  "bellwood",
-  "benzole",
-  "boreum",
-  "brenda",
-  "cassiopeian",
-  "chansonnier",
-  "cleric",
-  "conclusional",
-  "conventicle",
-  "copalm",
-  "cornopion",
-  "crossbar",
-  "disputative",
-  "djilas",
-  "ebracteate",
-  "ephemerally",
-  "epidemical",
-  "evasive",
-  "eyeglasses",
-  "farragut",
-  "fenny",
-  "ferryman",
-  "fluently",
-  "foreigner",
-  "genseng",
-  "glaiket",
-  "haunch",
-  "histogeny",
-  "illocution",
-  "imprescriptible",
-  "inapproachable",
-  "incisory",
-  "intrusiveness",
-  "isoceraunic",
-  "japygid",
-  "juiciest",
-  "jump",
-  "kananga",
-  "leavening",
-  "legerdemain",
-  "licence",
-  "licia",
-  "luanda",
-  "malaga",
-  "mathewson",
-  "nonhumus",
-  "nonsailor",
-  "nummary",
-  "nyregyhza",
-  "onanist",
-  "opis",
-  "orphrey",
-  "paganising",
-  "pebbling",
-  "penchi",
-  "photopia",
-  "pinocle",
-  "principally",
-  "prosector.",
-  "radiosensitive",
-  "redbrick",
-  "reexposure",
-  "revived",
-  "subexternal",
-  "sukarnapura",
-  "supersphenoid",
-  "tabularizing",
-  "territorialism",
-  "tester",
-  "thalassography",
-  "tuberculise",
-  "uncranked",
-  "undersawyer",
-  "unimpartible",
-  "unsubdivided",
-  "untwining",
-  "unwaived",
-  "webfoot",
-  "wedeling",
-  "wellingborough",
-  "whiffet",
-  "whipstall",
-  "wot",
-  "yonkersite",
-  "zonary"
-];
-var data = createRandomizedData();
-
-function createRandomizedData() {
-  var data = [];
-
-  for (var i = 0; i < 10000; i++) {
-    data.push(createRandomizedItem(0));
-  }
-
-  return data;
-}
-
-function createRandomizedItem(depth) {
-  var item = {};
-  item.children = [];
-  item.name = RANDOM_WORDS[Math.floor(Math.random() * RANDOM_WORDS.length)];
-
-  var numChildren = depth < 3 ? Math.floor(Math.random() * 5) : 0;
-  for (var i = 0; i < numChildren; i++) {
-    item.children.push(createRandomizedItem(depth + 1));
-  }
-
-  item.expanded = numChildren > 0 && Math.random() < 0.25;
-
-  return item;
-}
-
 const defaultQuery = () => ({ type: "and", rules: [], groups: [] });
 export class QueryPanel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       name: "",
-      source: sources["ADSBApollo"],
-      query: {
-        data: defaultQuery(),
-        acft: defaultQuery(),
-        acftType: defaultQuery()
-      },
-      ageoff: { ageoff: 90, unit: "seconds" }
+      source: sources["Test"],
+      query: {},
+      ageoff: { ageoff: 5, unit: "minutes" }
     };
   }
   static propTypes = {
@@ -148,13 +28,9 @@ export class QueryPanel extends React.Component {
   clear = () => {
     this.setState({
       name: "",
-      source: sources["ADSBApollo"],
-      query: {
-        data: defaultQuery(),
-        acft: defaultQuery(),
-        acftType: defaultQuery()
-      },
-      ageoff: { ageoff: 90, unit: "seconds" }
+      source: sources["Test"],
+      query: {},
+      ageoff: { ageoff: 5, unit: "minutes" }
     });
   };
   setName = e => {
@@ -167,6 +43,9 @@ export class QueryPanel extends React.Component {
   setSource = option => {
     console.log("Setting source", option.value);
     this.setState({ source: option.value });
+  };
+  setQuery = query => {
+    this.setState({ query });
   };
   updateFilter = event => {
     const filter = event.target.value;
@@ -181,17 +60,14 @@ export class QueryPanel extends React.Component {
       this.state.ageoff
     );
   };
-  handleFormUpdate = (event, value, selectedKey) => {
-    let query = { ...this.state.query, ...value };
-
-    this.setState({ query });
-  };
   render() {
     const { name, query, source, ageoff } = this.state;
     const {
       setName,
       setSource,
       setAgeoff,
+      setQuery,
+      data,
       clear,
       execute,
       handleFormUpdate
@@ -211,43 +87,41 @@ export class QueryPanel extends React.Component {
           flexDirection: "column"
         }}
       >
-        <Form
-          style={{ width: "100%", flex: 1, padding: 10, overflow: "hidden" }}
-        >
+        <Form style={{ width: "100%", flex: 1, overflow: "hidden" }}>
           <PerfectScrollbar>
-            <h3>Query</h3>
-            <FormGroup>
-              <Label for="name">Name</Label>
-              <Input
-                value={name}
-                type="text"
-                name="name"
-                id="name"
-                placeholder="Query Name"
-                onChange={setName}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="source">Source</Label>
-              <Select
-                options={sourceOptions}
-                value={currentSource}
-                onChange={setSource}
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label for="ageoff">Age-Off</Label>
-              <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
-            </FormGroup>
-            {
-              <div>
-                <FilterableDropdownTree data={data} />
-              </div>
-            }
-            <h3>Criteria</h3>
-            {source.Form && (
-              <source.Form data={query} onChange={handleFormUpdate} />
-            )}
+            <div style={{ padding: 15 }}>
+              <h3>Query</h3>
+              <FormGroup>
+                <Label for="name">Name</Label>
+                <Input
+                  value={name}
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Query Name"
+                  onChange={setName}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="source">Source</Label>
+                <Select
+                  options={sourceOptions}
+                  value={currentSource}
+                  onChange={setSource}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="ageoff">Age-Off</Label>
+                <Ageoff id="ageoff" onChange={setAgeoff} value={ageoff} />
+              </FormGroup>
+              {/*
+                <div>
+                  <FilterableDropdownTree data={data} />
+                </div>
+              */}
+              <h3>Criteria</h3>
+              {source.Form && <source.Form data={query} onChange={setQuery} />}
+            </div>
           </PerfectScrollbar>
         </Form>
         <ButtonGroup style={{ marginTop: "auto", display: "flex" }}>

@@ -88,10 +88,18 @@ let aircraftTypeOptions = aircraftTypeFields.map(f => ({
   headerName: f,
   field: f
 }));
+const defaultQuery = () => ({ type: "and", rules: [], groups: [] });
 class AdsbQueryForm extends React.Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired
+  };
+  componentDidMount = () => {
+    this.props.onChange({
+      data: defaultQuery(),
+      acft: defaultQuery(),
+      acftType: defaultQuery()
+    });
   };
   handleFormChange = field => (event, value, key) => {
     console.log("TODO: parse ", toGql(value));
@@ -114,7 +122,7 @@ class AdsbQueryForm extends React.Component {
     }
     let data = { ...this.props.data };
     data[field] = value;
-    this.props.onChange(event, data, key);
+    this.props.onChange(data);
   };
   render() {
     //We do this to ensure we don't use the onChange passed by the parent
@@ -123,26 +131,32 @@ class AdsbQueryForm extends React.Component {
     return (
       <div>
         <h4>Mode-S Data</h4>
-        <BooleanQueryBuilder
-          fields={aircraftOptions}
-          group={data.data}
-          onChange={handleFormChange("data")}
-          {...props}
-        />
+        {data.data && (
+          <BooleanQueryBuilder
+            fields={aircraftOptions}
+            group={data.data}
+            onChange={handleFormChange("data")}
+            {...props}
+          />
+        )}
         <h4>Aircraft Information</h4>
-        <BooleanQueryBuilder
-          fields={aircraftOptions}
-          group={data.acft}
-          onChange={handleFormChange("acft")}
-          {...props}
-        />
+        {data.acft && (
+          <BooleanQueryBuilder
+            fields={aircraftOptions}
+            group={data.acft}
+            onChange={handleFormChange("acft")}
+            {...props}
+          />
+        )}
         <h4>Aircraft Type Information</h4>
-        <BooleanQueryBuilder
-          fields={aircraftTypeOptions}
-          group={data.acftType}
-          onChange={handleFormChange("acftType")}
-          {...props}
-        />
+        {data.acftType && (
+          <BooleanQueryBuilder
+            fields={aircraftTypeOptions}
+            group={data.acftType}
+            onChange={handleFormChange("acftType")}
+            {...props}
+          />
+        )}
       </div>
     );
   }

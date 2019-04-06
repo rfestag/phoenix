@@ -14,6 +14,7 @@ import uuid from "uuid/v4";
 import _ from "lodash";
 import { createPropertyColumn, getDefaultColumns } from "../columns/Constants";
 import { SPEED, KNOTS, LATITUDE, LONGITUDE } from "./Constants";
+import TestForm from "./TestForm";
 
 function fakestr() {
   var text = "";
@@ -40,6 +41,7 @@ export class TestSource extends Source {
    */
   constructor(def = {}) {
     super("Test");
+    this.Form = TestForm;
   }
 
   dictionary(def) {
