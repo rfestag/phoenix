@@ -11,15 +11,15 @@ class RuleList extends React.Component {
     onChange: PropTypes.func.isRequired,
     rules: PropTypes.array.isRequired
   };
-  handleFieldChange = index => (event, value, selectedKey) => {
+  handleFieldChange = index => value => {
     let data = [...this.props.rules];
     data[index] = value;
-    this.props.onChange(null, data);
+    this.props.onChange(data);
   };
-  handleFieldRemove = index => (event, value, selectedKey) => {
+  handleFieldRemove = index => value => {
     let data = [...this.props.rules];
     data.splice(index, 1);
-    this.props.onChange(null, data);
+    this.props.onChange(data);
   };
   render() {
     let { rules, fields } = this.props;
@@ -32,7 +32,7 @@ class RuleList extends React.Component {
             fields={fields}
             onChange={this.handleFieldChange(index)}
             onRemove={this.handleFieldRemove(index)}
-            canRemove={rules.length > 1}
+            canRemove={true}
           />
         ))}
       </div>
@@ -42,26 +42,28 @@ class RuleList extends React.Component {
 class GroupList extends React.Component {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
-    groups: PropTypes.array.isRequired
+    groups: PropTypes.array.isRequired,
+    fields: PropTypes.array
   };
-  handleFieldChange = index => (event, value, selectedKey) => {
+  handleFieldChange = index => value => {
     let data = [...this.props.groups];
     data[index] = value;
-    this.props.onChange(null, data);
+    this.props.onChange(data);
   };
-  handleFieldRemove = index => (event, value, selectedKey) => {
+  handleFieldRemove = index => value => {
     let data = [...this.props.groups];
     data.splice(index, 1);
-    this.props.onChange(null, data);
+    this.props.onChange(data);
   };
   render() {
     let { groups } = this.props;
     return (
       <div style={{ paddingLeft: 8, paddingTop: 4, paddingBottom: 4 }}>
-        {groups.map((group, fields, up, index) => (
+        {groups.map((group, index) => (
           <QueryGroup
             key={group.id}
             group={group}
+            fields={this.props.fields}
             onChange={this.handleFieldChange(index)}
             onRemove={this.handleFieldRemove(index)}
             canRemove={true}
@@ -94,32 +96,32 @@ class Rule extends React.Component {
   setField = value => {
     let rule = { ...this.props.rule };
     rule.field = value ? value.value : value;
-    this.props.onChange(null, rule);
+    this.props.onChange(rule);
   };
   createField = value => {
     let rule = { ...this.props.rule };
     rule.field = { headerName: value, field: value };
-    this.props.onChange(null, rule);
+    this.props.onChange(rule);
   };
   setOp = value => {
     if (value) {
       let rule = { ...this.props.rule };
       rule.op = value.value;
-      this.props.onChange(null, rule);
+      this.props.onChange(rule);
     }
   };
   setValue = values => {
     if (values) {
       let rule = { ...this.props.rule };
       rule.values = values.map(v => v.value);
-      this.props.onChange(null, rule);
+      this.props.onChange(rule);
     }
   };
   createValue = value => {
     let rule = { ...this.props.rule };
     rule.values = rule.values ? [...rule.values] : [];
     rule.values.push(value);
-    this.props.onChange(null, rule);
+    this.props.onChange(rule);
   };
   isValid = input => {
     //Yea, this seems dumb. For whatever reason, without it, the bowels
@@ -193,18 +195,18 @@ class QueryGroup extends React.Component {
     onRemove: PropTypes.func,
     canRemove: PropTypes.bool
   };
-  handleFieldChange = field => (event, value, selectedKey) => {
+  handleFieldChange = field => value => {
     let data = { ...this.props.group };
     data[field] = value;
     // you could pass the event here but also null if it is not necessary nor useful
-    this.props.onChange(null, data);
+    this.props.onChange(data);
   };
   setType = this.handleFieldChange("type");
   setAnd = () => {
-    this.setType(null, "and");
+    this.setType("and");
   };
   setOr = () => {
-    this.setType(null, "or");
+    this.setType("or");
   };
   changeRules = this.handleFieldChange("rules");
   changeGroups = this.handleFieldChange("groups");
@@ -212,23 +214,23 @@ class QueryGroup extends React.Component {
     let rules = [...this.props.group.rules];
     let rule = { id: uuid(), op: "in" };
     rules.push(rule);
-    this.changeRules(null, rules);
+    this.changeRules(rules);
   };
   addGroup = () => {
     let groups = [...this.props.group.groups];
     let group = {
       id: uuid(),
       type: "and",
-      rules: [{ id: uuid() }],
+      rules: [{ id: uuid(), op: "in" }],
       groups: []
     };
     groups.push(group);
-    this.changeGroups(null, groups);
+    this.changeGroups(groups);
   };
   render() {
     let { group, fields, onRemove, canRemove } = this.props;
     let { id, type, rules, groups } = group;
-    let { setAnd, setOr, addRule, addGroup, handleFieldChange } = this;
+    let { setAnd, setOr, addRule, addGroup, changeGroups, changeRules } = this;
     return (
       <FormGroup style={{ margin: 0 }}>
         <div style={{ display: "flex" }}>
@@ -275,12 +277,8 @@ class QueryGroup extends React.Component {
             </Button>
           </ButtonGroup>
         </div>
-        <RuleList
-          rules={rules}
-          fields={fields}
-          onChange={handleFieldChange("rules")}
-        />
-        <GroupList groups={groups} onChange={handleFieldChange("groups")} />
+        <RuleList rules={rules} fields={fields} onChange={changeRules} />
+        <GroupList groups={groups} fields={fields} onChange={changeGroups} />
       </FormGroup>
     );
   }

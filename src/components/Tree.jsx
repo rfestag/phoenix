@@ -74,7 +74,7 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     console.log("Created new tree");
-    this.state = { data: JSON.parse(JSON.stringify(props.data)) };
+    this.state = { data: props.data };
     this.refList = React.createRef();
     this.element = React.createRef();
   }

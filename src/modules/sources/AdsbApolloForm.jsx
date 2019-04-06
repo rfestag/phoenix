@@ -36,23 +36,26 @@ const client = new ApolloClient({
 });
 
 function toGql(query) {
-  let { type, rules, field, op, value } = query;
+  let { type, rules, groups, field, op, values } = query;
   let parsed;
+  let terms = [];
+  if (rules) terms = terms.concat(rules.map(toGql));
+  if (groups) terms = terms.concat(groups.map(toGql));
+  terms = terms.filter(Boolean);
   if (type === "and") {
-    parsed = rules.map(toGql).join(",");
+    parsed = terms.join(",");
     return parsed.length ? `{and:[${parsed}]}` : "";
   }
   if (type === "or") {
-    parsed = rules.map(toGql).join(",");
-    return rules.length ? `{or:[${parsed}]}` : "";
+    parsed = terms.join(",");
+    return parsed.length ? `{or:[${parsed}]}` : "";
   }
   if (field && op) {
-    console.log(field, op, value);
     field = field.field;
     if (op === "exists") {
       return `{field: ${field}, op: ${op}}`;
-    } else if (value) {
-      value = `[${value.map(v => `"${v}"`)}]`;
+    } else if (values) {
+      let value = `[${values.map(v => `"${v}"`)}]`;
       return `{field: ${field}, op: ${op}, values: ${value}}`;
     }
   }
@@ -101,9 +104,9 @@ class AdsbQueryForm extends React.Component {
       acftType: defaultQuery()
     });
   };
-  handleFormChange = field => (event, value, key) => {
-    console.log("TODO: parse ", toGql(value));
+  handleFormChange = field => value => {
     let searchTerms = toGql(value);
+    console.log(searchTerms);
     if (searchTerms.length > 0) {
       const countQuery = gql`
         query {
@@ -120,14 +123,15 @@ class AdsbQueryForm extends React.Component {
         .finally(d => console.log(d));
       console.log(results);
     }
-    let data = { ...this.props.data };
-    data[field] = value;
+    let data = { ...this.props.data, [field]: value };
     this.props.onChange(data);
   };
+  handleDataChange = this.handleFormChange("data");
+  handleAcftChange = this.handleFormChange("acft");
+  handleAcftTypeChange = this.handleFormChange("acftType");
   render() {
-    //We do this to ensure we don't use the onChange passed by the parent
     let { onChange, data, ...props } = this.props;
-    let { handleFormChange } = this;
+    let { handleDataChange, handleAcftChange, handleAcftTypeChange } = this;
     return (
       <div>
         <h4>Mode-S Data</h4>
@@ -135,7 +139,7 @@ class AdsbQueryForm extends React.Component {
           <BooleanQueryBuilder
             fields={aircraftOptions}
             group={data.data}
-            onChange={handleFormChange("data")}
+            onChange={handleDataChange}
             {...props}
           />
         )}
@@ -144,7 +148,7 @@ class AdsbQueryForm extends React.Component {
           <BooleanQueryBuilder
             fields={aircraftOptions}
             group={data.acft}
-            onChange={handleFormChange("acft")}
+            onChange={handleAcftChange}
             {...props}
           />
         )}
@@ -153,7 +157,7 @@ class AdsbQueryForm extends React.Component {
           <BooleanQueryBuilder
             fields={aircraftTypeOptions}
             group={data.acftType}
-            onChange={handleFormChange("acftType")}
+            onChange={handleAcftTypeChange}
             {...props}
           />
         )}
