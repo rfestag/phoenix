@@ -332,14 +332,14 @@ export const CollectionLayer = Layer.extend({
       let destroyed = 0;
       for (var [id, entity] of this.entities) {
         if (this.collection.data[id] === undefined) {
-          _.each(entity, (geom, field) => {
-            _.each(geom, (shape, idx) => {
+          for (let geom of entity) {
+            for (let shape of geom) {
               if (shape) {
                 destroyed += 1;
                 shape.destroy();
               }
-            });
-          });
+            }
+          }
           deleted += 1;
           this.entities.delete(id);
         }
@@ -347,10 +347,11 @@ export const CollectionLayer = Layer.extend({
       if (deleted > 0)
         console.log(`Destroyed ${destroyed} shapes (${deleted} deleted)`);
 
-      _.each(this.collection.data, (entity, id) => {
+      for (let id in this.collection.data) {
+        let entity = this.collection.data[id];
         let geoms = this._updateEntity(entity, id, minTime, maxTime);
         this.entities.set(id, geoms);
-      });
+      }
 
       stage.batchDraw();
     }
@@ -439,9 +440,9 @@ export const CollectionLayer = Layer.extend({
     ) {
       let diff = geoms[field].length - geometryCollection.geometries.length;
       let deleted = geoms[field].splice(0, diff);
-      _.each(deleted, shape => {
+      for (let shape of deleted) {
         shape && shape.destroy();
-      });
+      }
     }
     geoms[field] = _.reduce(
       geometryCollection.geometries,
@@ -714,9 +715,9 @@ export const CollectionLayer = Layer.extend({
                     if (!wasHovered && e && e[field]) {
                       didChange = true;
                       const geoms = e[field];
-                      _.each(geoms, (shape, idx) => {
+                      for (let shape of geoms) {
                         if (shape) style(shape, selected, true);
-                      });
+                      }
                     }
                   }
                   return hits;
@@ -726,9 +727,9 @@ export const CollectionLayer = Layer.extend({
               if (!gHit && wasHovered) {
                 didChange = true;
                 const geoms = this.entities.get(id)[field];
-                _.each(geoms, (shape, idx) => {
+                for (let shape of geoms) {
                   if (shape) style(shape, selected, false);
-                });
+                }
               }
               return hits;
             },
