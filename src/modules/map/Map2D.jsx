@@ -73,9 +73,7 @@ export class Map2D extends Component {
       }
     }
   };
-  onContextmenu = () => {
-    L.DomEvent.preventDefault();
-  };
+  onContextmenu = L.DomEvent.preventDefault;
   onMousemove = _.throttle(
     e => {
       let didHover = false;
