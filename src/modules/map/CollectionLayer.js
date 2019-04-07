@@ -267,7 +267,7 @@ export const CollectionLayer = Layer.extend({
     this._map.off("moveend", this.throttleRedraw);
     delete this._container;
   },
-  redraw: function(fast) {
+  redraw: function() {
     if (this.dragging) return;
     const map = this._map;
 
@@ -295,7 +295,6 @@ export const CollectionLayer = Layer.extend({
       );
       this._center = this._map.getCenter();
       this._zoom = this._map.getZoom();
-      this._skipIfUnchanged = fast;
       var b = this._bounds,
         stage = this.stage,
         container = this._container,
@@ -337,7 +336,6 @@ export const CollectionLayer = Layer.extend({
             _.each(geom, (shape, idx) => {
               if (shape) {
                 destroyed += 1;
-                //shape.geom = null;
                 shape.destroy();
               }
             });
@@ -383,6 +381,7 @@ export const CollectionLayer = Layer.extend({
       : undefined;
   },
   _closeTo: function(geom, allBoxes) {
+    //return false
     let minTime = this.getMinTime();
     let maxTime = undefined; //Placeholder
     return _.reduce(
@@ -397,12 +396,13 @@ export const CollectionLayer = Layer.extend({
         geom = timeBoundedGeom(geom, minTime, maxTime);
         if (geom === undefined) return false;
         if (geom.type === "Point") return true;
-        else {
+        else if (geom.type === "LineString")
           return (
-            turf.booleanWithin(geom, clickBox) ||
-            !turf.booleanDisjoint(geom, clickBox)
+            !turf.booleanDisjoint(clickBox, geom) ||
+            turf.booleanWithin(geom, clickBox)
           );
-        }
+        else return !turf.booleanDisjoint(clickBox, geom);
+        //turf.booleanOverlap(clickBox, geom) || turf.booleanWithin(clickBox, geom)
       },
       false
     );
@@ -439,7 +439,9 @@ export const CollectionLayer = Layer.extend({
     ) {
       let diff = geoms[field].length - geometryCollection.geometries.length;
       let deleted = geoms[field].splice(0, diff);
-      _.each(deleted, shape => shape && shape.destroy());
+      _.each(deleted, shape => {
+        shape && shape.destroy();
+      });
     }
     geoms[field] = _.reduce(
       geometryCollection.geometries,
@@ -482,7 +484,6 @@ export const CollectionLayer = Layer.extend({
     return geoms[field];
   },
   _renderPoint: function(geom, shape, hovered, selected, minTime, maxTime) {
-    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -507,7 +508,6 @@ export const CollectionLayer = Layer.extend({
             });
             this.layer.add(shape);
           }
-          //shape.geom = geom;
           shape.x(x);
           shape.y(y);
           style(shape, selected, hovered);
@@ -521,8 +521,6 @@ export const CollectionLayer = Layer.extend({
     return shape;
   },
   _renderLine: function(geom, shape, hovered, selected, minTime, maxTime) {
-    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -589,7 +587,6 @@ export const CollectionLayer = Layer.extend({
               });
               this.layer.add(shape);
             }
-            //shape.geom = geom;
             shape.points(points);
             shape.tension(0.5);
             style(shape, selected, hovered);
@@ -606,8 +603,6 @@ export const CollectionLayer = Layer.extend({
     return shape;
   },
   _renderPolygon: function(geom, shape, hovered, selected, minTime, maxTime) {
-    //if (this._skipIfUnchanged && shape && shape.geom === geom) return shape;
-
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -641,7 +636,6 @@ export const CollectionLayer = Layer.extend({
               });
               this.layer.add(shape);
             }
-            //shape.geom = geom;
             shape.points(points);
             //shape.tension(0);
             style(shape, selected, hovered);
