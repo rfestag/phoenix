@@ -56,6 +56,10 @@ export class Grid extends Component {
     columns: []
   };
 
+  constructor(props) {
+    super(props);
+    this.lastRender = 0;
+  }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.skipSelectChange) {
       console.log("Skipping update");
@@ -166,7 +170,7 @@ export class Grid extends Component {
     //appears to perform better, and handles mutable entities
     if (this.api) {
       let transaction = { update: [], add: [], remove: [] };
-      let keys = {};
+      let keys = new Map();
       let count = 0;
       this.batchUpdatingSelect = true;
 
@@ -178,7 +182,8 @@ export class Grid extends Component {
       //over the data.
       this.api.forEachNode((node, index) => {
         count += 1;
-        keys[node.id] = true;
+        keys.set(node.id, true);
+        //keys[node.id] = true;
         node.setSelected(Boolean(this.props.selected[node.id]));
       });
       this.batchUpdatingSelect = false;
@@ -192,24 +197,36 @@ export class Grid extends Component {
       //add vs update based on that.
       else {
         transaction = this.props.data.reduce((transaction, entity) => {
-          delete keys[entity.id];
-          try {
-            if (!this.api.getRowNode(entity.id)) transaction.add.push(entity);
-            else transaction.update.push(entity);
-          } catch (e) {
+          //delete keys[entity.id];
+          keys.delete(entity.id);
+          //try {
+          if (
+            this.lastRender < entity.createTime &&
+            !this.api.getRowNode(entity.id)
+          )
+            transaction.add.push(entity);
+          else if (this.lastRender < entity.updateTime)
             transaction.update.push(entity);
-          }
+          //if (!this.api.getRowNode(entity.id)) transaction.add.push(entity);
+          //else transaction.update.push(entity);
+          //} catch (e) {
+          //  transaction.update.push(entity);
+          //}
           return transaction;
         }, transaction);
         //Finally, remove any keys we didn't either add or update.
         //These will be associated with entities that have aged off
         //or been deleted
-        transaction.remove = Object.keys(keys).map(id => ({ id }));
+        for (let [id, v] of keys) {
+          transaction.remove.push({ id });
+        }
+        //transaction.remove = Object.keys(keys).map(id => ({ id }));
       }
       //We explicitly do the synchronous update vs. async. The async
       //logic adds unnecessary overhead, taking 50-100ms longer.
       this.api.updateRowData(transaction);
     }
+    this.lastRender = Date.now();
     return (
       <div
         style={{ height: "100%", width: "100%" }}

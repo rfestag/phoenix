@@ -33,8 +33,8 @@ function updateCollection(collection, action) {
         fields,
         collection.ageoff
       );
-      updateEntity.updatTime = now;
-      if (isNew) updateEntity.createTime = now;
+      updatedEntity.updateTime = now;
+      if (isNew) updatedEntity.createTime = now;
       data[id] = updatedEntity;
       fields = updatedFields;
       return data;

@@ -332,7 +332,8 @@ export const CollectionLayer = Layer.extend({
       let destroyed = 0;
       for (var [id, entity] of this.entities) {
         if (this.collection.data[id] === undefined) {
-          for (let geom of entity) {
+          for (let gid in entity) {
+            let geom = entity[gid];
             for (let shape of geom) {
               if (shape) {
                 destroyed += 1;

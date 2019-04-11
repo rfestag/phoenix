@@ -39,10 +39,10 @@ export class RightPanel extends Component {
             style={{ height: "100%", width: 40 }}
           />
         </h2>
-        <TabPane tabId={COLUMN_PANE} style={{ flex: 1 }}>
+        <TabPane tabId={COLUMN_PANE} style={{ flex: 1, overflow: "hidden" }}>
           <ColumnManager />
         </TabPane>
-        <TabPane tabId={LAYER_PANE} style={{ flex: 1 }}>
+        <TabPane tabId={LAYER_PANE} style={{ flex: 1, overflow: "hidden" }}>
           <LayerManager />
         </TabPane>
       </TabContent>
