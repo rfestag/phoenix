@@ -22,7 +22,9 @@ const Ageoff = ({ value, onChange, name, placeholder, children }) => {
           type="numeric"
           name={name}
           placeholder={placeholder}
-          onChange={e => onChange({ value: Number(e.target.value), unit })}
+          onChange={e =>
+            onChange({ value: Number(e.target.value) || null, unit })
+          }
           invalid={invalid}
         />
         <div style={{ width: 150 }}>

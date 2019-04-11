@@ -22,6 +22,7 @@ function updateCollection(collection, action) {
     properties: { ...collection.fields.properties },
     geometries: { ...collection.fields.geometries }
   };
+  const now = Date.now();
   let data = _.reduce(
     action.data,
     (data, updates, id) => {
@@ -32,7 +33,8 @@ function updateCollection(collection, action) {
         fields,
         collection.ageoff
       );
-      updateEntity.isNew = isNew;
+      updateEntity.updatTime = now;
+      if (isNew) updateEntity.createTime = now;
       data[id] = updatedEntity;
       fields = updatedFields;
       return data;
