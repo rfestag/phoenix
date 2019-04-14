@@ -111,6 +111,7 @@ export const updateEntity = (e, updates, fields) => {
             : createGeometry(entity.geometries[field]);
           updateWhen(entity, update.when.end || update.when.start);
           updatedGeometries[field] = updateGeometry(prop, update);
+          updatedGeometries[field].eid = entity.id;
           if (!fields.geometries[field])
             fields.geometries[field] = createGeometryColumn(field, update);
           return updatedGeometries;

@@ -84,6 +84,14 @@ export const createGeometryColumn = (field, opts = {}) => {
     headerName: field,
     hide: false,
     latestOnly: true,
+    style: {
+      strokeColor: "red",
+      strokeOpacity: 1,
+      fillColor: "red",
+      fillOpacity: 0.65,
+      icon: undefined,
+      dash: undefined
+    },
     showHead: true, //Only applicable to tracks/lines
     tension: 0.5 //Onely applicable to tracks/lines
   };

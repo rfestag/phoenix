@@ -1,13 +1,43 @@
+import React from "react";
 import { MapLayer, withLeaflet } from "react-leaflet";
 import { Layer, LatLng, Point, Bounds, Browser, DomUtil } from "leaflet";
-import { Stage, Circle, Line, FastLayer } from "konva";
+import {
+  Stage,
+  Circle,
+  Group,
+  Image as KImage,
+  Line,
+  Layer as KLayer
+} from "konva";
 import _ from "lodash";
 import * as turf from "@turf/turf";
 import moment from "moment";
+import componentToImage from "../../utils/componentToImage";
+import * as MapIcons from "../../components/MapIcons";
 
 const MIN_SIMPLIFY_ZOOM = 6;
 //const MAX_SIMPLIFY_ZOOM = 8;
 
+const iconCache = {};
+function zoomToSize(zoom) {
+  if (zoom < 5) return 4;
+  switch (zoom) {
+    case 5:
+      return 8;
+    case 6:
+      return 8;
+    case 7:
+      return 12;
+    case 8:
+      return 12;
+    case 9:
+      return 16;
+    case 10:
+      return 20;
+    default:
+      return 24;
+  }
+}
 function touchBounds(geom, bounds) {
   const bbox = geom.bbox;
   //bbox -> minlon, minlat, maxlon, maxlat
@@ -15,6 +45,15 @@ function touchBounds(geom, bounds) {
   if (bbox[1] > bounds._northEast.lat) return false; // box is north of tile
   if (bbox[2] < bounds._southWest.lng) return false; // box is west of tile
   if (bbox[3] < bounds._southWest.lat) return false; // box is south of tile
+  return true; // boxes overlap
+}
+function inBounds(geom, bounds) {
+  const bbox = geom.bbox;
+  //bbox -> minlon, minlat, maxlon, maxlat
+  if (bbox[2] > bounds._northEast.lng) return false; // box is east of tile
+  if (bbox[3] > bounds._northEast.lat) return false; // box is north of tile
+  if (bbox[0] < bounds._southWest.lng) return false; // box is west of tile
+  if (bbox[1] < bounds._southWest.lat) return false; // box is south of tile
   return true; // boxes overlap
 }
 function polarBounds(bounds, map) {
@@ -178,20 +217,6 @@ function getBoundsAndTransforms(bounds, map, boundsFromMap = true) {
     return [[bounds, 0]];
   }
 }
-
-function style(shape, selected, hovered) {
-  if (hovered) {
-    shape.stroke("rgba(255, 255, 0, 1)");
-    shape.fill("rgba(255, 255, 0, 0.65)");
-    shape.moveToTop();
-  } else if (selected) {
-    shape.stroke("rgba(0, 0, 255, 1)");
-    shape.fill("rgba(0, 0, 255, 0.65)");
-  } else {
-    shape.stroke("rgba(255, 0, 0, 1)");
-    shape.fill("rgba(255, 0, 0, 0.65)");
-  }
-}
 function geomInTime(geom, minTime, maxTime) {
   //We do this just in case there is only a start or end for some
   //reason.
@@ -256,9 +281,9 @@ export const CollectionLayer = Layer.extend({
     this.throttleRedraw = _.throttle(this.redraw, 100, this);
     this._map.on("movestart", this._onMoveStart, this);
     this._map.on("moveend", this._onMoveEnd, this);
-    this._map.on("zoomend", this.throttleRedraw, this);
+    this._map.on("zoomend", this._onZoomEnd, this);
     this.stage = new Stage({ container });
-    this.layer = new FastLayer({ transformEnabled: "position" });
+    this.layer = new KLayer({ transformEnabled: "position" });
     this.stage.add(this.layer);
   },
   onRemove: function() {
@@ -267,7 +292,8 @@ export const CollectionLayer = Layer.extend({
     this._map.off("moveend", this.throttleRedraw);
     delete this._container;
   },
-  redraw: function() {
+  redraw: function(redrawAll) {
+    //The redrawAll is necessary on any pan/zoom. Otherwise, we only need to update entities that changed
     if (this.dragging) return;
     const map = this._map;
 
@@ -307,7 +333,7 @@ export const CollectionLayer = Layer.extend({
 
       // set canvas size (also clearing it); use double size on retina
       const width = m * size.x,
-        height = m * size.x,
+        height = m * size.y,
         x = -b.min.x,
         y = -b.min.y;
       const position = stage.position();
@@ -337,7 +363,7 @@ export const CollectionLayer = Layer.extend({
             for (let shape of geom) {
               if (shape) {
                 destroyed += 1;
-                shape.destroy();
+                this._cleanupShape(shape);
               }
             }
           }
@@ -350,9 +376,12 @@ export const CollectionLayer = Layer.extend({
 
       for (let id in this.collection.data) {
         let entity = this.collection.data[id];
-        let geoms = this._updateEntity(entity, id, minTime, maxTime);
-        this.entities.set(id, geoms);
+        if (redrawAll || this.lastUpdated < entity.updateTime) {
+          let geoms = this._updateEntity(entity, minTime, maxTime);
+          this.entities.set(id, geoms);
+        }
       }
+      this.lastUpdated = Date.now();
 
       stage.batchDraw();
     }
@@ -366,6 +395,7 @@ export const CollectionLayer = Layer.extend({
     this.onFocus = props.onFocus;
     this.setTimeRange(timeRange);
     this.setCollection(collection);
+    this.lastUpdated = 0;
   },
   setTimeRange: function(timeRange) {
     this.timeRange = timeRange;
@@ -382,6 +412,61 @@ export const CollectionLayer = Layer.extend({
           .valueOf()
       : undefined;
   },
+  _applyStyle: function(shape, field, entity, hover) {
+    const hovered =
+      hover !== undefined
+        ? hover
+        : this.hovered[entity.id] && this.hovered[entity.id][field];
+    const selected =
+      this.collection.selected && this.collection.selected[entity.id];
+
+    if (shape.nodeType === "Group") {
+      if (hovered) shape.moveToTop();
+      for (let child of shape.getChildren()) {
+        this._applyStyle(child, field, entity, hovered);
+      }
+    } else if (shape.className === "Image") {
+      const zoom = this._map.getZoom();
+      const iconSize = zoomToSize(zoom);
+      let iconName = "Plane";
+      let color = hovered ? "yellow" : selected ? "blue" : "red";
+      let imageKey = `${iconName}_${iconSize}_${color}`;
+      let image = iconCache[imageKey];
+      if (image) {
+        if (image !== shape.image()) {
+          shape.image(image);
+        }
+      } else {
+        let Component = MapIcons[iconName];
+        iconCache[imageKey] = new Image();
+        componentToImage(<Component color={color} size={iconSize} />).then(
+          image => {
+            iconCache[imageKey] = image;
+            image.onload = () => {
+              iconCache[imageKey] = image;
+              this.throttleRedraw(true);
+            };
+          }
+        );
+      }
+    } else {
+      if (hovered) {
+        shape.stroke("rgba(255, 255, 0, 1)");
+        shape.fill("rgba(255, 255, 0, 0.65)");
+        shape.moveToTop();
+      } else if (selected) {
+        shape.stroke("rgba(0, 0, 255, 1)");
+        shape.fill("rgba(0, 0, 255, 0.65)");
+      } else {
+        shape.stroke("rgba(255, 0, 0, 1)");
+        shape.fill("rgba(255, 0, 0, 0.65)");
+      }
+    }
+  },
+  _cleanupShape: function(shape) {
+    shape.geom = null;
+    shape.destroy();
+  },
   _closeTo: function(geom, allBoxes) {
     //return false
     let minTime = this.getMinTime();
@@ -391,6 +476,7 @@ export const CollectionLayer = Layer.extend({
       (close, box) => {
         const [, clickBounds, clickBox] = box;
         if (close) return close;
+        if (inBounds(geom, clickBounds)) return true; //No need to do anything else if we are fully contained
         if (!touchBounds(geom, clickBounds)) return false;
         //TODO: Find a more efficient way to do this. As tracks grow,
         //we'll get more false positives, making this object creation
@@ -409,15 +495,15 @@ export const CollectionLayer = Layer.extend({
       false
     );
   },
-  _updateEntity: function(entity, id, minTime, maxTime) {
-    let geoms = this.entities.get(id);
+  _updateEntity: function(entity, minTime, maxTime) {
+    let geoms = this.entities.get(entity.id);
     return _.reduce(
       entity.geometries,
       (geoms, geom, field) => {
         geoms[field] = this._updateGeometry(
           geom,
           field,
-          id,
+          entity,
           geoms,
           minTime,
           maxTime
@@ -430,7 +516,7 @@ export const CollectionLayer = Layer.extend({
   _updateGeometry: function(
     geometryCollection,
     field,
-    id,
+    entity,
     geoms,
     minTime,
     maxTime
@@ -442,18 +528,14 @@ export const CollectionLayer = Layer.extend({
       let diff = geoms[field].length - geometryCollection.geometries.length;
       let deleted = geoms[field].splice(0, diff);
       for (let shape of deleted) {
-        shape && shape.destroy();
+        if (shape) {
+          this._cleanupShape(shape);
+        }
       }
     }
     geoms[field] = _.reduce(
       geometryCollection.geometries,
       (geom, geometry, idx) => {
-        //geometry = timeBoundedGeom(geometry, minTime, maxTime)
-        //if (geometry === undefined) return geom
-        const hovered = this.hovered[id] && this.hovered[id][field];
-        const selected =
-          this.collection.selected && this.collection.selected[id];
-        //Update the shape itself
         let renderer = null;
         if (geometry.etype === "Circle") {
           renderer = "_renderPolygon";
@@ -470,14 +552,22 @@ export const CollectionLayer = Layer.extend({
           renderer = "_renderPoint";
         }
         if (renderer) {
-          geom[idx] = this[renderer](
-            geometry,
-            geom[idx],
-            hovered,
-            selected,
-            minTime,
-            maxTime
-          );
+          let shape = geom[idx];
+          let fieldDef = this.collection.fields.geometries[field];
+          //TODO: Use maxTime to find correct "lastGeomIndex"
+          let lastGeomIdx = geometryCollection.geometries.length - 1;
+          if (fieldDef.latestOnly && idx != lastGeomIdx) {
+            if (shape) shape.hide();
+          } else {
+            geom[idx] = this[renderer](
+              geometry,
+              shape,
+              field,
+              entity,
+              minTime,
+              maxTime
+            );
+          }
         }
         return geom;
       },
@@ -485,7 +575,7 @@ export const CollectionLayer = Layer.extend({
     );
     return geoms[field];
   },
-  _renderPoint: function(geom, shape, hovered, selected, minTime, maxTime) {
+  _renderPoint: function(geom, shape, field, entity, minTime, maxTime) {
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -510,9 +600,10 @@ export const CollectionLayer = Layer.extend({
             });
             this.layer.add(shape);
           }
+          shape.geom = geom;
           shape.x(x);
           shape.y(y);
-          style(shape, selected, hovered);
+          this._applyStyle(shape, field, entity);
           shape.show();
         }
         return rendered;
@@ -522,7 +613,7 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderLine: function(geom, shape, hovered, selected, minTime, maxTime) {
+  _renderLine: function(geom, shape, field, entity, minTime, maxTime) {
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -532,6 +623,8 @@ export const CollectionLayer = Layer.extend({
           rendered = true;
           const zoom = this._map.getZoom();
           let points = [];
+          let bearing = 0;
+          let iconSize = zoomToSize(zoom);
           let coordinates =
             geom.type === "Point" ? [geom.coordinates] : geom.coordinates;
           let start = 0;
@@ -542,23 +635,15 @@ export const CollectionLayer = Layer.extend({
             end = _.sortedIndex(geom.times, maxTime);
           if (start === coordinates.length) start = start - 1;
           if (end === coordinates.length) end = end - 1;
+          if (end > 0)
+            bearing = turf.bearing(coordinates[end - 1], coordinates[end]);
           if (zoom < MIN_SIMPLIFY_ZOOM) {
-            const p1 = coordinates[start];
-            const p2 = coordinates[end];
+            const p1 = coordinates[end];
             const pt1 = this._map.latLngToLayerPoint(
               new LatLng(p1[1], p1[0] + transform, p1[2])
             );
-            const pt2 = this._map.latLngToLayerPoint(
-              new LatLng(p2[1], p2[0] + transform, p2[2])
-            );
-            points = [
-              Math.floor(pt1.x),
-              Math.floor(pt1.y),
-              Math.floor(pt2.x) + 1,
-              Math.floor(pt2.y) + 1
-            ];
+            points = [Math.floor(pt1.x), Math.floor(pt1.y)];
           } else {
-            //points = simplifyByZoom(geom, zoom).coordinates.reduce((pts, p) => {
             points = coordinates.reduce((pts, p, i) => {
               //TODO: Interpolate
               if (start <= i && i <= end) {
@@ -572,26 +657,46 @@ export const CollectionLayer = Layer.extend({
             }, points);
           }
           if (points.length > 0) {
-            //Special case - if this is a track of one point so far,
-            //we tweak the points to make it visible
-            if (points.length === 2) {
-              points[2] = points[0] + 1;
-              points[3] = points[1] + 1;
-            }
+            let line, head;
             if (!shape) {
-              shape = new Line({
+              shape = new Group({ x: 0, y: 0 });
+              let line = new Line({
                 shadowForStrokeEnabled: false,
                 fillEnabled: false,
                 strokeHitEnabled: false,
                 listening: false,
                 perfectDrawEnabled: false,
-                strokeWidth: 2
+                strokeWidth: 2,
+                id: "line"
               });
+              let head = new KImage({
+                shadowForStrokeEnabled: false,
+                fillEnabled: true,
+                strokeHitEnabled: false,
+                listening: false,
+                perfectDrawEnabled: false,
+                width: 28,
+                height: 28,
+                id: "head"
+              });
+              shape.add(line);
+              shape.add(head);
               this.layer.add(shape);
             }
-            shape.points(points);
-            shape.tension(0.5);
-            style(shape, selected, hovered);
+            line = shape.findOne("#line");
+            head = shape.findOne("#head");
+            shape.geom = geom;
+            line.points(points);
+            line.tension(0.5);
+            head.x(points[points.length - 2]);
+            head.y(points[points.length - 1]);
+            head.offsetX(iconSize / 2);
+            head.offsetY(iconSize / 2);
+            head.width(iconSize);
+            head.height(iconSize);
+            head.rotation(bearing - 90);
+            this._applyStyle(shape, field, entity);
+            zoom < MIN_SIMPLIFY_ZOOM ? line.hide() : line.show();
             shape.show();
           } else {
             console.log("Cannot render", start, end, minTime, geom);
@@ -604,7 +709,7 @@ export const CollectionLayer = Layer.extend({
     if (shape && !rendered) shape.hide();
     return shape;
   },
-  _renderPolygon: function(geom, shape, hovered, selected, minTime, maxTime) {
+  _renderPolygon: function(geom, shape, field, entity, minTime, maxTime) {
     const rendered = _.reduce(
       this._allBounds,
       (rendered, bt) => {
@@ -638,9 +743,9 @@ export const CollectionLayer = Layer.extend({
               });
               this.layer.add(shape);
             }
+            shape.geom = geom;
             shape.points(points);
-            //shape.tension(0);
-            style(shape, selected, hovered);
+            this._applyStyle(shape, field, entity);
             shape.show();
           }
         }
@@ -694,6 +799,7 @@ export const CollectionLayer = Layer.extend({
       //create an array that has all three in them, since they are based on allBounds translate
       let didHover = false;
       let didChange = false;
+      let now = Date.now();
       //const pt = e.latlng //this._map.layerPointToLatLng(e);
       this.hovered = _.reduce(
         this.collection.data,
@@ -716,8 +822,9 @@ export const CollectionLayer = Layer.extend({
                     if (!wasHovered && e && e[field]) {
                       didChange = true;
                       const geoms = e[field];
+                      entity.updateTime = now;
                       for (let shape of geoms) {
-                        if (shape) style(shape, selected, true);
+                        if (shape) this._applyStyle(shape, field, entity, true);
                       }
                     }
                   }
@@ -728,8 +835,9 @@ export const CollectionLayer = Layer.extend({
               if (!gHit && wasHovered) {
                 didChange = true;
                 const geoms = this.entities.get(id)[field];
+                entity.updateTime = now;
                 for (let shape of geoms) {
-                  if (shape) style(shape, selected, false);
+                  if (shape) this._applyStyle(shape, field, entity, false);
                 }
               }
               return hits;
@@ -745,8 +853,8 @@ export const CollectionLayer = Layer.extend({
         this._hoverCursor = false;
       }
       if (didChange) {
-        this.throttleRedraw();
-        //this.stage.batchDraw();
+        //this.throttleRedraw();
+        this.stage.batchDraw();
       }
     } catch (e) {
       console.error(e);
@@ -758,7 +866,10 @@ export const CollectionLayer = Layer.extend({
   },
   _onMoveEnd: function(e) {
     this.dragging = false;
-    this.throttleRedraw();
+    this.throttleRedraw(true);
+  },
+  _onZoomEnd: function(e) {
+    this.throttleRedraw(true);
   },
   _onClick: function(e) {
     let { shiftKey, ctrlKey } = e.originalEvent;

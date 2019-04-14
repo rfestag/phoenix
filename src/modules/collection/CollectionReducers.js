@@ -47,6 +47,7 @@ function updateCollection(collection, action) {
 export default function(state = initialState, action) {
   const id = action.id;
   let collection;
+  let now = Date.now();
   switch (action.type) {
     case CREATE_COLLECTION:
       collection = state.collections[id];
@@ -126,7 +127,13 @@ export default function(state = initialState, action) {
       console.log("Setting selected entities");
       collection = state.collections[id];
       if (collection) {
+        if (action.clear) {
+          for (let id in collection.selected) {
+            collection.data[id].updateTime = now;
+          }
+        }
         collection.selected = action.ids.reduce((selected, id) => {
+          collection.data[id].updateTime = now;
           selected[id] = true;
           return selected;
         }, action.clear ? {} : { ...collection.selected });
@@ -141,8 +148,14 @@ export default function(state = initialState, action) {
       console.log("Toggling selected entities");
       collection = state.collections[id];
       if (collection) {
+        if (action.clear) {
+          for (let id in collection.selected) {
+            collection.data[id].updateTime = now;
+          }
+        }
         collection.selected = action.ids.reduce((selected, id) => {
           selected[id] = !collection.selected[id];
+          collection.data[id].updateTime = now;
           return selected;
         }, action.clear ? {} : { ...collection.selected });
         return {
@@ -156,6 +169,9 @@ export default function(state = initialState, action) {
       state.collections = _.reduce(
         state.collections,
         (collections, collection, id) => {
+          for (let id in collection.selected) {
+            collection.data[id].updateTime = now;
+          }
           collection = { ...collection, selected: {} };
           collections[id] = collection;
           return collections;
