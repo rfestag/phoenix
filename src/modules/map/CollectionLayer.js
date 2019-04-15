@@ -16,8 +16,8 @@ import componentToImage from "../../utils/componentToImage";
 import * as MapIcons from "../../components/MapIcons";
 
 const MIN_SIMPLIFY_ZOOM = 6;
-const SELECTED_COLOR = [0x00, 0x91, 0xff];
-const BASE_COLOR = [0x91, 0x00, 0x00];
+const SELECTED_COLOR = [0x00, 0x92, 0xff];
+const BASE_COLOR = [0x92, 0x00, 0x00];
 //const MAX_SIMPLIFY_ZOOM = 8;
 
 const iconCache = {};
@@ -418,7 +418,7 @@ export const CollectionLayer = Layer.extend({
           .valueOf()
       : undefined;
   },
-  _applyStyle: function(shape, field, entity, hover) {
+  _applyStyle: function(shape, field, entity, hover, grouped) {
     const hovered =
       hover !== undefined
         ? hover
@@ -436,10 +436,11 @@ export const CollectionLayer = Layer.extend({
       hovered
     )}, ${to_c(color[2], hovered)}, 0.65)`;
 
+    if (!grouped) if (hovered) shape.moveToTop();
     if (shape.nodeType === "Group") {
       let children = shape.getChildren();
       shape.getChildren().each((child, n) => {
-        this._applyStyle(child, field, entity, hovered);
+        this._applyStyle(child, field, entity, hovered, true);
       });
     } else if (shape.className === "Image") {
       const zoom = this._map.getZoom();
@@ -463,9 +464,6 @@ export const CollectionLayer = Layer.extend({
     } else {
       shape.stroke(stroke);
       shape.fill(fill);
-      if (hovered) {
-        shape.moveToTop();
-      }
     }
   },
   _cleanupShape: function(shape) {
