@@ -78,6 +78,7 @@ export function mapToCollection(action$) {
 
         //We separate the query's observable from the source because we assume it 'cold',
         //and we don't want to restart it on subscription
+        const collectionId = uuid();
         concat(
           adapter.pipe(
             map(d => {
@@ -93,7 +94,6 @@ export function mapToCollection(action$) {
           of(cancelQuery(action.id, `Completed Successfully`))
         ).subscribe(source);
 
-        const collectionId = uuid();
         const pausable = pauseQuery.pipe(
           switchMap(
             paused =>
