@@ -16,9 +16,15 @@ import componentToImage from "../../utils/componentToImage";
 import * as MapIcons from "../../components/MapIcons";
 
 const MIN_SIMPLIFY_ZOOM = 6;
+const SELECTED_COLOR = [0x00, 0x91, 0xff];
+const BASE_COLOR = [0x91, 0x00, 0x00];
 //const MAX_SIMPLIFY_ZOOM = 8;
 
 const iconCache = {};
+function to_c(c, hovered) {
+  c = hovered ? c * 1.75 : c;
+  return c > 255 ? 255 : c;
+}
 function zoomToSize(zoom) {
   if (zoom < 5) return 4;
   switch (zoom) {
@@ -420,46 +426,45 @@ export const CollectionLayer = Layer.extend({
     const selected =
       this.collection.selected && this.collection.selected[entity.id];
 
+    const color = selected ? SELECTED_COLOR : BASE_COLOR;
+    const stroke = `rgb(${to_c(color[0], hovered)}, ${to_c(
+      color[1],
+      hovered
+    )}, ${to_c(color[2], hovered)})`;
+    const fill = `rgba(${to_c(color[0], hovered)}, ${to_c(
+      color[1],
+      hovered
+    )}, ${to_c(color[2], hovered)}, 0.65)`;
+
     if (shape.nodeType === "Group") {
-      if (hovered) shape.moveToTop();
-      for (let child of shape.getChildren()) {
+      let children = shape.getChildren();
+      shape.getChildren().each((child, n) => {
         this._applyStyle(child, field, entity, hovered);
-      }
+      });
     } else if (shape.className === "Image") {
       const zoom = this._map.getZoom();
       const iconSize = zoomToSize(zoom);
       let iconName = "Plane";
-      let color = hovered ? "yellow" : selected ? "blue" : "red";
-      let imageKey = `${iconName}_${iconSize}_${color}`;
+      let imageKey = `${iconName}_${iconSize}_${stroke}`;
       let image = iconCache[imageKey];
       if (image) {
-        if (image !== shape.image()) {
-          shape.image(image);
-        }
+        //Image is in the cache, and is different from the current shape image
+        shape.image(image);
       } else {
         let Component = MapIcons[iconName];
-        iconCache[imageKey] = new Image();
-        componentToImage(<Component color={color} size={iconSize} />).then(
+        iconCache[imageKey] = new Image(); //Placeholder so we don't request a bunch of images at once
+        componentToImage(<Component color={stroke} size={iconSize} />).then(
           image => {
             iconCache[imageKey] = image;
-            image.onload = () => {
-              iconCache[imageKey] = image;
-              this.throttleRedraw(true);
-            };
+            this.redraw(true);
           }
         );
       }
     } else {
+      shape.stroke(stroke);
+      shape.fill(fill);
       if (hovered) {
-        shape.stroke("rgba(255, 255, 0, 1)");
-        shape.fill("rgba(255, 255, 0, 0.65)");
         shape.moveToTop();
-      } else if (selected) {
-        shape.stroke("rgba(0, 0, 255, 1)");
-        shape.fill("rgba(0, 0, 255, 0.65)");
-      } else {
-        shape.stroke("rgba(255, 0, 0, 1)");
-        shape.fill("rgba(255, 0, 0, 0.65)");
       }
     }
   },
@@ -659,8 +664,8 @@ export const CollectionLayer = Layer.extend({
           if (points.length > 0) {
             let line, head;
             if (!shape) {
-              shape = new Group({ x: 0, y: 0 });
-              let line = new Line({
+              shape = new Group();
+              line = new Line({
                 shadowForStrokeEnabled: false,
                 fillEnabled: false,
                 strokeHitEnabled: false,
@@ -669,7 +674,7 @@ export const CollectionLayer = Layer.extend({
                 strokeWidth: 2,
                 id: "line"
               });
-              let head = new KImage({
+              head = new KImage({
                 shadowForStrokeEnabled: false,
                 fillEnabled: true,
                 strokeHitEnabled: false,
@@ -679,12 +684,12 @@ export const CollectionLayer = Layer.extend({
                 height: 28,
                 id: "head"
               });
-              shape.add(line);
               shape.add(head);
+              shape.add(line);
               this.layer.add(shape);
             }
-            line = shape.findOne("#line");
-            head = shape.findOne("#head");
+            line = line || shape.findOne("#line");
+            head = head || shape.findOne("#head");
             shape.geom = geom;
             line.points(points);
             line.tension(0.5);
@@ -822,7 +827,6 @@ export const CollectionLayer = Layer.extend({
                     if (!wasHovered && e && e[field]) {
                       didChange = true;
                       const geoms = e[field];
-                      entity.updateTime = now;
                       for (let shape of geoms) {
                         if (shape) this._applyStyle(shape, field, entity, true);
                       }
@@ -835,7 +839,6 @@ export const CollectionLayer = Layer.extend({
               if (!gHit && wasHovered) {
                 didChange = true;
                 const geoms = this.entities.get(id)[field];
-                entity.updateTime = now;
                 for (let shape of geoms) {
                   if (shape) this._applyStyle(shape, field, entity, false);
                 }

@@ -16,7 +16,6 @@ export const ageOffEpic = (action$, state$) => {
       let actions = _.reduce(
         collections,
         (actions, collection, id) => {
-          console.log("Ageoff", collection.ageoff);
           if (!collection.ageoff || !collection.ageoff.value > 0)
             return actions;
           const ageoff = moment().subtract(
@@ -32,11 +31,6 @@ export const ageOffEpic = (action$, state$) => {
               if (t < ageoff) ids.push(id);
               else {
                 ageoffHistory(entity, ageoff);
-                /*
-                _.each(entity.properties, p => {
-                  ageoffProperty(p, ageoff);
-                });
-                */
                 _.each(entity.geometries, g => {
                   ageoffGeometry(g, ageoff);
                 });

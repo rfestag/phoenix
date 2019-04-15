@@ -10,7 +10,9 @@ export default function componentToImage(component) {
     ReactDOM.render(component, div, () => {
       canvg(canvas, div.innerHTML);
       image.src = canvas.toDataURL();
-      resolve(image);
+      image.onload = () => {
+        resolve(image);
+      };
     });
   });
 }

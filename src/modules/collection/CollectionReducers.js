@@ -23,6 +23,7 @@ function updateCollection(collection, action) {
     geometries: { ...collection.fields.geometries }
   };
   const now = Date.now();
+  //console.time("Update")
   let data = _.reduce(
     action.data,
     (data, updates, id) => {
@@ -42,6 +43,8 @@ function updateCollection(collection, action) {
     //collection.data
     { ...collection.data }
   );
+  //console.timeEnd("Update")
+
   return { ...collection, fields, data };
 }
 export default function(state = initialState, action) {
@@ -129,11 +132,11 @@ export default function(state = initialState, action) {
       if (collection) {
         if (action.clear) {
           for (let id in collection.selected) {
-            collection.data[id].updateTime = now;
+            if (collection.data[id]) collection.data[id].updateTime = now;
           }
         }
         collection.selected = action.ids.reduce((selected, id) => {
-          collection.data[id].updateTime = now;
+          if (collection.data[id]) collection.data[id].updateTime = now;
           selected[id] = true;
           return selected;
         }, action.clear ? {} : { ...collection.selected });
@@ -150,12 +153,12 @@ export default function(state = initialState, action) {
       if (collection) {
         if (action.clear) {
           for (let id in collection.selected) {
-            collection.data[id].updateTime = now;
+            if (collection.data[id]) collection.data[id].updateTime = now;
           }
         }
         collection.selected = action.ids.reduce((selected, id) => {
           selected[id] = !collection.selected[id];
-          collection.data[id].updateTime = now;
+          if (collection.data[id]) collection.data[id].updateTime = now;
           return selected;
         }, action.clear ? {} : { ...collection.selected });
         return {
@@ -170,7 +173,7 @@ export default function(state = initialState, action) {
         state.collections,
         (collections, collection, id) => {
           for (let id in collection.selected) {
-            collection.data[id].updateTime = now;
+            if (collection.data[id]) collection.data[id].updateTime = now;
           }
           collection = { ...collection, selected: {} };
           collections[id] = collection;
