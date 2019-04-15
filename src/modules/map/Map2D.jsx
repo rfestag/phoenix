@@ -61,7 +61,11 @@ export class Map2D extends Component {
         center: [center.lat, center.lng],
         bounds: map.getBounds()
       });
-      this.setState({ zoom: map.getZoom() - 4, bounds: map.getBounds() });
+      this.setState({
+        zoom: map.getZoom() - 4,
+        bounds: map.getBounds(),
+        center
+      });
     } catch (e) {
       //Do nothing. This can happen in polar projections when you pan too far out
     }
