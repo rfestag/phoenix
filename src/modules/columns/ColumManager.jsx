@@ -67,7 +67,12 @@ export class ColumnManager extends Component {
     this.setState({ columns });
   };
   toggleGeometry = geom => {
-    console.log("Toggle", geom);
+    const { geometries } = this.state;
+    const { field } = geom;
+    geom = { ...geom };
+    geom.hide = !geom.hide;
+    geometries[field] = geom;
+    this.setState({ geometries });
   };
   resetColumns = () => {
     const columns = this.props.columns || {};
@@ -110,16 +115,13 @@ export class ColumnManager extends Component {
                   <div key={name}>
                     <Checkbox
                       selected={!geometries.hide}
-                      onClick={() => this.toggleColumn(geometries)}
+                      onClick={() => this.toggleGeometry(geometries)}
                     />{" "}
                     {geometries.headerName}
                   </div>
                 );
               })
               .value()}
-            {/*_.map(this.state.geometries, (geom, name) => {
-              return <div key={name}><Checkbox selected={!geom.hide} onClick={() => this.toggleGeometry(geom)}/> {name}</div>;
-            })*/}
           </PerfectScrollbar>
         </div>
         <ButtonGroup style={{ marginTop: "auto", display: "flex" }}>

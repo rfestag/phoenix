@@ -16,7 +16,8 @@ import componentToImage from "../../utils/componentToImage";
 import * as MapIcons from "../../components/MapIcons";
 
 const MIN_SIMPLIFY_ZOOM = 6;
-const SELECTED_COLOR = [0x00, 0x92, 0xff];
+//const SELECTED_COLOR = [0x00, 0x92, 0xff];
+const SELECTED_COLOR = [0xff, 0xa0, 0x00];
 const BASE_COLOR = [0x92, 0x00, 0x00];
 //const MAX_SIMPLIFY_ZOOM = 8;
 

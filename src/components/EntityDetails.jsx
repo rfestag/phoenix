@@ -5,6 +5,7 @@ import { ListGroup, ListGroupItem, Table } from "reactstrap";
 import { RevealContainer, RevealButtonGroup, RevealButton } from "./Reveal";
 import EntityToolbar from "./EntityToolbar";
 import PerfectScrollbar from "react-perfect-scrollbar";
+import { UNIT_TYPES } from "../modules/sources/Constants";
 
 const EntityHeaderWrapper = styled.div`
   background-color: ${props => props.theme.secondary};
@@ -13,14 +14,25 @@ const EntityHeaderWrapper = styled.div`
 
 export default class EntityDetails extends Component {
   static propTypes = {
-    entity: PropTypes.object
+    entity: PropTypes.object,
+    propertyDefs: PropTypes.array
   };
 
+  suffix = field => {
+    let { propertyDefs } = this.props;
+    let def = propertyDefs[field];
+    let unitType = UNIT_TYPES[def._unitType];
+    if (unitType) {
+      let unit = unitType[def._unit];
+      if (unit) return `(${unit.abbrv})`;
+    }
+    return undefined;
+  };
   render() {
-    let { entity } = this.props;
+    let { suffix, props } = this;
+    let { entity, propertyDefs } = props;
     let { label, properties } = entity;
     let fields = Object.keys(properties).sort();
-    console.log(entity);
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <ListGroup>
@@ -82,8 +94,10 @@ export default class EntityDetails extends Component {
               <tbody>
                 {fields.map(f => (
                   <tr key={f}>
-                    <td>{f}</td>
-                    <td>{properties[f].value}</td>
+                    <td title={propertyDefs[f]._description}>{f}</td>
+                    <td>
+                      {properties[f].value} <em>{suffix(f)}</em>
+                    </td>
                   </tr>
                 ))}
               </tbody>

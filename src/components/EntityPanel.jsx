@@ -8,14 +8,19 @@ import _ from "lodash";
 
 const getFocusedEntityId = (state, props) => state.collection.focused;
 const getCollections = (state, props) => state.collection.collections;
-const getEntity = createSelector(
+const getFocusedCollection = createSelector(
   [getFocusedEntityId, getCollections],
-  (id, collections) => {
-    const collectionWithEntity = _.find(collections, c => {
-      return c.data[id];
-    });
+  (id, collections) => _.find(collections, c => c.data[id])
+);
+const getCollectionFields = createSelector(
+  [getFocusedCollection],
+  collection => (collection ? collection.fields.properties : [])
+);
+const getEntity = createSelector(
+  [getFocusedEntityId, getFocusedCollection],
+  (id, collectionWithEntity) => {
     let entity = collectionWithEntity
-      ? collectionWithEntity.data[id]
+      ? { ...collectionWithEntity.data[id] } //Hack to force update
       : undefined;
     return entity;
   }
@@ -23,18 +28,24 @@ const getEntity = createSelector(
 
 export class EntityPanel extends Component {
   static propTypes = {
-    entity: PropTypes.object
+    entity: PropTypes.object,
+    propertyDefs: PropTypes.array
   };
 
   render() {
-    let { entity } = this.props;
-    return entity ? <EntityDetails entity={entity} /> : <EntityList />;
+    let { entity, propertyDefs } = this.props;
+    return entity ? (
+      <EntityDetails entity={entity} propertyDefs={propertyDefs} />
+    ) : (
+      <EntityList />
+    );
   }
 }
 
 function mapStateToProps(state, props) {
   return {
-    entity: getEntity(state, props)
+    entity: getEntity(state, props),
+    propertyDefs: getCollectionFields(state, props)
   };
 }
 export default connect(mapStateToProps, null)(EntityPanel);

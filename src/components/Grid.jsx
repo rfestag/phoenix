@@ -174,6 +174,15 @@ export class Grid extends Component {
       let count = 0;
       this.batchUpdatingSelect = true;
 
+      let focused = this.api.getFocusedCell();
+      let focusedId = undefined;
+      let focusedField = undefined;
+      if (focused) {
+        let row = this.api.getDisplayedRowAtIndex(focused.rowIndex);
+        focusedField = focused.column.colDef.field;
+        focusedId = row.data.id;
+      }
+
       //Start by manually setting everything as selected.
       //While it may technically be more correct select after
       //the update (to ensure any new entities that somehow may
@@ -225,6 +234,13 @@ export class Grid extends Component {
       //We explicitly do the synchronous update vs. async. The async
       //logic adds unnecessary overhead, taking 50-100ms longer.
       this.api.updateRowData(transaction);
+
+      if (focusedId) {
+        let targetRow = this.api.getRowNode(focusedId);
+        if (targetRow) {
+          this.api.setFocusedCell(targetRow.rowIndex, focusedField);
+        }
+      }
     }
     this.lastRender = Date.now();
     return (
