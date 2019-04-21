@@ -558,9 +558,18 @@ export const CollectionLayer = Layer.extend({
         if (renderer) {
           let shape = geom[idx];
           let fieldDef = this.collection.fields.geometries[field];
+
           //TODO: Use maxTime to find correct "lastGeomIndex"
           let lastGeomIdx = geometryCollection.geometries.length - 1;
-          if (fieldDef.latestOnly && idx != lastGeomIdx) {
+          if (!fieldDef) {
+            console.log(
+              "No field def. Need to figure out how this happens",
+              field,
+              this.collection.fields.geometries,
+              geom,
+              geometry
+            );
+          } else if (fieldDef.latestOnly && idx != lastGeomIdx) {
             if (shape) shape.hide();
           } else {
             geom[idx] = this[renderer](
