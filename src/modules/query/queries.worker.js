@@ -67,7 +67,7 @@ export function mapToCollection(action$) {
       mergeMap(action => {
         const sourceAdapter = _.find(sources, s => s.name === action.source);
         console.log("Source adapter", sourceAdapter, action.source, sources);
-        const adapter = sourceAdapter.query(action.query);
+        const adapter = sourceAdapter.query(action.query, action);
         const dictionary = sourceAdapter.dictionary(action.query);
         const id = action.id;
         const name = action.name || id;
