@@ -24,6 +24,24 @@ function updateCollection(collection, action) {
   };
   const now = Date.now();
   //console.time("Update")
+  let data = { ...collection.data };
+  let keys = Object.keys(action.data);
+  for (let i = 0; i < keys.length; i++) {
+    let id = keys[i];
+    let updates = action.data[id];
+    let isNew = data[id] === undefined;
+    const [updatedEntity, updatedFields] = updateEntity(
+      data[id],
+      updates,
+      fields,
+      collection.ageoff
+    );
+    updatedEntity.updateTime = now;
+    if (isNew) updatedEntity.createTime = now;
+    data[id] = updatedEntity;
+    fields = updatedFields;
+  }
+  /*
   let data = _.reduce(
     action.data,
     (data, updates, id) => {
@@ -43,6 +61,7 @@ function updateCollection(collection, action) {
     //collection.data
     { ...collection.data }
   );
+  */
   //console.timeEnd("Update")
 
   return { ...collection, fields, data };

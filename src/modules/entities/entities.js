@@ -51,58 +51,53 @@ export const ageoffHistory = (entity, time) => {
   return entity;
 };
 export const updateEntity = (e, updates, fields) => {
-  const entity = updates.reduce((entity, update) => {
-    if (!entity.id) entity.id = update.id;
-    if (!entity.label) entity.label = update.label;
-    if (!entity.provider) entity.provider = update.provider;
+  let entity = createEntity(e);
+  for (let i = 0; i < updates.length; i++) {
+    let u = updates[i];
+    //}
+    //const entity = updates.reduce((entity, update) => {
+    if (!entity.id) entity.id = u.id;
+    if (!entity.label) entity.label = u.label;
+    if (!entity.provider) entity.provider = u.provider;
 
-    if (update.properties) {
-      entity.properties = _.reduce(
-        update.properties,
-        (properties, update, field) => {
-          const { value, time } = update;
-          if (properties[field]) {
-            if (properties[field].time < time) {
-              properties[field] = update;
-            }
-          } else {
-            properties[field] = update;
+    if (u.properties) {
+      let properties = entity.properties || {};
+      let updatedProperties = Object.keys(u.properties);
+      for (let p = 0; p < updatedProperties.length; p++) {
+        let field = updatedProperties[p];
+        let prop = u.properties[field];
+        const { value, time } = prop;
+        if (properties[field]) {
+          if (properties[field].time < time) {
+            properties[field] = prop;
           }
-          updateWhen(entity, time);
-          if (!fields.properties[field]) {
-            let idx = Object.keys(fields.properties).length;
-            fields.properties[field] = createPropertyColumn(field, value);
-            fields.properties[field].position = idx;
-          }
-          return properties;
-        },
-        entity.properties || {}
-      );
-
-      //Mutable version
-      /*
-      let updatedProperties = _.reduce(
-        update.properties,
-        (updatedProperties, update, field) => {
-          const { value, time } = update;
-          const prop = updatedProperties[field]
-            ? updatedProperties[field]
-            : createProperty(entity.properties[field]);
-          updatedProperties[field] = updateProperty(prop, value, time);
-          updateWhen(entity, time);
-          if (!fields.properties[field]) {
-            let idx = Object.keys(fields.properties).length;
-            fields.properties[field] = createPropertyColumn(field, value);
-            fields.properties[field].position = idx;
-          }
-          return updatedProperties;
-        },
-        entity.properties
-      );
-      */
+        } else {
+          properties[field] = prop;
+        }
+        updateWhen(entity, time);
+        if (!fields.properties[field]) {
+          let idx = Object.keys(fields.properties).length;
+          fields.properties[field] = createPropertyColumn(field, value);
+          fields.properties[field].position = idx;
+        }
+      }
+      entity.properties = properties;
     }
-    if (update.geometries) {
-      //Mutable version
+    if (u.geometries) {
+      let geometries = entity.geometries || {};
+      let updatedGeometries = Object.keys(u.geometries);
+      for (let g = 0; g < updatedGeometries.length; g++) {
+        let field = updatedGeometries[g];
+        let update = u.geometries[field];
+        const prop = geometries[field] ? geometries[field] : createGeometry();
+        updateWhen(entity, update.when.end || update.when.start);
+        geometries[field] = updateGeometry(prop, update);
+        geometries[field].eid = entity.id;
+        if (!fields.geometries[field])
+          fields.geometries[field] = createGeometryColumn(field, update);
+      }
+      entity.geometries = geometries;
+      /*
       _.reduce(
         update.geometries,
         (updatedGeometries, update, field) => {
@@ -118,10 +113,12 @@ export const updateEntity = (e, updates, fields) => {
         },
         entity.geometries
       );
+      */
     }
-    entity.history.push({ update, time: entity.when.end });
+    entity.history.push({ update: u, time: entity.when.end });
 
-    return entity;
-  }, createEntity(e));
+    //  return entity;
+    //}, createEntity(e));
+  }
   return [entity, fields];
 };

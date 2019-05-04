@@ -6,13 +6,13 @@ import Select from "../../components/Select";
 import Duration from "../../components/Duration";
 
 var RANDOM_WORDS = [
-  "abstrusity",
-  "advertisable",
+  "abstrusityAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "advertisableAAAAAAAAAAAAAAAAAAAAAAAAAA",
   "bellwood",
   "benzole",
   "boreum",
   "brenda",
-  "cassiopeian",
+  "cassiopeianAAAAAAAAAAAAAAAAAAAAAAAAAA",
   "chansonnier",
   "cleric",
   "conclusional",
@@ -23,7 +23,7 @@ var RANDOM_WORDS = [
   "disputative",
   "djilas",
   "ebracteate",
-  "ephemerally",
+  "ephemerallyAAAAAAAAAAAAAAAAAAAAAAAA",
   "epidemical",
   "evasive",
   "eyeglasses",
@@ -216,7 +216,7 @@ class TestForm extends React.Component {
         </FormGroup>
         <FormGroup>
           <Label>Example Tree Dropdown</Label>
-          <FilterableDropdownTree data={tree} />
+          <FilterableDropdownTree data={tree} width={300} />
         </FormGroup>
       </div>
     );

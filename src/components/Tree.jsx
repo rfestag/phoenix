@@ -13,7 +13,11 @@ import _ from "lodash";
 var ROW_HEIGHT = 24;
 
 const ExpandIndicator = ({ expanded, expandable }) => {
-  return expanded ? <ExpandedIcon /> : expandable ? <CollapsedIcon /> : null;
+  return expanded ? (
+    <ExpandedIcon style={{ display: "inline-block" }} />
+  ) : expandable ? (
+    <CollapsedIcon style={{ display: "inline-block" }} />
+  ) : null;
 };
 ExpandIndicator.propTypes = {
   expanded: PropTypes.bool.isRequired,
@@ -209,6 +213,9 @@ class Tree extends React.Component {
           key="label"
           role="button"
           style={{
+            display: "flex",
+            alignItems: "center",
+            whiteSpace: "nowrap",
             paddingLeft: hasChildren ? 0 : 16,
             cursor: hasChildren ? "pointer" : "auto"
           }}
@@ -226,7 +233,12 @@ class Tree extends React.Component {
               onClick={handleSelectChange}
             />
           }
-          {itemText}
+          <span
+            title={itemText}
+            style={{ paddingLeft: 4, overflow: "hidden", flex: 1 }}
+          >
+            {itemText}
+          </span>
         </div>
       );
     }
