@@ -77,8 +77,7 @@ const FOCUSABLE_ELEMENTS =
 class Tree extends React.Component {
   constructor(props) {
     super(props);
-    console.log("Created new tree");
-    this.state = { data: props.data };
+    //this.state = { data: props.data };
     this.refList = React.createRef();
     this.element = React.createRef();
   }
@@ -182,7 +181,8 @@ class Tree extends React.Component {
       event.stopPropagation();
       setSubtreeSelection(item, !item.selected);
       setAncestorsIndeterminate(ancestors);
-      if (this.props.onSelectChange) this.props.onSelectChange(item, ancestors);
+      if (this.props.onSelectChange)
+        this.props.onSelectChange(this.props.data, item, ancestors);
       this.refList.current.recomputeRowHeights();
       this.refList.current.forceUpdate();
     };
@@ -255,7 +255,7 @@ class Tree extends React.Component {
   };
 
   rowRenderer = ({ key, index, style }) => {
-    var renderedCell = this.renderItem(this.state.data[index], [], index);
+    var renderedCell = this.renderItem(this.props.data[index], [], index);
 
     return (
       <div
@@ -290,7 +290,7 @@ class Tree extends React.Component {
 
   rowHeight = ({ index }) => {
     return (
-      this.getExpandedItemCount(this.state.data[index]) *
+      this.getExpandedItemCount(this.props.data[index]) *
       (this.props.rowHeight || ROW_HEIGHT)
     );
   };
@@ -323,7 +323,7 @@ class Tree extends React.Component {
               ref={this.refList}
               rowHeight={this.rowHeight}
               rowRenderer={this.rowRenderer}
-              rowCount={this.state.data.length}
+              rowCount={this.props.data.length}
               width={width}
             />
           )}

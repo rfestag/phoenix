@@ -133,10 +133,22 @@ const DEFAULT_PROPS = {
   tree: RANDOM_DATA,
   count: 100,
   iterations: 30,
+  words: [],
   updateInterval: { value: 1, unit: "seconds" },
   shapeTypes: ALLOWED_SHAPES
 };
 
+const getSelectedWords = (words, rootPath) => {
+  return words.reduce((words, w) => {
+    let path = rootPath ? `${rootPath}/${w.name}` : w.name;
+    if (w.selected) {
+      words.push({ ...w, path });
+    } else if (w.indeterminate && w.children) {
+      words = words.concat(getSelectedWords(w.children, path));
+    }
+    return words;
+  }, []);
+};
 class TestForm extends React.Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
@@ -160,6 +172,10 @@ class TestForm extends React.Component {
     const shapeTypes = types.map(t => t.value);
     this.props.onChange({ ...this.props.data, shapeTypes });
   };
+  setTreeData = (data, item, ancestors) => {
+    const words = getSelectedWords(data);
+    this.props.onChange({ ...this.props.data, words });
+  };
   render() {
     let { data } = this.props;
     //We do some gymnastics here because the default object is empty.
@@ -167,8 +183,14 @@ class TestForm extends React.Component {
     //We don't ever want any expected values to be undefined, because the Input
     //elements will be created as Uncontrolled instead of Controlled.
     data = { ...DEFAULT_PROPS, ...data };
-    let { tree, count, iterations, updateInterval, shapeTypes } = data;
-    let { setCount, setIterations, setShapeTypes, setInterval } = this;
+    let { tree, words, count, iterations, updateInterval, shapeTypes } = data;
+    let {
+      setCount,
+      setIterations,
+      setShapeTypes,
+      setInterval,
+      setTreeData
+    } = this;
     let shapeTypeValues = shapeTypes
       ? shapeTypes.map(t => ({ label: t, value: t }))
       : [];
@@ -216,7 +238,12 @@ class TestForm extends React.Component {
         </FormGroup>
         <FormGroup>
           <Label>Example Tree Dropdown</Label>
-          <FilterableDropdownTree data={tree} width={300} />
+          <FilterableDropdownTree
+            data={tree}
+            width={300}
+            onChange={setTreeData}
+          />
+          <ul>{words.map(w => <li key={w.path}>{w.path}</li>)}</ul>
         </FormGroup>
       </div>
     );
