@@ -192,6 +192,12 @@ let OVERLAYS = [
     }
   }
 ];
+const USER_LAYERS = [
+  {
+    name: "Default",
+    features: []
+  }
+];
 
 const DEFAULT_STATE = {
   baseLayers: BASE_LAYERS,
@@ -209,6 +215,11 @@ function preferencesToState(pref) {
     l.active = (pref.overlays || []).includes(l.name);
     return l;
   });
+  map.userLayers = USER_LAYERS.map(layer => {
+    let l = { ...layer };
+    l.active = true; //Only the default layer exists initially, so we'll let it show
+    return l;
+  });
   map.center = pref.center || map.crs.settings.center;
   map.zoom = pref.zoom || 3;
   return map;
@@ -218,6 +229,8 @@ function stateToPreferences(map) {
   pref.crs = undefined;
   pref.baseLayers = undefined;
   pref.projections = undefined;
+  pref.userLayers = undefined;
+  pref.editFeature = undefined;
   pref.layer = pref.layer.name;
   pref.overlays = pref.overlays.filter(l => l.active).map(l => l.name);
   return pref;

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   MdChevronRight,
   MdExpandMore,
@@ -7,13 +8,15 @@ import {
   MdList,
   MdPictureInPictureAlt,
   MdAdd,
+  MdEdit,
   MdTimeline,
   MdPlaylistAdd,
   MdOpenInNew,
   MdDelete,
   MdClose,
   MdArrowUpward,
-  MdArrowDownward
+  MdArrowDownward,
+  MdTabUnselected
 } from "react-icons/md";
 import {
   FaCheckSquare,
@@ -41,11 +44,54 @@ import {
   FaTh
 } from "react-icons/fa";
 import { FaRegSquare, FaRegStar } from "react-icons/fa";
+import spritesheet from "../sprite.svg";
+
+const Polygon = () => (
+  <svg
+    className=""
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 16 16"
+    height="1em"
+    width="1em"
+  >
+    <use href={`${spritesheet}#polygon`} />
+  </svg>
+);
+const Polyline = () => (
+  <svg
+    className=""
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 16 16"
+    height="1em"
+    width="1em"
+  >
+    <use href={`${spritesheet}#polyline`} />
+  </svg>
+);
+const Rectangle = () => (
+  <svg
+    className=""
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 16 16"
+    height="1em"
+    width="1em"
+  >
+    <use href={`${spritesheet}#rectangle`} />
+  </svg>
+);
 
 export const AddGroupIcon = MdPlaylistAdd;
 export const AddRuleIcon = MdAdd;
+export const AddIcon = MdAdd;
 export const SortAscending = MdArrowUpward;
 export const SortDescending = MdArrowDownward;
+export const SelectIcon = MdTabUnselected;
 export const ChevronLeftIcon = FaChevronLeft;
 export const ChevronRightIcon = FaChevronRight;
 export const ColumnsIcon = FaColumns;
@@ -53,6 +99,7 @@ export const CollapsedIcon = MdChevronRight;
 export const CenterIcon = MdFilterCenterFocus;
 export const DeleteIcon = MdDelete;
 export const ExpandedIcon = MdExpandMore;
+export const EditIcon = MdEdit;
 export const TimeIcon = MdHourglassEmpty;
 export const LayersIcon = MdLayers;
 export const EntityPanelIcon = MdList;
@@ -65,8 +112,9 @@ export const UncheckedIcon = FaRegSquare;
 export const IndeterminateCheckIcon = FaMinusSquare;
 export const FilterIcon = FaFilter;
 export const LabelToolIcon = FaFont;
-export const PolygonToolIcon = FaDrawPolygon;
-export const BoxToolIcon = FaSquare;
+export const PolylineToolIcon = Polyline;
+export const PolygonToolIcon = Polygon;
+export const BoxToolIcon = Rectangle;
 export const CircleToolIcon = FaCircle;
 export const GroupToolIcon = FaObjectGroup;
 export const UngroupToolIcon = FaObjectUngroup;

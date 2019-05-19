@@ -3,7 +3,13 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { setBaselayer, showOverlay, hideOverlay } from "./MapActions";
+import {
+  setBaselayer,
+  showOverlay,
+  hideOverlay,
+  showUserLayer,
+  hideUserLayer
+} from "./MapActions";
 import { AutoSizer, List } from "react-virtualized";
 import { Collapse, ListGroup, ListGroupItem } from "reactstrap";
 import {
@@ -156,6 +162,11 @@ export class LayerManager extends Component {
     return (
       <SwitchableCollapse defaultPane="Base Layers">
         <LayerList
+          name="User Layers"
+          layers={this.props.userLayers}
+          onLayerClick={this.props.toggleUserLayer}
+        />
+        <LayerList
           name="Overlays"
           layers={this.props.overlays}
           onLayerClick={this.props.toggleOverlay}
@@ -173,9 +184,11 @@ export class LayerManager extends Component {
 LayerManager.propTypes = {
   baseLayers: PropTypes.array,
   overlays: PropTypes.array,
+  userLayers: PropTypes.array,
   layer: PropTypes.object,
   setBaselayer: PropTypes.func,
   toggleOverlay: PropTypes.func,
+  toggleUserLayer: PropTypes.func,
   onLayerClick: PropTypes.func
 };
 
@@ -183,6 +196,7 @@ function mapStateToProps(state) {
   return {
     baseLayers: state.map.baseLayers,
     overlays: state.map.overlays,
+    userLayers: state.map.userLayers,
     layer: state.map.layer
   };
 }
@@ -190,7 +204,8 @@ const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       setBaselayer,
-      toggleOverlay: l => (l.active ? hideOverlay(l) : showOverlay(l))
+      toggleOverlay: l => (l.active ? hideOverlay(l) : showOverlay(l)),
+      toggleUserLayer: l => (l.active ? hideUserLayer(l) : showUserLayer(l))
     },
     dispatch
   );

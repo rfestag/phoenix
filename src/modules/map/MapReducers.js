@@ -12,6 +12,14 @@ import {
   HIDE_OVERLAY,
   ADD_OVERLAY,
   REMOVE_OVERLAY,
+  SHOW_USER_LAYER,
+  HIDE_USER_LAYER,
+  ADD_USER_LAYER,
+  UPDATE_USER_LAYER,
+  REMOVE_USER_LAYER,
+  SET_EDITABLE_FEATURE,
+  UNSET_EDITABLE_FEATURE,
+  UPDATE_FEATURE,
   SET_PANNABLE,
   SET_TIMELINE_VISIBILITY,
   TOGGLE_TIMELINE_VISIBILITY
@@ -19,10 +27,12 @@ import {
 
 const initialState = {
   baseLayers: [],
-  center: null,
-  crs: null,
-  layer: null,
+  center: undefined,
+  crs: undefined,
+  layer: undefined,
+  editFeature: undefined,
   overlays: [],
+  userLayers: [],
   projections: [],
   pannable: true,
   timelineVisible: true,
@@ -38,7 +48,7 @@ function setActiveBaselayer(layers, layer) {
   layers[newIndex] = { ...layers[newIndex], active: true };
   return layers;
 }
-function setActiveOverlays(layers, layer, active) {
+function setActiveLayer(layers, layer, active) {
   let idx = layers.findIndex(l => l === layer);
   if (idx < 0) return layers;
   layer = { ...layer, active };
@@ -50,6 +60,10 @@ export default function(state = initialState, action) {
   let idx = -1;
   let baseLayers;
   let overlays;
+  let userLayers;
+  let oldLayers;
+  let feature;
+  let layer;
   switch (action.type) {
     case SET_MAP_STATE:
       return action.state;
@@ -96,8 +110,10 @@ export default function(state = initialState, action) {
       return { ...state, baseLayers: [...state.baseLayers, action.layer] };
     case ADD_OVERLAY:
       return { ...state, overlays: [...state.overlays, action.layer] };
+    case ADD_USER_LAYER:
+      return { ...state, userLayers: [...state.userLayers, action.layer] };
     case REMOVE_BASELAYER:
-      const oldLayers = state.baseLayers;
+      oldLayers = state.baseLayers;
       idx = oldLayers.indexOf(action.layer);
       if (idx >= 0)
         return {
@@ -118,11 +134,40 @@ export default function(state = initialState, action) {
         };
       return state;
     case SHOW_OVERLAY:
-      overlays = [...setActiveOverlays(state.overlays, action.layer, true)];
+      overlays = [...setActiveLayer(state.overlays, action.layer, true)];
       return { ...state, overlays };
     case HIDE_OVERLAY:
-      overlays = [...setActiveOverlays(state.overlays, action.layer, false)];
+      overlays = [...setActiveLayer(state.overlays, action.layer, false)];
       return { ...state, overlays };
+    case REMOVE_USER_LAYER:
+      oldLayers = state.userLayer;
+      idx = oldLayers.indexOf(action.layer);
+      if (idx >= 0)
+        return {
+          ...state,
+          userLayers: [...oldLayers.slice(0, idx), ...oldLayers.slice(idx + 1)]
+        };
+      return state;
+    case SHOW_USER_LAYER:
+      userLayers = [...setActiveLayer(state.userLayers, action.layer, true)];
+      return { ...state, userLayers };
+    case HIDE_USER_LAYER:
+      userLayers = [...setActiveLayer(state.userLayers, action.layer, false)];
+      return { ...state, userLayers };
+    case UPDATE_USER_LAYER:
+      userLayers = [...state.userLayers];
+      idx = userLayers.findIndex(l => l.id === action.layer.id);
+      if (idx) {
+        userLayers[idx] = action.layer;
+        return { ...state, userLayers };
+      } else {
+        console.log("No matching user layer to update");
+        return state;
+      }
+    case SET_EDITABLE_FEATURE:
+      return { ...state, editFeature: action.layer };
+    case UNSET_EDITABLE_FEATURE:
+      return { ...state, editFeature: undefined };
     default:
       return state;
   }

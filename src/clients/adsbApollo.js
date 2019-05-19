@@ -2,8 +2,9 @@ import gql from "graphql-tag";
 import * as fetch from "cross-fetch";
 import { ApolloClient } from "apollo-client";
 import { HttpLink } from "apollo-link-http";
+import { onError } from "apollo-link-error";
 import { InMemoryCache } from "apollo-cache-inmemory";
-import { split } from "apollo-link";
+import { from, split } from "apollo-link";
 import { WebSocketLink } from "apollo-link-ws";
 import { getMainDefinition } from "apollo-utilities";
 import _ from "lodash";
@@ -19,7 +20,7 @@ const wsLink = new WebSocketLink({
   }
 });
 
-const link = split(
+const handler = split(
   ({ query }) => {
     const { kind, operation } = getMainDefinition(query);
     return kind === "OperationDefinition" && operation === "subscription";
@@ -27,6 +28,18 @@ const link = split(
   wsLink,
   httpLink
 );
+const error = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors)
+    graphQLErrors.map(({ message, locations, path }) =>
+      console.log(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      )
+    );
+
+  if (networkError) console.log(`[Network error]: ${networkError}`);
+});
+
+const link = from([error, handler]);
 
 export const client = new ApolloClient({
   link,

@@ -24,3 +24,6 @@ yarn-error.log*
 *.css 
 *.swp
 *.swo
+*.key
+*.crt
+*.csr
