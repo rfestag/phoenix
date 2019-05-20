@@ -68,7 +68,7 @@ export class MapToolbar extends React.Component {
     setActiveTool: PropTypes.func,
     clearEditShape: PropTypes.func,
     onLayerChange: PropTypes.func,
-    layer: Proptypes.object,
+    layer: PropTypes.object,
     activeTool: PropTypes.string,
     updateUserLayer: PropTypes.func,
     layers: PropTypes.array

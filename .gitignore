@@ -27,3 +27,4 @@ yarn-error.log*
 *.key
 *.crt
 *.csr
+*-secret.yaml
