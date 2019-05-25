@@ -36,6 +36,7 @@ import ViewControl from "./ViewControl";
 import EditFeatureToolbar from "./EditFeatureToolbar";
 import MiniMap from "./MiniMap";
 import DragBox from "./DragBox";
+import MeasureControl from "./MeasureControl";
 import ShapeEditPanel from "./ShapeEditPanel";
 import { EditControl } from "react-leaflet-draw";
 
@@ -427,6 +428,7 @@ export class Map2D extends Component {
               }}
               active={this.state.activeTool === "select"}
             />
+            <MeasureControl active={this.state.activeTool === "measure"} />
             {this.props.timelineVisible && <TimeControl />}
           </Map>
         </div>
