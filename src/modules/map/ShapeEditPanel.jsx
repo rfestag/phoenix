@@ -141,7 +141,7 @@ const ShapePosition = ({ shape }) => {
 };
 class ShapeEditPanel extends React.Component {
   static propTypes = {
-    shape: PropTypesobject,
+    shape: PropTypes.object,
     onApply: PropTypes.func,
     onCancel: PropTypes.func
   };
