@@ -19,3 +19,6 @@
     border-left-color: $split-border;
     border-right-color: $split-border;
 }
+.reflex-layout > .reflex-splitter {
+  z-index: 1 !important;
+}

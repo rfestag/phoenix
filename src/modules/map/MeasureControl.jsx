@@ -47,7 +47,6 @@ L.Control.MeasureControl = L.Control.extend({
     L.DomEvent.off(map, "click", this._handleClick, this);
   },
   _reset: function() {
-    console.log("Resetting");
     const map = this._map;
     this._startLatLng = null;
     this._prevSegments.clearLayers();
@@ -64,7 +63,6 @@ L.Control.MeasureControl = L.Control.extend({
     return new L.GeoJSON(feature, { interactive: false });
   },
   _createWaypoint: function(e, permanent = false) {
-    console.log(this.markerStyle);
     var waypoint = new L.CircleMarker(e.latlng, {
       radius: this.markerRadius,
       ...this.markerStyle,
@@ -96,9 +94,7 @@ L.Control.MeasureControl = L.Control.extend({
     return waypoint;
   },
   _endSegment: function(e) {
-    console.log("WAYPOINT CLICK", e);
     this._prevSegments.eachLayer(l => {
-      console.log("Moving layer", l);
       this._prevSegments.removeLayer(l);
       this._paths.addLayer(l);
     });
@@ -109,7 +105,6 @@ L.Control.MeasureControl = L.Control.extend({
     this._reset();
   },
   _handleClick: function(e) {
-    console.log("Click", e, this._prevSegments);
     const map = this._map;
     if (!this._isActive) return;
 

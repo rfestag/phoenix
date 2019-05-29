@@ -101,38 +101,37 @@ export class MapToolbar extends React.Component {
   };
   addShapeToLayer = e => {};
   activateMeasure = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("measure", e));
   };
   activateSelect = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("select", e));
   };
   activateLocate = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("locate", e));
   };
   activateBox = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("rectangle", e));
   };
   activateCircle = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("circle", e));
   };
   activateLine = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("polyline", e));
   };
   activatePolygon = e => {
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("polygon", e));
   };
   activateLabel = e => {
+    console.log("STOPPING PROP");
+    L.DomEvent.stopPropagation(e);
     this.props.setActiveTool(this.toggleTool("label", e));
-  };
-  addFeature = (geometry, properties) => {
-    let layer = { ...this.props.layer };
-    layer.features = layer.features.map(f => {
-      if (f.properties.editing)
-        f.properties = { ...f.properties, editing: false };
-      return f;
-    });
-    layer.features.push({ type: "Feature", geometry, properties });
-    this.props.updateUserLayer(layer);
   };
   /*
   activateGroup = () => {

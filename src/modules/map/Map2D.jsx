@@ -1,8 +1,7 @@
-//import 'leaflet-editable';
-//import 'leaflet-path-drag';
 import "leaflet";
-import "leaflet-draw";
-import "leaflet-draw-drag";
+import "leaflet-path-drag";
+import "leaflet-editable";
+import "../../utils/leaflet-editable";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
@@ -14,31 +13,20 @@ import {
   toggleSelectedEntities
 } from "../collection/CollectionActions";
 import { emitTimingMetric } from "../metrics/MetricsActions";
-import {
-  Map,
-  GeoJSON,
-  Rectangle,
-  Polyline,
-  Polygon,
-  Circle,
-  FeatureGroup
-} from "react-leaflet";
-//import HeatmapLayer from "react-leaflet-heatmap-layer";
+import { Map, FeatureGroup } from "react-leaflet";
 import CollectionLayer from "./CollectionLayer.js";
 import MapToolbar from "./MapToolbar";
 import Selectbar from "./Selectbar";
 import TimeControl from "./TimeControl";
 import _ from "lodash";
-//import Freedraw, { ALL } from 'react-leaflet-freedraw';
 import L from "leaflet";
-//import EditControl from "./EditControl";
+import EditableControl from "./EditableControl";
 import ViewControl from "./ViewControl";
 import EditFeatureToolbar from "./EditFeatureToolbar";
 import MiniMap from "./MiniMap";
 import DragBox from "./DragBox";
 import MeasureControl from "./MeasureControl";
 import ShapeEditPanel from "./ShapeEditPanel";
-import { EditControl } from "react-leaflet-draw";
 
 import { LAYER_TYPE_MAP } from "./MapConstants";
 
@@ -46,23 +34,9 @@ const RECTANGLE = "rectangle";
 const CIRCLE = "circle";
 const POLYGON = "polygon";
 const POLYLINE = "polyline";
+const LABEL = "label";
 const MEASURE = "measure";
 const LOCATE = "locate";
-const SHAPES = [RECTANGLE, CIRCLE, POLYGON, POLYLINE];
-function featureToLayer(f) {
-  let layer;
-  switch (f.type) {
-    case RECTANGLE:
-      layer = <Rectangle {...f.properties} />;
-    case CIRCLE:
-      layer = <Circle {...f.properties} />;
-    case POLYGON:
-      layer = <Polygon {...f.properties} />;
-    case POLYLINE:
-      layer = <Polyline {...f.properties} />;
-  }
-  console.log("LAYER", layer);
-}
 export class Map2D extends Component {
   constructor(props) {
     super(props);
@@ -76,17 +50,6 @@ export class Map2D extends Component {
       zoomBoxActive: false,
       editFeature: undefined,
       editToolbarPosition: { x: 0, y: 0 },
-      polygons: [[[51.515, -0.09], [51.52, -0.1], [51.52, -0.12]]],
-      shapes: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]]
-          },
-          properties: {}
-        }
-      ],
       miniMapActive: false,
       center: props.center,
       zoom: props.zoom - 4
@@ -134,15 +97,14 @@ export class Map2D extends Component {
   setUserLayer = activeUserLayer => {
     this.setState({ activeUserLayer });
   };
+  setEditFeature = layer => {
+    console.log("SETTING EDIT FEAUTRE", layer);
+    this.setState({ editFeature: layer });
+  };
   setActiveTool = activeTool => {
-    let { editFeature } = this.state;
-    if (editFeature) {
-      console.log("Feature when changing tool", editFeature);
-      editFeature.disableEdit();
-      editFeature = undefined;
+    if (activeTool != this.state.activeTool) {
+      this.setState({ activeTool, editFeature: undefined });
     }
-    console.log("Setting active tool", activeTool);
-    this.setState({ activeTool, editFeature });
   };
   clearEditShape = () => {
     console.log("Clearing edit shape");
@@ -152,45 +114,14 @@ export class Map2D extends Component {
     console.log("TODO: Handle add", feature);
   };
   onClick = e => {
+    console.log("MAP CLICK");
     let map = this.map.current && this.map.current.leafletElement;
     if (map) {
-      let editFeature = this.state.editFeature;
-      if (SHAPES.includes(this.state.activeTool) && !editFeature) {
-        let pt = L.latLng(e.latlng);
-        console.log("Current editFeature", editFeature);
-        switch (this.state.activeTool) {
-          case RECTANGLE:
-            editFeature = map.editTools.startRectangle(pt);
-            editFeature.on("click", this.editToolbar);
-            break;
-          case CIRCLE:
-            editFeature = map.editTools.startCircle(pt);
-            editFeature.on("click", this.editToolbar);
-            break;
-          case POLYGON:
-            editFeature = map.editTools.startPolygon(pt);
-            editFeature.on("click", this.editToolbar);
-            break;
-          case POLYLINE:
-            editFeature = map.editTools.startPolyline(pt);
-            editFeature.on("click", this.editToolbar);
-            break;
-        }
-        console.log("Setting edit feature", editFeature);
-        this.setState({ editFeature });
-      } else {
-        for (let ref of this.collectionLayerRefs) {
-          if (ref && ref.leafletElement) {
-            ref.leafletElement._onClick(e);
-          }
+      for (let ref of this.collectionLayerRefs) {
+        if (ref && ref.leafletElement) {
+          ref.leafletElement._onClick(e);
         }
       }
-      /*
-      for (let i = 0; i < this.editLayerRefs.length; i++) {
-        let layer = this.editLayerRefs[i].leafletElement
-        console.log("TODO", layer)
-      }
-      */
     }
   };
   onContextmenu = L.DomEvent.preventDefault;
@@ -267,15 +198,6 @@ export class Map2D extends Component {
   toggleMiniMap = () => {
     this.setState({ miniMapActive: !this.state.miniMapActive });
   };
-  edit = () => {
-    let editing = !this.state.editing;
-    for (let i = 0; i < this.editLayerRefs.length; i++) {
-      let layer = this.editLayerRefs[i].leafletElement;
-      editing ? layer.enableEdit() : layer.disableEdit();
-      //editing ? layer.editing.enable() : layer.editing.disable();
-    }
-    this.setState({ editing });
-  };
   editToolbar = e => {
     L.DomEvent.stopPropagation(e);
     let focusedShape = e.target;
@@ -294,13 +216,27 @@ export class Map2D extends Component {
       editingShape: undefined
     });
   };
-  editFeature = e => {
-    L.DomEvent.stopPropagation(e);
-    let showEditToolbar = false;
-    let editingShape = this.state.focusedShape;
-    editingShape.enableEdit();
-    //editingShape.editing.enable();
-    this.setState({ showEditToolbar, editingShape });
+  cancelShape = e => {
+    if (this.state.editFeature) {
+      const map = this.map.current && this.map.current.leafletElement;
+      const { editFeature } = this.state;
+      if (editFeature) {
+        const { updated } = editFeature.properties;
+        //editFeature.disableEdit();
+        //If there is no updated property, this shape was new and should be deleted
+        if (!updated) {
+          editFeature.remove();
+        } else {
+          console.log("TODO: Revert shape");
+        }
+      }
+      this.setState({ activeTool: undefined, editFeature: undefined });
+    }
+  };
+  commitShape = e => {
+    if (this.state.editFeature) {
+      this.setState({ activeTool: undefined, editFeature: undefined });
+    }
   };
 
   render() {
@@ -316,7 +252,9 @@ export class Map2D extends Component {
         <div style={{ zIndex: 2, width: "100%", height: "100%" }}>
           <ShapeEditPanel
             open={Boolean(this.state.editFeature)}
-            close={this.clearEditShape}
+            shape={this.state.editFeature}
+            onApply={this.commitShape}
+            onCancel={this.cancelShape}
           />
           <MapToolbar
             map={this.map.current && this.map.current.leafletElement}
@@ -357,20 +295,16 @@ export class Map2D extends Component {
               editFeature={this.editFeature}
               deleteShape={this.deleteShape}
             />
-            {/*<HeatmapLayer
-            points={this.props.heatmapPoints}
-            longitudeExtractor={m => m.location[0]}
-            latitudeExtractor={m => m.location[1]}
-            intensityExtractor={m => m.value}
-          />*/}
+            <EditableControl
+              activeTool={this.state.activeTool}
+              activeShape={this.state.editFeature}
+              setActiveShape={this.setEditFeature}
+            />
             <BaseLayer {...this.props.layer.settings} />
             {_.map(this.props.overlays, overlay => {
               let Overlay = LAYER_TYPE_MAP[overlay.type];
               return overlay.active && <Overlay {...overlay.settings} />;
             })}
-            {/*_.map(this.state.polygons, (shape, i) =>(
-              <Polygon ref={ref => this.editLayerRefs[i] = ref } positions={shape} onClick={this.editToolbar}/>
-            ))*/}
             {_.map(this.state.userLayers, (layer, i) => (
               <FeatureGroup ref={ref => (this.editLayerRefs[i] = ref)} />
             ))}
@@ -401,18 +335,6 @@ export class Map2D extends Component {
             >
               <BaseLayer {...this.props.layer.settings} />
             </MiniMap>
-            {/*<FeatureGroup>
-              <EditControl
-                position='topright'
-                onEdited={this._onEditPath}
-                onCreated={this._onCreate}
-                onDeleted={this._onDeleted}
-                draw={{
-                  rectangle: false
-                }}
-              />
-              <Circle center={[51.51, -0.06]} radius={200} />
-            </FeatureGroup>*/}
             <DragBox
               onComplete={this.zoomToBounds}
               boxStyle={{ weight: 1, dashArray: "4", fillColor: "gray" }}
