@@ -1,10 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
-  UncontrolledButtonDropdown as Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
   Input,
   Form,
   FormGroup,
@@ -146,9 +142,6 @@ class ShapeEditPanel extends React.Component {
     onCancel: PropTypes.func
   };
   state = {};
-  constructor(props) {
-    super(props);
-  }
   componentDidUpdate(prevProps) {
     //Reset state when shape changes
     if (prevProps.shape !== this.props.shape) {

@@ -226,7 +226,7 @@ export class Grid extends Component {
         //Finally, remove any keys we didn't either add or update.
         //These will be associated with entities that have aged off
         //or been deleted
-        for (let [id, v] of keys) {
+        for (let [id] of keys) {
           transaction.remove.push({ id });
         }
         //transaction.remove = Object.keys(keys).map(id => ({ id }));

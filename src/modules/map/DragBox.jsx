@@ -15,13 +15,11 @@ L.Control.DragBoxControl = L.Control.extend({
   },
   onAdd: function(map) {
     var div = L.DomUtil.create("div");
-    var map = this._map;
     L.DomEvent.on(map, "mousedown", this._handleMouseDown, this);
     div.setAttribute("id", uuid());
     return div;
   },
   onRemove: function(map) {
-    var map = this._map;
     L.DomEvent.off(map, "mousedown", this._handleMouseDown, this);
     L.DomEvent.off(map, "mousemove", this._handleMouseMove, this);
     L.DomEvent.off(map, "mouseup", this._handleMouseUp, this);
@@ -62,9 +60,7 @@ L.Control.DragBoxControl = L.Control.extend({
       this._isActive
     ) {
       var ne = this._startLatLng;
-      var nw = new L.LatLng(this._startLatLng.lat, e.latlng.lng);
       var sw = e.latlng;
-      var se = new L.LatLng(e.latlng.lat, this._startLatLng.lng);
 
       var bounds = L.latLngBounds([ne, sw]);
       if (this.onComplete) this.onComplete(bounds, map, e);
@@ -103,10 +99,6 @@ L.control.boxZoomControl = opts => {
 
 class DragBoxControl extends MapControl {
   control;
-
-  constructor(props) {
-    super(props);
-  }
 
   createLeafletElement(props) {
     this.control = L.control.boxZoomControl({ ...props });

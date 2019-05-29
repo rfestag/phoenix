@@ -19,7 +19,7 @@ import {
   ADD_OVERLAY,
   REMOVE_OVERLAY
 } from "./MapActions";
-import { WMS, TILE, GROUP } from "./MapConstants";
+import { TILE } from "./MapConstants";
 
 const MAP_ACTIONS = [
   SET_VIEWPORT,

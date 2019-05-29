@@ -26,7 +26,6 @@ import {
   FaCircle,
   FaColumns,
   FaCrosshairs,
-  FaDrawPolygon,
   FaEllipsisH,
   FaEye,
   FaEyeSlash,
@@ -40,7 +39,6 @@ import {
   FaRuler,
   FaSearch,
   FaStar,
-  FaSquare,
   FaTh
 } from "react-icons/fa";
 import { FaRegSquare, FaRegStar } from "react-icons/fa";

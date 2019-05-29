@@ -30,13 +30,6 @@ import ShapeEditPanel from "./ShapeEditPanel";
 
 import { LAYER_TYPE_MAP } from "./MapConstants";
 
-const RECTANGLE = "rectangle";
-const CIRCLE = "circle";
-const POLYGON = "polygon";
-const POLYLINE = "polyline";
-const LABEL = "label";
-const MEASURE = "measure";
-const LOCATE = "locate";
 export class Map2D extends Component {
   constructor(props) {
     super(props);
@@ -102,7 +95,7 @@ export class Map2D extends Component {
     this.setState({ editFeature: layer });
   };
   setActiveTool = activeTool => {
-    if (activeTool != this.state.activeTool) {
+    if (activeTool !== this.state.activeTool) {
       this.setState({ activeTool, editFeature: undefined });
     }
   };
@@ -218,7 +211,6 @@ export class Map2D extends Component {
   };
   cancelShape = e => {
     if (this.state.editFeature) {
-      const map = this.map.current && this.map.current.leafletElement;
       const { editFeature } = this.state;
       if (editFeature) {
         const { updated } = editFeature.properties;
@@ -241,8 +233,9 @@ export class Map2D extends Component {
 
   render() {
     let cids = Object.keys(this.props.collections);
+    /*
     const map = this.map.current && this.map.current.leafletElement;
-    /*if (map) {
+    if (map) {
       let pannable = this.props.pannable && !this.state.activeTool === 'select'
       pannable ? map.dragging.enable() : map.dragging.disable();
     }*/

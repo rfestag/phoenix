@@ -19,7 +19,6 @@ import {
   REMOVE_USER_LAYER,
   SET_EDITABLE_FEATURE,
   UNSET_EDITABLE_FEATURE,
-  UPDATE_FEATURE,
   SET_PANNABLE,
   SET_TIMELINE_VISIBILITY,
   TOGGLE_TIMELINE_VISIBILITY
@@ -62,8 +61,6 @@ export default function(state = initialState, action) {
   let overlays;
   let userLayers;
   let oldLayers;
-  let feature;
-  let layer;
   switch (action.type) {
     case SET_MAP_STATE:
       return action.state;

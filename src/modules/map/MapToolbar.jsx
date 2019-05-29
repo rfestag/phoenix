@@ -26,8 +26,7 @@ import {
 import {
   addUserLayer,
   updateUserLayer,
-  setEditableFeature,
-  unsetEditableFeature
+  setEditableFeature
 } from "./MapActions";
 
 const SelectLayerBtn = styled(DropdownToggle)`
@@ -77,7 +76,6 @@ export class MapToolbar extends React.Component {
     let { map } = this.props;
     console.log("MOUNTING", map);
     if (map) {
-      let { clearEditShape } = this.props;
       map.on("editable:created", function(e) {
         console.log("CREATED", e);
       });
@@ -153,12 +151,10 @@ export class MapToolbar extends React.Component {
       activateCircle,
       activateLine,
       activatePolygon,
-      activateLabel,
-      activateGroup,
-      activateUngroup
+      activateLabel
     } = this;
     const { edit } = this.state;
-    const { layers, map, activeTool, layer } = this.props;
+    const { layers, activeTool, layer } = this.props;
     return (
       <Wrapper>
         <Filler />

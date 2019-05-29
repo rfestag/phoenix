@@ -33,7 +33,6 @@ L.Control.MeasureControl = L.Control.extend({
   },
   onAdd: function(map) {
     var div = L.DomUtil.create("div");
-    var map = this._map;
     map.addLayer(this._paths);
     map.addLayer(this._prevSegments);
     map.addLayer(this._waypoints);
@@ -43,7 +42,6 @@ L.Control.MeasureControl = L.Control.extend({
     return div;
   },
   onRemove: function(map) {
-    var map = this._map;
     L.DomEvent.off(map, "click", this._handleClick, this);
   },
   _reset: function() {
@@ -125,7 +123,7 @@ L.Control.MeasureControl = L.Control.extend({
       return;
     } else {
       //This is the first point
-      var waypoint = this._createWaypoint(e);
+      waypoint = this._createWaypoint(e);
       this._waypoints.addLayer(waypoint);
     }
     this._startLatLng = e.latlng;
@@ -172,10 +170,6 @@ L.control.measureControl = opts => {
 
 class MeasureControl extends MapControl {
   control;
-
-  constructor(props) {
-    super(props);
-  }
 
   createLeafletElement(props) {
     this.control = L.control.measureControl({ ...props });

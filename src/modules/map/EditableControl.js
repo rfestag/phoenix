@@ -1,7 +1,6 @@
 import L from "leaflet";
 import PropTypes from "prop-types";
 import uuid from "uuid/v4";
-import * as turf from "@turf/turf";
 import { withLeaflet, MapControl } from "react-leaflet";
 
 let idx = 0;
@@ -98,7 +97,7 @@ L.Control.EditableControl = L.Control.extend({
     this.setActiveShape = element.setActiveShape;
     if (
       this.currentLayer &&
-      (!element.activeShape || this.currentLayer != element.activeShape)
+      (!element.activeShape || this.currentLayer !== element.activeShape)
     ) {
       this.currentLayer.disableEdit();
       this._map.editTools.stopDrawing();
@@ -111,7 +110,6 @@ L.Control.EditableControl = L.Control.extend({
   },
   onAdd: function(map) {
     var div = L.DomUtil.create("div");
-    var map = this._map;
     L.DomEvent.on(map, "editable:created", this._onCreated, this);
     L.DomEvent.on(map, "editable:editing", this._onEditing, this);
     L.DomEvent.on(map, "click", this._runHandler, this);
@@ -119,8 +117,9 @@ L.Control.EditableControl = L.Control.extend({
     return div;
   },
   onRemove: function(map) {
-    var map = this._map;
-    //TODO: Remove listeners
+    L.DomEvent.off(map, "editable:created", this._onCreated, this);
+    L.DomEvent.off(map, "editable:editing", this._onEditing, this);
+    L.DomEvent.off(map, "click", this._runHandler, this);
   },
   _onEditing: function(e) {
     initTooltip(e.layer); //Should be safe to init if it isn't already
@@ -168,10 +167,6 @@ L.control.editableControl = opts => {
 
 class EditableControl extends MapControl {
   control;
-
-  constructor(props) {
-    super(props);
-  }
 
   createLeafletElement(props) {
     this.control = L.control.editableControl({ ...props });

@@ -439,7 +439,6 @@ export const CollectionLayer = Layer.extend({
 
     if (!grouped) if (hovered) shape.moveToTop();
     if (shape.nodeType === "Group") {
-      let children = shape.getChildren();
       shape.getChildren().each((child, n) => {
         this._applyStyle(child, field, entity, hovered, true);
       });
@@ -569,7 +568,7 @@ export const CollectionLayer = Layer.extend({
               geom,
               geometry
             );
-          } else if (fieldDef.latestOnly && idx != lastGeomIdx) {
+          } else if (fieldDef.latestOnly && idx !== lastGeomIdx) {
             if (shape) shape.hide();
           } else {
             geom[idx] = this[renderer](
@@ -812,13 +811,10 @@ export const CollectionLayer = Layer.extend({
       //create an array that has all three in them, since they are based on allBounds translate
       let didHover = false;
       let didChange = false;
-      let now = Date.now();
       //const pt = e.latlng //this._map.layerPointToLatLng(e);
       this.hovered = _.reduce(
         this.collection.data,
         (hits, entity, id) => {
-          const selected =
-            this.collection.selected && this.collection.selected[id];
           return _.reduce(
             entity.geometries,
             (hits, gc, field) => {

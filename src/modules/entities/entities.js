@@ -5,7 +5,6 @@ import {
   createPropertyColumn,
   createGeometryColumn
 } from "../columns/Constants";
-import _ from "lodash";
 
 const defaultEntity = {
   id: undefined,
