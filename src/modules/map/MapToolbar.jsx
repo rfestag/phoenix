@@ -26,8 +26,9 @@ import {
 import {
   addUserLayer,
   updateUserLayer,
-  setEditableFeature
+  setEditableUserLayer
 } from "./MapActions";
+import { openUserLayerModal } from "../modal/ModalActions";
 
 const SelectLayerBtn = styled(DropdownToggle)`
   text-align: left !important;
@@ -70,7 +71,9 @@ export class MapToolbar extends React.Component {
     layer: PropTypes.object,
     activeTool: PropTypes.string,
     updateUserLayer: PropTypes.func,
-    layers: PropTypes.array
+    layers: PropTypes.array,
+    setEditableUserLayer: PropTypes.func,
+    openUserLayerModal: PropTypes.func
   };
   componentDidMount = () => {
     let { map } = this.props;
@@ -82,10 +85,13 @@ export class MapToolbar extends React.Component {
     }
   };
   setCurrentLayer = layer => {
-    this.props.onLayerChange(layer);
+    console.log("SETTING LAYER", layer);
+    this.props.setEditableUserLayer(layer);
   };
   addLayer = () => {
-    console.log("TODO: Modal for adding layer");
+    console.log("Should add layer");
+    this.props.setEditableUserLayer(undefined);
+    this.props.openUserLayerModal();
   };
   toggleEdit = () => {
     const edit = !this.state.edit;
@@ -164,13 +170,13 @@ export class MapToolbar extends React.Component {
               {layer ? layer.name : <em>No Active Layers</em>}
             </SelectLayerBtn>
             <DropdownMenu>
-              <DropdownItem>
-                <AddIcon onClick={addLayer} /> Add Layer
+              <DropdownItem onClick={addLayer}>
+                <AddIcon /> Add Layer
               </DropdownItem>
               <DropdownItem divider />
               {layers &&
-                layers.map((l, i) => (
-                  <DropdownItem key={i} onClick={() => setCurrentLayer(l)}>
+                layers.map(l => (
+                  <DropdownItem key={l.id} onClick={() => setCurrentLayer(l)}>
                     {l.name}
                   </DropdownItem>
                 ))}
@@ -264,6 +270,7 @@ export class MapToolbar extends React.Component {
 function mapStateToProps(state, props) {
   //Only map subset of state that map actually requires for rendering
   return {
+    layer: state.map.editLayer,
     layers: state.map.userLayers
   };
 }
@@ -273,7 +280,8 @@ function mapDispatchToProps(dispatch) {
     {
       addUserLayer,
       updateUserLayer,
-      setEditableFeature
+      setEditableUserLayer,
+      openUserLayerModal
     },
     dispatch
   );

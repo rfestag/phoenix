@@ -104,15 +104,18 @@ export class LayerList extends Component {
       this.setState({ layers });
     }
   }
-  renderRow = ({ key, index, style }) => (
-    <div
-      key={key}
-      style={style}
-      onClick={() => this.props.onLayerClick(this.state.layers[index])}
-    >
-      <LayerItem layer={this.state.layers[index]} />
-    </div>
-  );
+  renderRow = ({ key, index, style }) => {
+    console.log("ROW", index, this.state.layers[index], this.state.layers);
+    return (
+      <div
+        key={key}
+        style={style}
+        onClick={() => this.props.onLayerClick(this.state.layers[index])}
+      >
+        <LayerItem layer={this.state.layers[index]} />
+      </div>
+    );
+  };
   render() {
     return (
       <div
@@ -143,7 +146,7 @@ export class LayerList extends Component {
                 <List
                   height={height}
                   data={this.state.layers}
-                  rowCount={this.props.layers.length || 0}
+                  rowCount={this.state.layers.length || 0}
                   rowHeight={58}
                   rowRenderer={this.renderRow}
                   width={width}

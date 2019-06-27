@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import SettingsModal from "./modules/settings/SettingsModal";
+import UserLayerModal from "./modules/map/UserLayerModal";
 import Banner from "./components/Banner";
 import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
@@ -50,6 +51,7 @@ const App = ({ themeName, themeProps }) => (
     <ThemeProvider theme={themeProps}>
       <Outer>
         <SettingsModal />
+        <UserLayerModal />
         <Banner>Phoenix GIS</Banner>
         <TopMenu />
         <Main>

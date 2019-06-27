@@ -152,7 +152,9 @@ class ShapeEditPanel extends React.Component {
     const shape = this.props.shape;
     const name = this.state.name;
     console.log(shape, name);
-    return name || (shape && shape.properties && shape.properties.name);
+    return name !== undefined
+      ? name
+      : shape && shape.properties && shape.properties.name;
   };
   setName = e => {
     const name = e.target.value;

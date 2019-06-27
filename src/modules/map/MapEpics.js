@@ -195,6 +195,7 @@ let OVERLAYS = [
 const USER_LAYERS = [
   {
     name: "Default",
+    id: "default",
     features: []
   }
 ];
@@ -220,6 +221,7 @@ function preferencesToState(pref) {
     l.active = true; //Only the default layer exists initially, so we'll let it show
     return l;
   });
+  map.editLayer = USER_LAYERS[0];
   map.center = pref.center || map.crs.settings.center;
   map.zoom = pref.zoom || 3;
   return map;

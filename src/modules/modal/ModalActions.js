@@ -3,10 +3,10 @@ export const OPEN_MODAL = "OPEN_MODAL";
 export const CLOSE_MODAL = "CLOSE_MODAL";
 export const TOGGLE_MODAL = "TOGGLE_MODAL";
 
-/* Left panel panes */
 export const SETTINGS_MODAL = "SETTINGS_MODAL";
 export const FIELD_MODAL = "FIELD_MODAL";
 export const GEOMETRY_MODAL = "GEOMETRY_MODAL";
+export const USER_LAYER_MODAL = "USER_LAYER_MODAL";
 
 /* Actions */
 export const openModal = (modal, payload) => ({
@@ -34,9 +34,16 @@ export const closeGeometryModal = () => closeModal(GEOMETRY_MODAL);
 export const toggleGeometryModal = payload =>
   toggleModal(GEOMETRY_MODAL, payload);
 
+export const openUserLayerModal = payload =>
+  openModal(USER_LAYER_MODAL, payload);
+export const closeUserLayerModal = () => closeModal(USER_LAYER_MODAL);
+export const toggleUserLayerModal = payload =>
+  toggleModal(USER_LAYER_MODAL, payload);
+
 /* Helpers */
 export const modalOpen = modal => state => state.modal[modal];
 export const modalClosed = modal => state => state.modal[modal];
 export const settingsOpen = state => state.modal[SETTINGS_MODAL];
 export const fieldOpen = state => state.modal[FIELD_MODAL];
 export const geometryOpen = state => state.modal[GEOMETRY_MODAL];
+export const userLayerOpen = state => state.modal[USER_LAYER_MODAL];

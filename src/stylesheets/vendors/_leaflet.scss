@@ -1,0 +1,21 @@
+.leaflet-control-container {
+  height: 100%;
+}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  position: absolute;
+  pointer-events: none;
+  border: 6px solid transparent;
+  background: transparent;
+  content: "";
+}
+.leaflet-label {
+  border: none;
+  box-shadow: none;
+  background: none;
+  text-shadow: 1px 1px 2px black, 0 0 0.5em black, 0 0 0.2em black;
+  color: white;
+  font: 1.2em Georgia, serif;
+}

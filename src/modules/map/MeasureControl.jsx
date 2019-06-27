@@ -3,6 +3,10 @@ import PropTypes from "prop-types";
 import uuid from "uuid/v4";
 import * as turf from "@turf/turf";
 import { withLeaflet, MapControl } from "react-leaflet";
+import Utm from "geodesy/utm.js";
+import Mgrs, { LatLon } from "geodesy/mgrs.js";
+
+const parsers = { Utm, Mgrs, LatLon };
 
 const _defaultFormat = (pts, dist, totalDist, units) => {
   return `<div>
@@ -12,6 +16,62 @@ const _defaultFormat = (pts, dist, totalDist, units) => {
    </div>
   `;
 };
+
+const locations = [
+  { lat: 50, lng: 5 },
+  { lat: "50:03:59N", lng: "005:42:53W" },
+  "58°38′38″N, 003°04′12″W", //DMS
+  "31U DQ 48251 11932", //MGRS
+  "48 N 377298.745 1483034.794" //UTM
+];
+
+function parse(str) {
+  for (const k in parsers) {
+    const parser = parsers[k];
+    try {
+      let parsed = parser.parse(str);
+      if (parsed) {
+        switch (k) {
+          case "Utm":
+            return parsed.toLatLon();
+          case "Mgrs":
+            return parsed.toUtm().toLatLon();
+          default:
+            return parsed;
+        }
+      }
+    } catch (e) {
+      //console.error(e)
+      //Ignore
+    }
+  }
+}
+
+function format(coordinate, type = "dms", precision = 2) {
+  const parsed = LatLon.parse(coordinate);
+  switch (type) {
+    case "utm":
+      return parsed.toUtm().toString();
+    case "mgrs":
+      return parsed
+        .toUtm()
+        .toMgrs()
+        .toString();
+    default:
+      return parsed.toString(type, precision);
+  }
+}
+
+for (const l of locations) {
+  let result = parse(l);
+  console.log("Result", result);
+  console.log("Default", format(result));
+  console.log("DD", format(result, "d"));
+  console.log("DMS", format(result, "dms"));
+  console.log("UTM", format(result, "utm"));
+  console.log("MGRS", format(result, "mgrs"));
+}
+
 L.Control.MeasureControl = L.Control.extend({
   _isActive: false,
   _startLatLng: null,

@@ -4,7 +4,7 @@ import { combineReducers } from "redux";
 import { combineEpics } from "redux-observable";
 import collection from "../modules/collection/CollectionReducers";
 import { ageOffEpic } from "../modules/collection/CollectionEpics";
-import { enrichNewEntitiesEpic } from "../modules/enrich/EnrichEpics";
+//import { enrichNewEntitiesEpic } from "../modules/enrich/EnrichEpics";
 import { manageSettings } from "../modules/settings/SettingsEpics";
 import { manageMapState } from "../modules/map/MapEpics";
 import map from "../modules/map/MapReducers";

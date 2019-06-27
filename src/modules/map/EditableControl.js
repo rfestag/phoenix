@@ -6,32 +6,39 @@ import { withLeaflet, MapControl } from "react-leaflet";
 let idx = 0;
 const initTooltip = shape => {
   if (!shape._tooltip) {
-    shape
-      .bindTooltip(shape.properties.name, {
-        className: "leaflet-label",
-        permanent: true,
-        interactive: false,
-        direction: "center"
-      })
-      .openTooltip();
-    let dragging = false;
-    shape.on("editable:editing", () => {
-      if (!dragging) shape.openTooltip();
-    });
-    if (shape.properties.type === "label") {
-      shape.on("drag", () => {
-        shape.openTooltip();
-        dragging = true;
+    try {
+      //Labels are only interactive via the tooltip
+      shape
+        .bindTooltip(shape.properties.name, {
+          className: "leaflet-label",
+          permanent: true,
+          interactive: shape.properties.type === "label",
+          direction: "center"
+        })
+        .openTooltip();
+      let dragging = false;
+      shape.on("editable:editing", () => {
+        if (!dragging) shape.openTooltip();
       });
-    } else {
-      shape.on("dragstart", () => {
-        shape.closeTooltip();
-        dragging = true;
-      });
-      shape.on("dragend", () => {
-        shape.openTooltip();
-        dragging = false;
-      });
+      if (shape.properties.type === "label") {
+        shape.on("drag", () => {
+          shape.openTooltip();
+          dragging = true;
+        });
+      } else {
+        shape.on("dragstart", () => {
+          shape.closeTooltip();
+          dragging = true;
+        });
+        shape.on("dragend", () => {
+          shape.openTooltip();
+          dragging = false;
+        });
+      }
+    } catch (e) {
+      //In some cases, the shape may fail to bind properly.
+      //If it does, unbind. It will try to bind again later.
+      shape.unbindTooltip();
     }
   }
 };

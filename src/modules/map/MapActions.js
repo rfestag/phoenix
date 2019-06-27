@@ -17,8 +17,7 @@ export const HIDE_USER_LAYER = "HIDE_USER_LAYER";
 export const ADD_USER_LAYER = "ADD_USER_LAYER";
 export const UPDATE_USER_LAYER = "UPDATE_USER_LAYER";
 export const REMOVE_USER_LAYER = "REMOVE_USER_LAYER";
-export const SET_EDITABLE_FEATURE = "SET_EDITABLE_FEATURE";
-export const UNSET_EDITABLE_FEATURE = "UNSET_EDITABLE_FEATURE";
+export const SET_EDITABLE_USER_LAYER = "SET_EDITABLE_USER_LAYER";
 
 export const SET_CENTER = "SET_CENTER";
 export const SET_ZOOM = "SET_ZOOM";
@@ -40,7 +39,6 @@ export const setProjection = projection => ({
 export const setBaselayer = layer => ({ type: SET_BASELAYER, layer });
 export const addBaselayer = layer => ({
   type: ADD_BASELAYER,
-  id: uuid(),
   layer
 });
 export const removeBaselayer = layer => ({ type: REMOVE_BASELAYER, layer });
@@ -66,17 +64,12 @@ export const showUserLayer = layer => ({ type: SHOW_USER_LAYER, layer });
 export const hideUserLayer = layer => ({ type: HIDE_USER_LAYER, layer });
 export const addUserLayer = layer => ({
   type: ADD_USER_LAYER,
-  id: uuid(),
   layer
 });
 export const updateUserLayer = layer => ({ type: UPDATE_USER_LAYER, layer });
 export const removeUserLayer = layer => ({ type: REMOVE_USER_LAYER, layer });
-export const setEditableFeature = (layer, feature) => ({
-  type: SET_EDITABLE_FEATURE,
-  layer
-});
-export const unsetEditableFeature = (layer, feature) => ({
-  type: UNSET_EDITABLE_FEATURE,
+export const setEditableUserLayer = layer => ({
+  type: SET_EDITABLE_USER_LAYER,
   layer
 });
 

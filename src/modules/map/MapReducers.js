@@ -17,8 +17,7 @@ import {
   ADD_USER_LAYER,
   UPDATE_USER_LAYER,
   REMOVE_USER_LAYER,
-  SET_EDITABLE_FEATURE,
-  UNSET_EDITABLE_FEATURE,
+  SET_EDITABLE_USER_LAYER,
   SET_PANNABLE,
   SET_TIMELINE_VISIBILITY,
   TOGGLE_TIMELINE_VISIBILITY
@@ -108,7 +107,12 @@ export default function(state = initialState, action) {
     case ADD_OVERLAY:
       return { ...state, overlays: [...state.overlays, action.layer] };
     case ADD_USER_LAYER:
-      return { ...state, userLayers: [...state.userLayers, action.layer] };
+      console.log("ADDING LAYER", action.layer, state.userLayers);
+      return {
+        ...state,
+        editLayer: action.layer,
+        userLayers: [...state.userLayers, action.layer]
+      };
     case REMOVE_BASELAYER:
       oldLayers = state.baseLayers;
       idx = oldLayers.indexOf(action.layer);
@@ -161,10 +165,8 @@ export default function(state = initialState, action) {
         console.log("No matching user layer to update");
         return state;
       }
-    case SET_EDITABLE_FEATURE:
-      return { ...state, editFeature: action.layer };
-    case UNSET_EDITABLE_FEATURE:
-      return { ...state, editFeature: undefined };
+    case SET_EDITABLE_USER_LAYER:
+      return { ...state, editLayer: action.layer };
     default:
       return state;
   }

@@ -11,8 +11,7 @@ L.Editable.include({
     return marker;
   },
   createLabel: function(latlng, options = {}) {
-    options.color = "rgba(0, 0, 0, 0, 0)";
-    options.fillColor = "rgba(0, 0, 0, 0)";
+    options.radius = 0;
     return this.createLayer(
       (options && options.labelClass) || this.options.labelClass,
       latlng,
