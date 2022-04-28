@@ -14,7 +14,7 @@
     "bootstrap": "4.3.1",
     "broadcast-channel": "^2.1.9",
     "canvg": "^1.5.3",
-    "cross-fetch": "^2.2.2",
+    "cross-fetch": "^3.1.5",
     "font-awesome": "^4.7.0",
     "geodesy": "^2.1.0",
     "graphql": "^0.13.2",
